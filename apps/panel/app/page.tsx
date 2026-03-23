@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Clock, BarChart3, ChevronRight } from 'lucide-react'
+import { Sparkles, Clock, BarChart3, ChevronRight, Zap, Target, Layers } from 'lucide-react'
+import { ProductPeek, ChatPeek } from '@/components/product-peek'
 
 export default function LandingPage() {
   return (
@@ -32,24 +33,25 @@ export default function LandingPage() {
             {/* Left Content */}
             <div className="flex flex-col gap-10 animate-fade-in">
               <div className="flex flex-col gap-8">
-                <h1 className="text-balance text-5xl sm:text-6xl lg:text-7xl font-serif leading-[1.1] text-foreground">
-                  The Art of <br />
-                  <span className="italic text-primary">Exceptional</span> Hospitality
+                <h1 className="text-balance text-6xl sm:text-7xl lg:text-8xl font-serif leading-[1.05] text-foreground tracking-tighter">
+                  The <span className="italic">Service</span> <br />
+                  of Exceptional <br />
+                  Hospitality.
                 </h1>
-                <p className="text-xl text-foreground/70 leading-relaxed max-w-xl font-light">
-                  Zuri empowers world-class resorts with a sophisticated AI concierge, delivering 24/7 personalized service that transforms stay into a seamless journey of luxury.
+                <p className="text-xl text-foreground/50 leading-relaxed max-w-xl font-light tracking-tight">
+                  Zuri elevates world-class resort operations with a sophisticated service layer—delivering personalized guest engagement and refined operational excellence.
                 </p>
               </div>
 
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row gap-6">
-                <Button asChild size="xl" className="rounded-full px-10 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20">
+                <Button asChild size="xl" className="rounded-full px-12 bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl shadow-primary/20 tracking-widest text-[10px] font-bold">
                   <Link href="/signup" className="flex items-center gap-2">
-                    BEGIN TRANSFORMATION <ChevronRight className="w-4 h-4" />
+                    ACTIVATE SERVICE <ChevronRight className="w-4 h-4" />
                   </Link>
                 </Button>
-                <Button asChild size="xl" variant="outline" className="rounded-full px-10 border-foreground/10 hover:bg-foreground/5 dark:border-foreground/20">
-                  <Link href="#features">EXPLORE CAPABILITIES</Link>
+                <Button asChild size="xl" variant="outline" className="rounded-full px-12 border-foreground/10 hover:bg-foreground/5 dark:border-foreground/20 tracking-widest text-[10px] font-bold">
+                  <Link href="#features">VIEW CAPABILITIES</Link>
                 </Button>
               </div>
 
@@ -61,16 +63,25 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Visual - High Quality Image */}
-            <div className="hidden lg:block relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 animate-slide-in-left border border-white/10">
+            {/* Right Visual - High Quality Image with Product Peek Overlays */}
+            <div className="hidden lg:block relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl shadow-black/10 animate-slide-in-right border border-white/5 bg-secondary/10">
               <Image 
                 src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1600&q=80"
                 alt="Luxury Resort Visual"
                 fill
-                className="object-cover"
+                className="object-cover opacity-80"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+              
+              {/* Product Overlays */}
+              <ProductPeek />
+              <ChatPeek />
+              
+              {/* LV Style Label */}
+              <div className="absolute top-10 left-10 text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">
+                Zuri Concierge v2.0
+              </div>
             </div>
           </div>
         </div>
@@ -90,44 +101,44 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-10">
             {/* Feature 1 */}
-            <div className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-10 hover:bg-card hover:shadow-2xl hover:border-primary/20 transition-all duration-500 overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Sparkles className="w-24 h-24 text-primary" />
+            <div className="group relative rounded-3xl border border-border bg-card p-12 hover:shadow-2xl hover:border-primary/20 transition-all duration-700 overflow-hidden">
+              <div className="absolute -bottom-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Target className="w-48 h-48 text-primary" />
               </div>
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <Sparkles className="w-7 h-7" />
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-10 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 scale-110">
+                <Target className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-serif text-foreground mb-4">Intelligent Concierge</h3>
-              <p className="text-foreground/60 leading-relaxed font-light">
-                Our AI understands subtle nuances, providing personalized recommendations that feel authentically human and deeply intuitive.
+              <h3 className="text-2xl font-serif text-foreground mb-6">Personalized Service</h3>
+              <p className="text-foreground/40 leading-relaxed font-light tracking-tight text-lg">
+                Seamless resolution of guest requests with tailored logic that mirrors your resort&apos;s unique heritage.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-10 hover:bg-card hover:shadow-2xl hover:border-primary/20 transition-all duration-500 overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Clock className="w-24 h-24 text-primary" />
+            <div className="group relative rounded-3xl border border-border bg-card p-12 hover:shadow-2xl hover:border-primary/20 transition-all duration-700 overflow-hidden">
+              <div className="absolute -bottom-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Zap className="w-48 h-48 text-primary" />
               </div>
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <Clock className="w-7 h-7" />
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-10 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 scale-110">
+                <Zap className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-serif text-foreground mb-4">Timeless Presence</h3>
-              <p className="text-foreground/60 leading-relaxed font-light">
-                Luxury never sleeps. Deliver impeccable service and instant booking management any hour of the day, across the globe.
+              <h3 className="text-2xl font-serif text-foreground mb-6">Service Velocity</h3>
+              <p className="text-foreground/40 leading-relaxed font-light tracking-tight text-lg">
+                Accelerate response times across all touchpoints with instant automated booking and excursion management.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-10 hover:bg-card hover:shadow-2xl hover:border-primary/20 transition-all duration-500 overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <BarChart3 className="w-24 h-24 text-primary" />
+            <div className="group relative rounded-3xl border border-border bg-card p-12 hover:shadow-2xl hover:border-primary/20 transition-all duration-700 overflow-hidden">
+              <div className="absolute -bottom-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Layers className="w-48 h-48 text-primary" />
               </div>
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <BarChart3 className="w-7 h-7" />
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-10 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 scale-110">
+                <Layers className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-serif text-foreground mb-4">Bespoke Insights</h3>
-              <p className="text-foreground/60 leading-relaxed font-light">
-                Anticipate guest needs before they emerge. Deep analytics provide a granular understanding of every preference and pattern.
+              <h3 className="text-2xl font-serif text-foreground mb-6">Integrated Management</h3>
+              <p className="text-foreground/40 leading-relaxed font-light tracking-tight text-lg">
+                Seamlessly unify your Property Management Systems with refined guest preference harvesting.
               </p>
             </div>
           </div>
