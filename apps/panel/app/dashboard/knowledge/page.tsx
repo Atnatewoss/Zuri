@@ -19,8 +19,8 @@ export default function KnowledgeBasePage() {
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <DashboardHeader
-          title="Knowledge Base"
-          subtitle="Manage documents that train your AI concierge"
+          title="Resort Knowledge Base"
+          subtitle="Provide the guides and policies that guide your AI Concierge"
         />
 
         <div className="p-8 space-y-8">
@@ -32,8 +32,8 @@ export default function KnowledgeBasePage() {
                 <Upload className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-3xl font-serif text-foreground mb-3">Impart <span className="italic text-primary">Intelligence</span></h3>
-            <p className="text-foreground/50 font-light text-lg mb-8 max-w-sm mx-auto tracking-tight">Drop your resort&apos;s blueprints, guides, or policies to orchestrate the AI concierge.</p>
+            <h3 className="text-3xl font-serif text-foreground mb-3">Upload <span className="italic text-primary">Knowledge</span></h3>
+            <p className="text-foreground/50 font-light text-lg mb-8 mx-auto tracking-tight">Drop your resort&apos;s blueprints, guides, or policies to orchestrate the AI concierge.</p>
             <Button className="rounded-full px-10 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20">
               BROWSE DOCUMENTS
             </Button>
@@ -46,10 +46,10 @@ export default function KnowledgeBasePage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/50">
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">File Name</th>
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Size</th>
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Status</th>
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Uploaded</th>
+                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Document Name</th>
+                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">File Size</th>
+                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Processing Status</th>
+                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Uploaded At</th>
                     <th className="px-4 py-4 text-right text-sm font-medium text-foreground/70">Actions</th>
                   </tr>
                 </thead>

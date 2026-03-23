@@ -28,7 +28,7 @@ export default function EmbedWidgetPage() {
 
         <div className="p-8 space-y-8">
           <div>
-            <p className="text-foreground/70 max-w-2xl">
+            <p className="text-foreground/70 w-full font-light tracking-tight">
               Add the AI Concierge chat widget to your website. Guests can access Zuri directly from your website to get assistance, make bookings, and ask questions.
             </p>
           </div>

@@ -39,7 +39,7 @@ export default function SettingsPage() {
           subtitle="Manage your resort information and preferences"
         />
 
-        <div className="p-8 max-w-2xl space-y-8">
+        <div className="p-8 space-y-8 w-full">
           {/* Resort Information */}
           <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm group">
             <div className="flex items-center gap-4">
@@ -115,36 +115,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Subscription */}
-          <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                <CreditCard className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-serif text-foreground">Subscription Orchestration</h2>
-                <p className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mt-1">Manage your access level</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-primary/30 bg-primary/5">
-                <div>
-                  <p className="font-medium text-foreground">Premium Plan</p>
-                  <p className="text-sm text-foreground/70 mt-1">$99/month • All features included</p>
-                </div>
-                <span className="text-sm font-medium text-primary">Active</span>
-              </div>
-
-              <div className="pt-4 border-t border-border/50">
-                <p className="text-sm text-foreground/70 mb-4">Next billing date: April 23, 2026</p>
-                <Button variant="outline" className="border-border text-foreground hover:bg-secondary/50">
-                  Manage Billing
-                </Button>
-              </div>
-            </div>
-          </div>
-
           {/* Security */}
           <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm">
             <div className="flex items-center gap-4">
@@ -167,42 +137,17 @@ export default function SettingsPage() {
                   Change
                 </Button>
               </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/30 transition-colors">
-                <div>
-                  <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                  <p className="text-sm text-foreground/70 mt-1">Not enabled</p>
-                </div>
-                <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary/50">
-                  Enable
-                </Button>
-              </div>
             </div>
           </div>
 
-          {/* Danger Zone */}
-          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-8 space-y-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-serif text-destructive">Termination Protocol</h2>
-                <p className="text-[10px] uppercase tracking-widest text-destructive/40 font-bold mt-1">Irreversible dissolution</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30">
-                <div>
-                  <p className="font-medium text-foreground">Delete Account</p>
-                  <p className="text-sm text-foreground/70 mt-1">Permanently delete your account and all data</p>
-                </div>
-                <Button variant="outline" size="sm" className="border-destructive text-destructive hover:bg-destructive/10">
-                  Delete
-                </Button>
-              </div>
-            </div>
+          {/* Logout Action */}
+          <div className="pt-8 border-t border-border/50">
+            <Button
+              variant="outline"
+              className="w-full rounded-full py-6 border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40 tracking-widest text-[10px] font-bold"
+            >
+              TERMINATE SESSION (SIGN OUT)
+            </Button>
           </div>
         </div>
       </div>

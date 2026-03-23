@@ -30,15 +30,15 @@ export default function ServicesPage() {
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <DashboardHeader
-          title="Services & Rooms"
-          subtitle="Manage your resort's services and room inventory"
+          title="Hotel Services"
+          subtitle="Manage your resort's offerings and availability"
         />
 
         <div className="p-8 space-y-8">
           {/* Services Section */}
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-serif text-foreground">Orchestrated Services</h2>
+              <h2 className="text-2xl font-serif text-foreground">Guest Services</h2>
               <Button className="rounded-full px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10">
                 <Plus className="w-4 h-4 mr-2" /> CREATE SERVICE
               </Button>
