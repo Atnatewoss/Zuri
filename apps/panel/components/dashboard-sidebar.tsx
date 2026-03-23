@@ -6,12 +6,12 @@ import { cn } from '@/lib/utils'
 import { LayoutDashboard, Library, Hotel, Calendar, Puzzle, Settings, LogOut, Sparkles } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/knowledge', label: 'Intelligence', icon: Library },
-  { href: '/dashboard/services', label: 'Services', icon: Hotel },
-  { href: '/dashboard/bookings', label: 'Reservations', icon: Calendar },
-  { href: '/dashboard/embed', label: 'Orchestration', icon: Puzzle },
-  { href: '/dashboard/settings', label: 'Configuration', icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/knowledge', label: 'Knowledge Base', icon: Library },
+  { href: '/dashboard/services', label: 'Guest Services', icon: Hotel },
+  { href: '/dashboard/bookings', label: 'Guest Bookings', icon: Calendar },
+  { href: '/dashboard/embed', label: 'Integrations', icon: Puzzle },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export function DashboardSidebar() {
@@ -29,7 +29,9 @@ export function DashboardSidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-8 space-y-3">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href)
+          const isActive = item.exact 
+            ? pathname === item.href 
+            : pathname.startsWith(item.href)
           const Icon = item.icon
           return (
             <Link
@@ -49,15 +51,17 @@ export function DashboardSidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-border/50 px-8 py-8 space-y-6">
-        <div className="space-y-1">
-          <p className="font-serif italic text-lg text-foreground">Kuriftu Resort</p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 font-bold">Addis Ababa, Ethiopia</p>
+      {/* User Profile Info (Footer) */}
+      <div className="px-8 py-8 border-t border-border/50 bg-secondary/5 mt-auto">
+        <div className="flex items-center gap-4 group cursor-pointer hover:bg-secondary/20 p-2 -m-2 rounded-xl transition-all duration-300">
+          <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-serif italic text-lg shrink-0 shadow-sm group-hover:shadow-primary/20 group-hover:border-primary/40 transition-all">
+            KR
+          </div>
+          <div className="flex flex-col min-w-0">
+            <p className="font-serif italic text-lg text-foreground truncate leading-tight">Kuriftu Resort</p>
+            <p className="text-[10px] text-foreground/40 font-bold truncate tracking-wider mt-0.5 uppercase">admin@kuriftu.com</p>
+          </div>
         </div>
-        <button className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-border/50 text-foreground/40 text-xs font-bold tracking-widest hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 transition-all duration-300">
-          <LogOut className="w-4 h-4" /> SIGN OUT
-        </button>
       </div>
     </div>
   )
