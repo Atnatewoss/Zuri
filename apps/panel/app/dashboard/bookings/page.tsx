@@ -2,6 +2,7 @@
 
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
+import { CheckCircle2, Clock, Eye, MoreHorizontal } from 'lucide-react'
 
 const bookings = [
   {
@@ -83,37 +84,38 @@ export default function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {bookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-secondary/20 transition-colors">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-foreground">
-                            {booking.guestName[0]}
+                    {bookings.map((booking) => (
+                      <tr key={booking.id} className="group hover:bg-secondary/20 transition-all duration-300">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xs font-serif italic text-primary border border-primary/20">
+                              {booking.guestName[0]}
+                            </div>
+                            <span className="font-serif text-lg text-foreground">{booking.guestName}</span>
                           </div>
-                          <span className="font-medium text-foreground">{booking.guestName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-foreground/80">{booking.service}</td>
-                      <td className="px-4 py-4 text-sm text-foreground/70">{booking.date}</td>
-                      <td className="px-4 py-4 text-sm text-foreground/70">{booking.time}</td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            booking.status === 'Confirmed'
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-muted text-foreground/70'
-                          }`}
-                        >
-                          {booking.status === 'Confirmed' ? '✓' : '⏳'} {booking.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <button className="text-sm text-foreground/70 hover:text-foreground font-medium transition-colors">
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-5 text-sm font-medium text-foreground/60">{booking.service}</td>
+                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.date.toUpperCase()}</td>
+                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.time.toUpperCase()}</td>
+                        <td className="px-6 py-5">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+                              booking.status === 'Confirmed'
+                                ? 'bg-primary/10 text-primary border border-primary/20'
+                                : 'bg-muted text-foreground/40 border border-border/50'
+                            }`}
+                          >
+                            {booking.status === 'Confirmed' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <button className="p-2 rounded-full hover:bg-primary/10 text-foreground/40 hover:text-primary transition-all">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

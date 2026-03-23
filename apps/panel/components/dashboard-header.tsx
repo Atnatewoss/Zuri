@@ -10,18 +10,18 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   return (
-    <div className="border-b border-border bg-card">
-      <div className="flex items-center justify-between px-8 py-6">
+    <div className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
+      <div className="flex items-center justify-between px-10 py-6">
         <div>
-          <h1 className="text-3xl font-light text-foreground">{title}</h1>
-          {subtitle && <p className="text-foreground/70 mt-1">{subtitle}</p>}
+          <h1 className="text-3xl font-serif text-foreground leading-tight">{title}</h1>
+          {subtitle && <p className="text-foreground/40 text-sm font-light mt-1 tracking-wide uppercase">{subtitle}</p>}
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="text-foreground hover:bg-secondary/50">
+        <div className="flex items-center gap-6">
+          <Button variant="ghost" size="icon" className="text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all">
             <Bell className="w-5 h-5" />
           </Button>
-          <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-foreground font-medium">
+          <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-serif italic text-lg shadow-inner">
             KR
           </div>
         </div>

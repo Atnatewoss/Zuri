@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
+import { Shield, CreditCard, Building2, AlertTriangle, CheckCircle2, Save } from 'lucide-react'
 
 export default function SettingsPage() {
   const [formData, setFormData] = useState({
@@ -40,10 +41,15 @@ export default function SettingsPage() {
 
         <div className="p-8 max-w-2xl space-y-8">
           {/* Resort Information */}
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium text-foreground">Resort Information</h2>
-              <p className="text-sm text-foreground/70 mt-1">Update your resort details</p>
+          <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif text-foreground">Resort Identity</h2>
+                <p className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mt-1">Core details of your heritage</p>
+              </div>
             </div>
 
             <div className="space-y-6">
@@ -93,16 +99,16 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-6 pt-6 border-t border-border/50">
                 <Button
                   onClick={handleSave}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="rounded-full px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                 >
-                  Save Changes
+                  <Save className="w-4 h-4 mr-2" /> SAVE IDENTITY
                 </Button>
                 {saved && (
-                  <span className="text-sm text-primary flex items-center gap-2">
-                    ✓ Changes saved successfully
+                  <span className="text-sm text-primary flex items-center gap-2 font-medium animate-in fade-in slide-in-from-left-2">
+                    <CheckCircle2 className="w-4 h-4" /> Changes immortalized.
                   </span>
                 )}
               </div>
@@ -110,10 +116,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Subscription */}
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium text-foreground">Subscription</h2>
-              <p className="text-sm text-foreground/70 mt-1">Manage your plan and billing</p>
+          <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                <CreditCard className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif text-foreground">Subscription Orchestration</h2>
+                <p className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mt-1">Manage your access level</p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -135,10 +146,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Security */}
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium text-foreground">Security</h2>
-              <p className="text-sm text-foreground/70 mt-1">Manage your account security</p>
+          <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                <Shield className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif text-foreground">Sanctuary Security</h2>
+                <p className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mt-1">Safeguard your operation</p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -165,10 +181,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Danger Zone */}
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium text-destructive">Danger Zone</h2>
-              <p className="text-sm text-foreground/70 mt-1">Irreversible actions</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-8 space-y-8 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif text-destructive">Termination Protocol</h2>
+                <p className="text-[10px] uppercase tracking-widest text-destructive/40 font-bold mt-1">Irreversible dissolution</p>
+              </div>
             </div>
 
             <div className="space-y-4">

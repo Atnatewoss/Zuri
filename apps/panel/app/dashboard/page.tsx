@@ -3,6 +3,7 @@
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Calendar, Users, MessageSquare, Clock, User } from 'lucide-react'
 
 const chartData = [
   { name: 'Mon', conversations: 12, bookings: 8 },
@@ -59,40 +60,46 @@ export default function DashboardPage() {
 
         <div className="p-8 space-y-8">
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Total Bookings */}
-            <div className="rounded-xl border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+            <div className="group rounded-2xl border border-border/50 bg-card p-8 hover:shadow-xl hover:border-primary/20 transition-all duration-300">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Total Bookings</p>
-                  <p className="text-4xl font-light text-foreground mt-2">247</p>
-                  <p className="text-xs text-primary mt-2">+12% vs last week</p>
+                  <p className="text-xs font-medium text-foreground/40 uppercase tracking-widest">Total Bookings</p>
+                  <p className="text-5xl font-serif text-foreground mt-4">247</p>
+                  <p className="text-xs text-primary mt-3 font-medium">+12% vs last week</p>
                 </div>
-                <span className="text-3xl">📅</span>
+                <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Calendar className="w-6 h-6" />
+                </div>
               </div>
             </div>
 
             {/* Active Guests */}
-            <div className="rounded-xl border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+            <div className="group rounded-2xl border border-border/50 bg-card p-8 hover:shadow-xl hover:border-primary/20 transition-all duration-300">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Active Guests</p>
-                  <p className="text-4xl font-light text-foreground mt-2">84</p>
-                  <p className="text-xs text-primary mt-2">12 new check-ins today</p>
+                  <p className="text-xs font-medium text-foreground/40 uppercase tracking-widest">Active Guests</p>
+                  <p className="text-5xl font-serif text-foreground mt-4">84</p>
+                  <p className="text-xs text-primary mt-3 font-medium">12 new check-ins today</p>
                 </div>
-                <span className="text-3xl">👥</span>
+                <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Users className="w-6 h-6" />
+                </div>
               </div>
             </div>
 
             {/* AI Conversations Today */}
-            <div className="rounded-xl border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+            <div className="group rounded-2xl border border-border/50 bg-card p-8 hover:shadow-xl hover:border-primary/20 transition-all duration-300">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">AI Conversations</p>
-                  <p className="text-4xl font-light text-foreground mt-2">156</p>
-                  <p className="text-xs text-primary mt-2">Today</p>
+                  <p className="text-xs font-medium text-foreground/40 uppercase tracking-widest">AI Interactions</p>
+                  <p className="text-5xl font-serif text-foreground mt-4">156</p>
+                  <p className="text-xs text-primary mt-3 font-medium">REAL-TIME SUPPORT</p>
                 </div>
-                <span className="text-3xl">💬</span>
+                <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
               </div>
             </div>
           </div>
@@ -120,24 +127,27 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-lg font-medium text-foreground mb-6">Recent Activity</h2>
+          <div className="rounded-2xl border border-border/50 bg-card p-8">
+            <h2 className="text-2xl font-serif text-foreground mb-8">Recent Activity</h2>
             <div className="space-y-4">
               {recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-secondary/20 transition-all"
+                  className="flex items-center justify-between p-5 rounded-xl border border-border/50 hover:border-primary/20 hover:bg-secondary/20 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium text-foreground">
-                      👤
+                  <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <User className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{activity.user}</p>
-                      <p className="text-sm text-foreground/70">{activity.action}</p>
+                      <p className="font-serif text-lg text-foreground">{activity.user}</p>
+                      <p className="text-sm text-foreground/50">{activity.action}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-foreground/60">{activity.time}</p>
+                  <div className="flex items-center gap-1.5 text-xs text-foreground/40 font-medium">
+                    <Clock className="w-3 h-3" />
+                    {activity.time.toUpperCase()}
+                  </div>
                 </div>
               ))}
             </div>

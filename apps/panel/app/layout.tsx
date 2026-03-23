@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"], variable: '--font-sans' });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: '--font-mono' });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' });
 
 export const metadata: Metadata = {
-  title: 'Zuri AI Concierge - Guest Experience Management',
-  description: 'Elevate your resort guest experience with AI-powered concierge services and 24/7 intelligent guest support',
+  title: 'Zuri | The Art of Exceptional Hospitality',
+  description: 'Elevate your resort guest experience with AI-powered concierge services and 24/7 intelligent guest support. Personalized, exclusive, and seamless.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`}>
+      <body className="font-sans antialiased text-foreground bg-background selection:bg-primary/20">
         {children}
         <Analytics />
       </body>

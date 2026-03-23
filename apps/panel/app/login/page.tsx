@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Sparkles, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -36,27 +37,32 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background">
       <div className="grid lg:grid-cols-2 min-h-screen">
         {/* Left Side - Visual */}
-        <div className="hidden lg:flex items-center justify-center bg-secondary/40 px-6">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-6">✨</div>
-            <h2 className="text-3xl font-light text-foreground mb-4">
-              Welcome Back
+        <div className="hidden lg:flex items-center justify-center bg-secondary/30 px-12 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--primary)_0%,transparent_70%)]" />
+          </div>
+          <div className="text-center max-w-md relative z-10 animate-fade-in">
+            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-10 text-primary">
+              <Sparkles className="w-10 h-10" />
+            </div>
+            <h2 className="text-5xl font-serif text-foreground mb-8">
+              Welcome <span className="italic">Back</span>
             </h2>
-            <p className="text-foreground/70 mb-8 leading-relaxed">
-              Access your Zuri AI Concierge dashboard to manage guest experiences and view analytics.
+            <p className="text-lg text-foreground/60 mb-12 leading-relaxed font-light">
+              Access your bespoke orchestration panel to refine and manage your resort&apos;s digital guest experience.
             </p>
-            <div className="space-y-4">
-              <div className="flex gap-3 items-center text-sm text-foreground/80">
-                <span className="text-2xl">→</span>
-                <span>Real-time Guest Interactions</span>
+            <div className="space-y-6 text-left">
+              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
+                <ArrowRight className="w-4 h-4 text-primary" />
+                <span>ORCHESTRATE INTERACTIONS</span>
               </div>
-              <div className="flex gap-3 items-center text-sm text-foreground/80">
-                <span className="text-2xl">→</span>
-                <span>Manage Bookings & Services</span>
+              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
+                <ArrowRight className="w-4 h-4 text-primary" />
+                <span>MANAGE PRESTIGE SERVICES</span>
               </div>
-              <div className="flex gap-3 items-center text-sm text-foreground/80">
-                <span className="text-2xl">→</span>
-                <span>View Detailed Analytics</span>
+              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
+                <ArrowRight className="w-4 h-4 text-primary" />
+                <span>INSIGHTS & ANALYTICS</span>
               </div>
             </div>
           </div>
@@ -66,15 +72,15 @@ export default function LoginPage() {
         <div className="flex items-center justify-center px-6 py-12">
           <div className="w-full max-w-md">
             {/* Header */}
-            <div className="mb-8">
-              <Link href="/" className="text-2xl font-light tracking-wide text-foreground">
-                Zuri<span className="font-normal"> ✨</span>
+            <div className="mb-12">
+              <Link href="/" className="text-3xl font-serif tracking-tight text-foreground flex items-center gap-2">
+                Zuri <span className="text-primary/60 text-xl font-sans font-light italic">Concierge</span>
               </Link>
-              <h1 className="mt-6 text-3xl font-light text-foreground">
-                Sign In to Your Resort
+              <h1 className="mt-10 text-4xl font-serif text-foreground">
+                Sign In
               </h1>
-              <p className="mt-2 text-foreground/70">
-                Access your AI Concierge dashboard
+              <p className="mt-3 text-foreground/50 font-light">
+                Secure access to your resort management suite
               </p>
             </div>
 

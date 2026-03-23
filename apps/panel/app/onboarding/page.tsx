@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Sparkles, Home, ConciergeBell, BedDouble, GraduationCap, ChevronRight, ChevronLeft, Upload, Check } from 'lucide-react'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -84,18 +85,22 @@ export default function OnboardingPage() {
         <div className="mx-auto max-w-3xl px-6 py-6">
           <div className="flex justify-between mb-4">
             {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} className="flex flex-col items-center gap-2">
+              <div key={step} className="flex flex-col items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-medium transition-all duration-500 border-2 ${
                     step <= currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
+                      ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'bg-transparent border-border text-foreground/30'
                   }`}
                 >
-                  {step < currentStep ? '✓' : step}
+                  {step < currentStep ? <Check className="w-5 h-5" /> : (
+                    <span className="font-serif italic">{step}</span>
+                  )}
                 </div>
-                <span className="text-xs text-foreground/60 hidden sm:block">
-                  {step === 1 && 'Resort Info'}
+                <span className={`text-[10px] uppercase tracking-[0.2em] font-medium hidden sm:block ${
+                  step <= currentStep ? 'text-foreground' : 'text-foreground/30'
+                }`}>
+                  {step === 1 && 'Resort'}
                   {step === 2 && 'Services'}
                   {step === 3 && 'Rooms'}
                   {step === 4 && 'Knowledge'}
@@ -117,10 +122,14 @@ export default function OnboardingPage() {
       <div className="mx-auto max-w-3xl px-6 py-12">
         {/* Step 1: Resort Info */}
         {currentStep === 1 && (
-          <div className="space-y-8">
+          <div className="space-y-10">
+            <div className="flex items-center gap-4 text-primary/40">
+              <Home className="w-10 h-10" />
+              <div className="h-px flex-1 bg-border/50" />
+            </div>
             <div>
-              <h2 className="text-3xl font-light text-foreground mb-2">Resort Information</h2>
-              <p className="text-foreground/70">Tell us about your luxury resort</p>
+              <h2 className="text-4xl font-serif text-foreground mb-3">Resort <span className="italic text-primary">Identity</span></h2>
+              <p className="text-foreground/50 font-light text-lg">Define the essence of your luxury hospitality experience.</p>
             </div>
 
             <div className="space-y-6">
@@ -242,17 +251,18 @@ export default function OnboardingPage() {
               <p className="text-foreground/70">Upload resort information to train your AI concierge</p>
             </div>
 
-            <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-              <div className="text-4xl mb-4">📄</div>
-              <h3 className="text-lg font-medium text-foreground mb-2">Drag & Drop Files Here</h3>
-              <p className="text-foreground/70 mb-4">or click to select</p>
-              <p className="text-sm text-foreground/50">Supports: PDF, DOC, DOCX, TXT</p>
+            <div className="group border-2 border-dashed border-border/50 rounded-2xl p-16 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer duration-500">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6 text-primary group-hover:scale-110 transition-transform">
+                <Upload className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-serif text-foreground mb-2">Archive Intelligence</h3>
+              <p className="text-foreground/50 font-light mb-6">Drop PDFs, guides, or policies to train your bespoke concierge.</p>
+              <Button variant="outline" className="rounded-full px-8 pointer-events-none">SELECT DOCUMENTS</Button>
             </div>
 
-            <div className="p-4 rounded-lg bg-secondary/20 border border-border">
-              <p className="text-sm text-foreground/70">
-                <strong>Tip:</strong> Upload your resort handbook, pricing guides, policies, and room descriptions for better AI responses.
-              </p>
+            <div className="p-6 rounded-2xl bg-secondary/10 border border-border/50 italic font-serif text-foreground/60 leading-relaxed">
+              &quot;The secret of hospitality is to make guests feel at home even when you wish they were.&quot; 
+              <span className="block not-italic font-sans text-xs uppercase tracking-widest mt-4 font-bold text-foreground/40">— Curation Tip: Upload thorough policy documents for precise AI responses.</span>
             </div>
           </div>
         )}
@@ -260,11 +270,13 @@ export default function OnboardingPage() {
         {/* Step 5: Finish */}
         {currentStep === 5 && (
           <div className="space-y-8">
-            <div className="text-center py-12">
-              <div className="text-6xl mb-6">✨</div>
-              <h2 className="text-4xl font-light text-foreground mb-4">Your AI Concierge is Ready</h2>
-              <p className="text-lg text-foreground/70 max-w-lg mx-auto">
-                Zuri is fully configured and ready to start delivering exceptional guest experiences. Let's go to your dashboard to get started.
+            <div className="text-center py-16 animate-fade-in">
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-10 text-primary">
+                <Sparkles className="w-12 h-12" />
+              </div>
+              <h2 className="text-5xl font-serif text-foreground mb-6">Your Presence is <span className="italic">Infinite</span></h2>
+              <p className="text-xl text-foreground/50 max-w-lg mx-auto font-light leading-relaxed">
+                Your bespoke AI concierge is fully orchestrated and ready to welcome guests with unparalleled grace.
               </p>
             </div>
 
@@ -281,22 +293,22 @@ export default function OnboardingPage() {
         )}
 
         {/* Navigation */}
-        <div className="mt-12 flex justify-between">
+        <div className="mt-16 flex justify-between border-t border-border/50 pt-10">
           <Button
             onClick={handleBack}
-            variant="outline"
-            className="border-border text-foreground hover:bg-secondary/50"
+            variant="ghost"
+            className="rounded-full px-8 text-foreground/40 hover:text-foreground transition-colors"
             disabled={currentStep === 1}
           >
-            Back
+            <ChevronLeft className="w-4 h-4 mr-2" /> RETURN
           </Button>
 
           <Button
             onClick={handleNext}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className="rounded-full px-12 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 tracking-widest font-bold text-xs"
             disabled={!canProceed()}
           >
-            {currentStep === 5 ? 'Go to Dashboard' : 'Next'}
+            {currentStep === 5 ? 'ENTER ORCHESTRATION PANEL' : 'CONTINUE JOURNEY'} <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>
