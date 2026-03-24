@@ -25,9 +25,4 @@ Find the `rooms.txt` file or the `[Rooms List]` section in `FULL_PROFILE.md`.
 - **Bulk**: Copy the multi-line text and send it to `POST /api/rooms/bulk?hotel_id=<id>`.
 
 ## Multi-Tenant IDs
-For testing, we recommend using these `hotel_id` values:
-1. `kuriftu`
-2. `haile`
-3. `sheraton`
-
-By using these IDs, the data remains perfectly isolated between the different resorts.
+Generated for each resort helping them get their own AI Specific to their use case.
