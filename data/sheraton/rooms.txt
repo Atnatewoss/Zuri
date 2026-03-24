@@ -1,0 +1,10 @@
+Classic King, 480.0, 60
+Classic Twin, 480.0, 40
+Executive King, 550.0, 25
+Executive Twin, 550.0, 20
+Classic Suite, 650.0, 15
+Junior Suite, 800.0, 10
+Executive Suite, 950.0, 5
+Royal Villa, 2500.0, 2
+Club Level Room, 510.0, 30
+Garden View King, 490.0, 20

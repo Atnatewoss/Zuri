@@ -1,0 +1,10 @@
+Classic Queen, 120.0, 15
+Double Lake View, 160.0, 12
+Family Apartment, 220.0, 5
+Deluxe Suite, 280.0, 3
+Presidential Suite, 450.0, 1
+Standard Twin, 110.0, 10
+Double Garden View, 130.0, 8
+One-Bedroom Apartment, 190.0, 3
+Superior Apartment, 240.0, 2
+Lake View Queen, 157.0, 6
