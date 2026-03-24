@@ -5,8 +5,10 @@ import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Shield, CreditCard, Building2, AlertTriangle, CheckCircle2, Save } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
 
 export default function SettingsPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ export default function SettingsPage() {
   })
 
   const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -25,9 +29,56 @@ export default function SettingsPage() {
     })
   }
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  useEffect(() => {
+    const hotelId = getTenantHotelId()
+    if (!hotelId) {
+      setError('No resort session found.')
+      setLoading(false)
+      return
+    }
+
+    apiFetch<{ resort_name: string; description: string; location: string; email: string }>(
+      `/api/settings?hotel_id=${encodeURIComponent(hotelId)}`
+    )
+      .then((settings) => {
+        setFormData({
+          resortName: settings.resort_name,
+          description: settings.description,
+          location: settings.location,
+          email: settings.email,
+        })
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load settings')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  const handleSave = async () => {
+    const hotelId = getTenantHotelId()
+    if (!hotelId) {
+      setError('No resort session found.')
+      return
+    }
+
+    setError(null)
+    try {
+      await apiFetch(`/api/settings?hotel_id=${encodeURIComponent(hotelId)}`, {
+        method: 'PUT',
+        bodyJson: {
+          resort_name: formData.resortName,
+          description: formData.description,
+          location: formData.location,
+          email: formData.email,
+        },
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save settings')
+    }
   }
 
   return (
@@ -53,6 +104,8 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-6">
+              {loading && <p className="text-sm text-foreground/60">Loading settings...</p>}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="resortName" className="text-foreground">Resort Name</Label>
                 <Input

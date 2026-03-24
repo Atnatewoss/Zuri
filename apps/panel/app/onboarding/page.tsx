@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Sparkles, Home, ConciergeBell, BedDouble, GraduationCap, ChevronRight, ChevronLeft, Upload, Check } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -19,6 +21,8 @@ export default function OnboardingPage() {
     rooms: [] as { type: string; price: string }[],
     files: [] as string[],
   })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -64,11 +68,58 @@ export default function OnboardingPage() {
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1)
     } else {
-      router.push('/dashboard')
+      const hotelId = getTenantHotelId()
+      if (!hotelId) {
+        setError('No resort session found. Please sign up again.')
+        router.push('/signup')
+        return
+      }
+
+      setSaving(true)
+      setError(null)
+      try {
+        await apiFetch(`/api/settings?hotel_id=${encodeURIComponent(hotelId)}`, {
+          method: 'PUT',
+          bodyJson: {
+            resort_name: formData.resortName,
+            description: formData.description,
+            location: formData.location,
+          },
+        })
+
+        if (formData.services.length > 0) {
+          const serviceData = formData.services.map((service) => `${service}, true`).join('\n')
+          await apiFetch(`/api/services/bulk?hotel_id=${encodeURIComponent(hotelId)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: serviceData,
+          })
+        }
+
+        if (formData.rooms.length > 0) {
+          const roomData = formData.rooms
+            .filter((room) => room.type && room.price)
+            .map((room) => `${room.type}, ${Number(room.price) || 0}, 1`)
+            .join('\n')
+          if (roomData) {
+            await apiFetch(`/api/rooms/bulk?hotel_id=${encodeURIComponent(hotelId)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: roomData,
+            })
+          }
+        }
+
+        router.push('/dashboard')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to complete onboarding')
+      } finally {
+        setSaving(false)
+      }
     }
   }
 
@@ -306,11 +357,12 @@ export default function OnboardingPage() {
           <Button
             onClick={handleNext}
             className="rounded-full px-12 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 tracking-widest font-bold text-xs"
-            disabled={!canProceed()}
+            disabled={!canProceed() || saving}
           >
-            {currentStep === 5 ? 'ENTER ORCHESTRATION PANEL' : 'CONTINUE JOURNEY'} <ChevronRight className="w-4 h-4 ml-2" />
+            {currentStep === 5 ? (saving ? 'FINALIZING SETUP...' : 'ENTER ORCHESTRATION PANEL') : 'CONTINUE JOURNEY'} <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
+        {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
       </div>
     </div>
   )

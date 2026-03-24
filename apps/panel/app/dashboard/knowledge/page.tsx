@@ -1,19 +1,129 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
-import { Upload, FileText, CheckCircle2, Clock, Trash2, Lightbulb } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, Clock, Lightbulb } from 'lucide-react'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
 
-const uploadedFiles = [
-  { id: 1, name: 'Resort_Handbook_2024.pdf', size: '2.4 MB', status: 'Ready', uploadedAt: '2 days ago' },
-  { id: 2, name: 'Dining_Menu_Collection.pdf', size: '1.8 MB', status: 'Ready', uploadedAt: '1 day ago' },
-  { id: 3, name: 'Room_Policies.docx', size: '456 KB', status: 'Ready', uploadedAt: '12 hours ago' },
-  { id: 4, name: 'Spa_Services_List.pdf', size: '890 KB', status: 'Processing', uploadedAt: '2 hours ago' },
-  { id: 5, name: 'Activity_Guide.pdf', size: '1.2 MB', status: 'Ready', uploadedAt: '1 hour ago' },
-]
+type KnowledgeDocument = {
+  id: number
+  filename: string
+  file_size: string
+  status: string
+  uploaded_at: string
+}
 
 export default function KnowledgeBasePage() {
+  const [files, setFiles] = useState<KnowledgeDocument[]>([])
+  const [hotelId, setHotelId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const loadDocuments = async (tenantId: string) => {
+    const docs = await apiFetch<KnowledgeDocument[]>(
+      `/api/knowledge/documents?hotel_id=${encodeURIComponent(tenantId)}`
+    )
+    setFiles(docs)
+  }
+
+  useEffect(() => {
+    const tenantId = getTenantHotelId()
+    if (!tenantId) {
+      setError('No resort session found.')
+      setLoading(false)
+      return
+    }
+
+    setHotelId(tenantId)
+    loadDocuments(tenantId)
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load documents')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (!hotelId) return
+    const hasProcessing = files.some((file) => file.status === 'Processing')
+    if (!hasProcessing) return
+
+    const intervalId = window.setInterval(() => {
+      loadDocuments(hotelId).catch(() => {
+        // Keep polling; transient failures should not break UX.
+      })
+    }, 4000)
+
+    return () => window.clearInterval(intervalId)
+  }, [files, hotelId])
+
+  const openFileDialog = () => fileInputRef.current?.click()
+
+  const handleFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !hotelId) return
+
+    setUploading(true)
+    setError(null)
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', `${API_BASE_URL}/api/knowledge/upload?hotel_id=${encodeURIComponent(hotelId)}`)
+        const token = window.localStorage.getItem('zuri_session_token')
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+        }
+        xhr.upload.onprogress = (progressEvent) => {
+          if (!progressEvent.lengthComputable) return
+          setUploadProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100))
+        }
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve()
+          } else {
+            reject(new Error(`Upload failed (${xhr.status})`))
+          }
+        }
+        xhr.onerror = () => reject(new Error('Network error during upload'))
+        xhr.send(formData)
+      })
+
+      await loadDocuments(hotelId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+      setUploadProgress(0)
+      event.target.value = ''
+    }
+  }
+
+  const handleDelete = async (documentId: number) => {
+    if (!hotelId) return
+    try {
+      await apiFetch(`/api/knowledge/documents/${documentId}?hotel_id=${encodeURIComponent(hotelId)}`, {
+        method: 'DELETE',
+      })
+      await loadDocuments(hotelId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete document')
+    }
+  }
+
+  const formatUploadTime = (iso: string) => {
+    const date = new Date(iso)
+    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString()
+  }
+
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
@@ -25,7 +135,10 @@ export default function KnowledgeBasePage() {
 
         <div className="p-8 space-y-8">
           {/* Upload Section */}
-          <div className="group rounded-2xl border-2 border-dashed border-border/50 bg-card/40 backdrop-blur-sm p-16 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer duration-500 overflow-hidden relative">
+          <div
+            className="group rounded-2xl border-2 border-dashed border-border/50 bg-card/40 backdrop-blur-sm p-16 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer duration-500 overflow-hidden relative"
+            onClick={openFileDialog}
+          >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,var(--primary)_0%,transparent_50%)] opacity-0 group-hover:opacity-5 transition-opacity" />
             <div className="flex justify-center mb-8">
               <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 border border-primary/20">
@@ -35,13 +148,25 @@ export default function KnowledgeBasePage() {
             <h3 className="text-3xl font-serif text-foreground mb-3">Upload <span className="italic text-primary">Knowledge</span></h3>
             <p className="text-foreground/50 font-light text-lg mb-8 mx-auto tracking-tight">Drop your resort&apos;s blueprints, guides, or policies to orchestrate the AI concierge.</p>
             <Button className="rounded-full px-10 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20">
-              BROWSE DOCUMENTS
+              {uploading ? 'UPLOADING...' : 'BROWSE DOCUMENTS'}
             </Button>
+            {uploading && (
+              <p className="mt-3 text-sm text-foreground/70">Upload progress: {uploadProgress}%</p>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileSelected}
+              accept=".pdf,.docx,.txt,.md,.csv"
+            />
           </div>
 
           {/* Uploaded Files */}
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="text-lg font-medium text-foreground mb-6">Uploaded Files</h2>
+            {loading && <p className="text-sm text-foreground/60 mb-4">Loading documents...</p>}
+            {error && <p className="text-sm text-destructive mb-4">{error}</p>}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -54,17 +179,17 @@ export default function KnowledgeBasePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                    {uploadedFiles.map((file) => (
+                    {files.map((file) => (
                       <tr key={file.id} className="group hover:bg-secondary/20 transition-all duration-300">
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                               <FileText className="w-5 h-5" />
                             </div>
-                            <span className="font-serif text-lg text-foreground">{file.name}</span>
+                            <span className="font-serif text-lg text-foreground">{file.filename}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5 text-sm font-medium text-foreground/40">{file.size}</td>
+                        <td className="px-6 py-5 text-sm font-medium text-foreground/40">{file.file_size}</td>
                         <td className="px-6 py-5">
                           <span
                             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
@@ -77,14 +202,24 @@ export default function KnowledgeBasePage() {
                             {file.status}
                           </span>
                         </td>
-                      <td className="px-4 py-4 text-sm text-foreground/70">{file.uploadedAt}</td>
+                      <td className="px-4 py-4 text-sm text-foreground/70">{formatUploadTime(file.uploaded_at)}</td>
                       <td className="px-4 py-4 text-right">
-                        <button className="text-sm text-primary hover:text-primary/80 font-medium transition-colors">
+                        <button
+                          className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                          onClick={() => handleDelete(file.id)}
+                        >
                           Remove
                         </button>
                       </td>
                     </tr>
                   ))}
+                  {!loading && files.length === 0 && (
+                    <tr>
+                      <td className="px-4 py-6 text-sm text-foreground/60" colSpan={5}>
+                        No documents uploaded yet for this resort.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

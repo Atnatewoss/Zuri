@@ -4,17 +4,74 @@ import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Copy, Check } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { apiFetch, API_BASE_URL } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
 
 export default function EmbedWidgetPage() {
   const [copied, setCopied] = useState(false)
+  const [hotelId, setHotelId] = useState<string | null>(null)
+  const [scriptCode, setScriptCode] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [verifyMessage, setVerifyMessage] = useState<string | null>(null)
 
-  const scriptCode = `<script src="https://zuri.ai/widget.js" data-hotel-id="kuriftu-demo"></script>`
+  const fallbackSnippet = hotelId
+    ? `<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${hotelId}" data-api-url="${API_BASE_URL}" async></script>`
+    : ''
+
+  useEffect(() => {
+    const tenantId = getTenantHotelId()
+    if (!tenantId) {
+      setError('No resort session found. Please sign up or log in again.')
+      setLoading(false)
+      return
+    }
+    setHotelId(tenantId)
+
+    apiFetch<{ snippet: string }>(`/api/embed/snippet/${encodeURIComponent(tenantId)}`)
+      .then((data) => {
+        setScriptCode(data.snippet)
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load embed snippet')
+        setScriptCode(`<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${tenantId}" data-api-url="${API_BASE_URL}" async></script>`)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
   const handleCopy = () => {
+    if (!scriptCode) return
     navigator.clipboard.writeText(scriptCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleCopyAndVerify = async () => {
+    if (!hotelId || !scriptCode) return
+    navigator.clipboard.writeText(scriptCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+
+    setVerifying(true)
+    setVerifyMessage(null)
+    try {
+      const result = await apiFetch<{ ok: boolean; mockup_url: string }>(
+        `/api/embed/verify/${encodeURIComponent(hotelId)}`
+      )
+      if (result.ok) {
+        setVerifyMessage(`Verified. Open mockup test page: ${result.mockup_url}`)
+      } else {
+        setVerifyMessage('Verification could not confirm setup.')
+      }
+    } catch (err) {
+      setVerifyMessage(err instanceof Error ? err.message : 'Verification failed')
+    } finally {
+      setVerifying(false)
+    }
   }
 
   return (
@@ -39,16 +96,19 @@ export default function EmbedWidgetPage() {
             <p className="text-sm text-foreground/70 mb-4">
               Copy this code and paste it into the HTML of your website, right before the closing {'</body>'} tag.
             </p>
+            {hotelId && <p className="text-xs text-foreground/60 mb-3">Resort ID: <span className="font-mono">{hotelId}</span></p>}
+            {error && <p className="text-sm text-destructive mb-3">{error}</p>}
 
             <div className="relative">
               <div className="bg-secondary/50 rounded-lg p-4 font-mono text-sm text-foreground overflow-x-auto border border-border/50">
-                <code>{scriptCode}</code>
+                <code>{loading ? 'Loading embed snippet...' : scriptCode || fallbackSnippet}</code>
               </div>
               <Button
                 onClick={handleCopy}
                 size="sm"
                 variant="outline"
                 className="absolute top-3 right-3 border-border text-foreground hover:bg-secondary/50"
+                disabled={loading || !(scriptCode || fallbackSnippet)}
               >
                 {copied ? (
                   <>
@@ -62,6 +122,16 @@ export default function EmbedWidgetPage() {
                   </>
                 )}
               </Button>
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <Button
+                onClick={handleCopyAndVerify}
+                size="sm"
+                disabled={loading || verifying || !(scriptCode || fallbackSnippet)}
+              >
+                {verifying ? 'Verifying...' : 'Copy & Verify Install'}
+              </Button>
+              {verifyMessage && <p className="text-xs text-foreground/70">{verifyMessage}</p>}
             </div>
           </div>
 

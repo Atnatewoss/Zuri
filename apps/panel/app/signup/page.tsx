@@ -6,6 +6,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { apiFetch } from '@/lib/api'
+import { setSessionToken, setTenantHotelId } from '@/lib/tenant'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ export default function SignupPage() {
     password: '',
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,14 +26,30 @@ export default function SignupPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // Simulate signup
-    setTimeout(() => {
-      setLoading(false)
+    setError(null)
+    try {
+      const signup = await apiFetch<{ resort: { hotel_id: string; resort_name: string }; session_token: string }>(
+        '/api/resorts/signup',
+        {
+          method: 'POST',
+          bodyJson: {
+            resort_name: formData.resortName,
+            location: 'Pending setup',
+            email: formData.email,
+          },
+        }
+      )
+      setTenantHotelId(signup.resort.hotel_id)
+      setSessionToken(signup.session_token)
       router.push('/onboarding')
-    }, 1000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Signup failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -102,6 +121,10 @@ export default function SignupPage() {
               >
                 {loading ? 'Creating Concierge...' : 'Create Your Concierge'}
               </Button>
+
+              {error && (
+                <p className="text-sm text-destructive text-center">{error}</p>
+              )}
 
               <p className="text-center text-sm text-foreground/70">
                 Already have an account?{' '}
