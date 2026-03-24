@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import CORS_ORIGINS
+from app.core.config import CORS_ORIGINS, ENV
 from app.core.database import init_db
 from fastapi.staticfiles import StaticFiles
 from app.api.knowledge import router as knowledge_router
@@ -67,7 +67,7 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "environment": ENV}
 
 
 if __name__ == "__main__":

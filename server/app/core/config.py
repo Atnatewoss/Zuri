@@ -1,11 +1,13 @@
 """Application configuration loaded from environment variables."""
 
 import os
-import tempfile
 from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# --- Runtime ---
+ENV = os.getenv("ENV", "development")
 
 # --- Paths ---
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
