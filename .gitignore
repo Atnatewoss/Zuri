@@ -6,3 +6,11 @@ __pycache__
 
 # Virtual Environment
 .venv
+
+# Zuri Local Data
+zuri.db
+server/uploads/
+server/chroma_data/
+server/_tmp_uploads/
+node_modules/
+.next/
