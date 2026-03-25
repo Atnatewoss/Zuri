@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, JavaScriptResponse
+from fastapi.responses import HTMLResponse, Response
 from sqlmodel import Session, select
 
 from app.core.auth import get_authenticated_hotel_id
@@ -92,7 +92,7 @@ def serve_widget_js():
     """Serves the embeddable widget bundle directly from source."""
     if not WIDGET_SOURCE_PATH.exists():
         raise HTTPException(status_code=404, detail="Widget script not found")
-    return JavaScriptResponse(content=WIDGET_SOURCE_PATH.read_text(encoding="utf-8"))
+    return Response(content=WIDGET_SOURCE_PATH.read_text(encoding="utf-8"), media_type="application/javascript")
 
 @router.get("/mockup/{hotel_id}")
 def get_mockup_page(hotel_id: str, request: Request):
