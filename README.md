@@ -2,23 +2,19 @@
 
 Zuri AI Concierge is a comprehensive hospitality AI platform designed to empower resorts and hotels with a multi-tenant, RAG-powered concierge service. This system provides real-time guest assistance through an embeddable chat widget, managed through a professional resort panel dashboard.
 
-<div align="center">
+## Technology Stack
 
-### Technology Stack
+### Frontend
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-**Frontend**
-Next.js | TypeScript | Tailwind CSS | Recharts | Lucide Icons
+### Backend
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white) ![SQLModel](https://img.shields.io/badge/SQLModel-EC4899?style=for-the-badge) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![ChromaDB](https://img.shields.io/badge/ChromaDB-3B82F6?style=for-the-badge)
 
-**Backend**
-Python | FastAPI | SQLModel | PostgreSQL (Supabase) | ChromaDB | uv
+### AI Engine
+![Google Gemini](https://img.shields.io/badge/Google_Gemini-8B5CF6?style=for-the-badge&logo=google&logoColor=white) ![RAG](https://img.shields.io/badge/RAG-Integration-pink?style=for-the-badge)
 
-**AI Engine**
-Google Gemini AI (2.0 Flash) | RAG Integration
-
-**Deployment**
-Render (Backend) | Vercel (Frontend)
-
-</div>
+### Deployment
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 ## Key Features
 
@@ -44,7 +40,7 @@ Create a `.env.local` file in the `apps/panel` directory with the following vari
 ```
 NEXT_PUBLIC_APP_ENV=development
 NEXT_PUBLIC_API_URL_DEV=http://localhost:8000
-NEXT_PUBLIC_API_URL_PROD=https://zuri-backend-rkws.onrender.com
+NEXT_PUBLIC_API_URL_PROD=your-production-backend-url
 ```
 
 - `NEXT_PUBLIC_APP_ENV`: Set to `development` for local testing or `production` for deployed environments.
