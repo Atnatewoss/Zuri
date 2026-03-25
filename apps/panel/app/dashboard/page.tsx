@@ -1,9 +1,19 @@
-'use client'
-
+import { useState, useEffect } from 'react'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Activity, ShieldCheck, Zap, ArrowUpRight, MessageSquare, User, Clock } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
+
+interface DashboardStats {
+  total_requests: number
+  resolved_requests: number
+  staff_hours_reclaimed: string
+  satisfaction_score: string
+  total_documents: number
+  documents_ready: number
+}
 
 const chartData = [
   { name: '00:00', request: 420, latency: 42 },
@@ -15,13 +25,30 @@ const chartData = [
   { name: '23:59', request: 720, latency: 43 },
 ]
 
-const recentActivity = [
-  { id: 1, user: 'Dr. Aris Thorne', action: 'Support: Suite Preference Request', time: '2m ago' },
-  { id: 2, user: 'Elena Rossi', action: 'Service: Sunset Cruise Coordination', time: '15m ago' },
-  { id: 3, user: 'Marcus Chen', action: 'Resolution: Dietary Preference Confirmed', time: '1h ago' },
-]
+const recentActivity: any[] = []
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadStats() {
+      const hotelId = getTenantHotelId()
+      if (!hotelId) return
+
+      try {
+        const data = await apiFetch<DashboardStats>(`/api/dashboard/stats?hotel_id=${hotelId}`)
+        setStats(data)
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadStats()
+  }, [])
+
   return (
     <div className="flex bg-background min-h-screen flex-col md:flex-row">
       <DashboardSidebar />
@@ -47,9 +74,11 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 font-bold">Total Guest Requests</p>
-              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">1,284</h3>
+              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">
+                {loading ? '...' : (stats?.total_requests?.toLocaleString() || '0')}
+              </h3>
               <p className="text-xs text-emerald-500 mt-4 font-medium flex items-center gap-1">
-                <ArrowUpRight className="w-3 h-3" /> +18.4% ACTIVITY
+                <ArrowUpRight className="w-3 h-3" /> {loading ? '...' : (stats?.total_requests ? '+18.4% ACTIVITY' : '0% ACTIVITY')}
               </p>
             </div>
 
@@ -62,7 +91,9 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 font-bold">Staff Hours Reclaimed</p>
-              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">128h</h3>
+              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">
+                {loading ? '...' : (stats?.staff_hours_reclaimed || '0h')}
+              </h3>
               <p className="text-xs text-foreground/40 mt-4 font-light italic">Efficiency Optimized</p>
             </div>
 
@@ -75,7 +106,9 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 font-bold">Guest Satisfaction</p>
-              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">98.2%</h3>
+              <h3 className="text-5xl font-serif text-foreground mt-4 tracking-tighter">
+                {loading ? '...' : (stats?.satisfaction_score || '0%')}
+              </h3>
               <p className="text-xs text-foreground/40 mt-4 font-light italic">Positive Sentiment</p>
             </div>
           </div>
