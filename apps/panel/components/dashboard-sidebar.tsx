@@ -3,65 +3,93 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Library, Hotel, Calendar, Puzzle, Settings, LogOut, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Calendar, Hotel, FileText, Code, Settings } from 'lucide-react'
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/knowledge', label: 'Knowledge Base', icon: Library },
-  { href: '/dashboard/services', label: 'Guest Services', icon: Hotel },
-  { href: '/dashboard/bookings', label: 'Guest Bookings', icon: Calendar },
-  { href: '/dashboard/embed', label: 'Integrations', icon: Puzzle },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+// UX Psychology Information Architecture for the Sidebar
+// Separating operational daily tasks, static knowledge tasks, and technical system configurations.
+const navGroups = [
+  {
+    title: 'Daily Operations',
+    items: [
+      { href: '/dashboard', label: 'Command Center', icon: LayoutDashboard, exact: true },
+      { href: '/dashboard/bookings', label: 'Guest Reservations', icon: Calendar },
+    ]
+  },
+  {
+    title: 'Property Intelligence',
+    items: [
+      { href: '/dashboard/services', label: 'Service Directory', icon: Hotel },
+      { href: '/dashboard/knowledge', label: 'Training Documents', icon: FileText },
+    ]
+  },
+  {
+    title: 'System Setup',
+    items: [
+      { href: '/dashboard/embed', label: 'Widget Integrations', icon: Code },
+    ]
+  }
 ]
 
 export function DashboardSidebar() {
   const pathname = usePathname()
 
+  // Reduced width (240px instead of 260+px) for that 'zoomed out / 10% smaller' tighter look.
+  // Using very sleek deep zinc colors.
   return (
-    <div className="hidden md:flex w-72 border-r border-border bg-sidebar h-screen flex-col sticky top-0 shadow-2xl shadow-black/5">
+    <div className="hidden md:flex w-[240px] bg-zinc-950 border-r border-zinc-800 flex-col h-screen sticky top-0 font-sans text-zinc-300">
       {/* Logo */}
-      <div className="px-8 py-10 border-b border-border/50">
-        <Link href="/" className="text-3xl font-serif tracking-tight text-foreground flex items-center gap-2">
-          Zuri <span className="text-primary/60 text-xl font-sans font-light italic">Concierge</span>
+      <div className="px-6 py-5 border-b border-zinc-800/60 bg-black/20">
+        <Link href="/dashboard" className="text-xl font-bold tracking-tighter text-white uppercase flex items-center gap-2">
+          ZURI
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-8 space-y-3">
-        {navItems.map((item) => {
-          const isActive = item.exact 
-            ? pathname === item.href 
-            : pathname.startsWith(item.href)
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-4 px-5 py-3.5 rounded-xl font-medium transition-all duration-300 tracking-wide group',
-                isActive
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                  : 'text-foreground/50 hover:text-foreground hover:bg-secondary/50'
-              )}
-            >
-              <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-primary-foreground" : "text-primary/60")} />
-              <span className="text-sm font-medium">{item.label.toUpperCase()}</span>
-            </Link>
-          )
-        })}
+      <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-8">
+        {navGroups.map((group) => (
+          <div key={group.title} className="space-y-1.5">
+            <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-3">
+              {group.title}
+            </div>
+            {group.items.map((item) => {
+              const isActive = item.exact 
+                ? pathname === item.href 
+                : pathname.startsWith(item.href)
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-[13px]', // Using text-[13px] instead of text-sm for a crisper, tighter fit
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'hover:bg-zinc-800/60 hover:text-white text-zinc-400'
+                  )}
+                >
+                  <Icon className="w-4 h-4 opacity-80" />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
-      {/* User Profile Info (Footer) */}
-      <div className="px-8 py-8 border-t border-border/50 bg-secondary/5 mt-auto">
-        <div className="flex items-center gap-4 group cursor-pointer hover:bg-secondary/20 p-2 -m-2 rounded-xl transition-all duration-300">
-          <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-serif italic text-lg shrink-0 shadow-sm group-hover:shadow-primary/20 group-hover:border-primary/40 transition-all">
-            KR
-          </div>
-          <div className="flex flex-col min-w-0">
-            <p className="font-serif italic text-lg text-foreground truncate leading-tight">Kuriftu Resort</p>
-            <p className="text-[10px] text-foreground/40 font-bold truncate tracking-wider mt-0.5 uppercase">admin@kuriftu.com</p>
-          </div>
-        </div>
+      {/* Settings at the Bottom */}
+      <div className="p-3 border-t border-zinc-800/60 bg-black/20">
+        <Link
+          href="/dashboard/settings"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-[13px]',
+            pathname.startsWith('/dashboard/settings')
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'hover:bg-zinc-800/60 hover:text-white text-zinc-400'
+          )}
+        >
+          <Settings className="w-4 h-4 opacity-80" />
+          <span>General Settings</span>
+        </Link>
       </div>
     </div>
   )

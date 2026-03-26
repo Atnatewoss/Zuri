@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Sparkles, Home, ConciergeBell, BedDouble, GraduationCap, ChevronRight, ChevronLeft, Upload, Check } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Upload, Check } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
 
@@ -130,94 +130,88 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Progress Bar */}
-      <div className="border-b border-border">
-        <div className="mx-auto max-w-3xl px-6 py-6">
-          <div className="flex justify-between mb-4">
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} className="flex flex-col items-center gap-3">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-medium transition-all duration-500 border-2 ${
-                    step <= currentStep
-                      ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20'
-                      : 'bg-transparent border-border text-foreground/30'
-                  }`}
-                >
-                  {step < currentStep ? <Check className="w-5 h-5" /> : (
-                    <span className="font-serif italic">{step}</span>
-                  )}
-                </div>
-                <span className={`text-[10px] uppercase tracking-[0.2em] font-medium hidden sm:block ${
-                  step <= currentStep ? 'text-foreground' : 'text-foreground/30'
-                }`}>
-                  {step === 1 && 'Resort'}
-                  {step === 2 && 'Services'}
-                  {step === 3 && 'Rooms'}
-                  {step === 4 && 'Knowledge'}
-                  {step === 5 && 'Finish'}
-                </span>
+    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-20">
+      {/* Header */}
+      <header className="bg-white border-b border-zinc-200">
+        <div className="mx-auto max-w-4xl px-8 py-5 flex items-center justify-between">
+            <span className="font-bold tracking-tight uppercase">ZURI</span>
+            <span className="text-sm font-medium text-zinc-400">Step {currentStep} of 5</span>
+        </div>
+      </header>
+
+      {/* Progress Bar Container */}
+      <div className="mx-auto max-w-2xl px-8 pt-12 pb-8">
+        <div className="flex justify-between items-center relative z-10">
+          {[1, 2, 3, 4, 5].map((step) => (
+            <div key={step} className="flex flex-col items-center gap-2 relative">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm transition-colors duration-300 z-10 ${
+                  step === currentStep
+                    ? 'bg-zinc-900 text-white'
+                    : step < currentStep
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-zinc-200 text-zinc-500'
+                }`}
+              >
+                {step < currentStep ? <Check className="w-4 h-4" /> : step}
               </div>
-            ))}
-          </div>
-          <div className="h-1 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
-            />
+            </div>
+          ))}
+          {/* Connecting Line */}
+          <div className="absolute top-4 left-4 right-4 h-0.5 bg-zinc-200 -z-0">
+             <div 
+               className="h-full bg-emerald-500 transition-all duration-500"
+               style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
+             />
           </div>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto max-w-xl px-8 bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 sm:p-12 mt-4">
         {/* Step 1: Resort Info */}
         {currentStep === 1 && (
-          <div className="space-y-10">
-            <div className="flex items-center gap-4 text-primary/40">
-              <Home className="w-10 h-10" />
-              <div className="h-px flex-1 bg-border/50" />
-            </div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div>
-              <h2 className="text-4xl font-serif text-foreground mb-3">Resort <span className="italic text-primary">Identity</span></h2>
-              <p className="text-foreground/50 font-light text-lg">Define the essence of your luxury hospitality experience.</p>
+              <h2 className="text-2xl font-semibold mb-2">Property Details</h2>
+              <p className="text-zinc-500 text-sm">Tell us about your property to configure your widget.</p>
             </div>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="resortName" className="text-foreground">Resort Name *</Label>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="resortName" className="text-sm font-medium text-zinc-700">Property Name *</Label>
                 <Input
                   id="resortName"
                   name="resortName"
-                  placeholder="e.g., Kuriftu Resort & Spa"
+                  placeholder="e.g. Grand Ocean Resort"
                   value={formData.resortName}
                   onChange={handleInputChange}
-                  className="bg-input border-border text-foreground"
+                  className="bg-zinc-50 border-zinc-200"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-foreground">Description *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-sm font-medium text-zinc-700">Description *</Label>
                 <textarea
                   id="description"
                   name="description"
-                  placeholder="Briefly describe your resort and its unique features..."
+                  placeholder="Briefly describe your property and its unique features..."
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-border bg-input text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-zinc-200 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   rows={4}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location" className="text-foreground">Location *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="location" className="text-sm font-medium text-zinc-700">Location *</Label>
                 <Input
                   id="location"
                   name="location"
-                  placeholder="e.g., Addis Ababa, Ethiopia"
+                  placeholder="e.g. Addis Ababa, Ethiopia"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="bg-input border-border text-foreground"
+                  className="bg-zinc-50 border-zinc-200"
                 />
               </div>
             </div>
@@ -226,25 +220,26 @@ export default function OnboardingPage() {
 
         {/* Step 2: Services */}
         {currentStep === 2 && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div>
-              <h2 className="text-3xl font-light text-foreground mb-2">Services & Amenities</h2>
-              <p className="text-foreground/70">Select the services your resort offers</p>
+              <h2 className="text-2xl font-semibold mb-2">Services & Amenities</h2>
+              <p className="text-zinc-500 text-sm">Select the services your property offers.</p>
             </div>
 
-            <div className="space-y-4">
-              {['Spa & Wellness', 'Fine Dining', 'Activities & Tours', 'Room Service', 'Concierge Desk', 'Event Planning'].map(
+            <div className="space-y-3">
+              {['Spa & Wellness', 'Fine Dining', 'Activities & Tours', 'Room Service', 'Concierge Desk', 'Event Planning', 'Airport Transfer'].map(
                 (service) => (
-                  <div key={service} className="flex items-center gap-3 p-4 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-colors">
+                  <label key={service} className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition-colors has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50">
                     <Checkbox
                       id={service}
                       checked={formData.services.includes(service)}
                       onCheckedChange={() => handleServiceChange(service)}
+                      className="data-[state=checked]:bg-zinc-900 border-zinc-300"
                     />
-                    <Label htmlFor={service} className="cursor-pointer flex-1 font-medium">
+                    <span className="font-medium text-sm text-zinc-800">
                       {service}
-                    </Label>
-                  </div>
+                    </span>
+                  </label>
                 )
               )}
             </div>
@@ -253,31 +248,32 @@ export default function OnboardingPage() {
 
         {/* Step 3: Rooms */}
         {currentStep === 3 && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div>
-              <h2 className="text-3xl font-light text-foreground mb-2">Room Types</h2>
-              <p className="text-foreground/70">Define your available room categories and pricing</p>
+              <h2 className="text-2xl font-semibold mb-2">Room Categories</h2>
+              <p className="text-zinc-500 text-sm">Define your available room types and base pricing.</p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {formData.rooms.map((room, index) => (
-                <div key={index} className="grid sm:grid-cols-2 gap-4 p-4 rounded-lg border border-border bg-secondary/10">
-                  <div className="space-y-2">
-                    <Label className="text-foreground text-sm">Room Type</Label>
+                <div key={index} className="grid grid-cols-2 gap-4 p-5 rounded-xl border border-zinc-200 bg-zinc-50/50">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">Room Type</Label>
                     <Input
-                      placeholder="e.g., Deluxe Room"
+                      placeholder="e.g. Deluxe Suite"
                       value={room.type}
                       onChange={(e) => updateRoom(index, 'type', e.target.value)}
-                      className="bg-input border-border text-foreground"
+                      className="bg-white border-zinc-200"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-foreground text-sm">Price per Night</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">Price per Night</Label>
                     <Input
-                      placeholder="e.g., $250"
+                      placeholder="e.g. 250"
                       value={room.price}
+                      type="number"
                       onChange={(e) => updateRoom(index, 'price', e.target.value)}
-                      className="bg-input border-border text-foreground"
+                      className="bg-white border-zinc-200"
                     />
                   </div>
                 </div>
@@ -286,7 +282,7 @@ export default function OnboardingPage() {
               <Button
                 onClick={addRoom}
                 variant="outline"
-                className="w-full border-border text-foreground hover:bg-secondary/50"
+                className="w-full border-dashed border-zinc-300 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 h-12"
               >
                 + Add Room Type
               </Button>
@@ -296,73 +292,66 @@ export default function OnboardingPage() {
 
         {/* Step 4: Knowledge Upload */}
         {currentStep === 4 && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div>
-              <h2 className="text-3xl font-light text-foreground mb-2">Train Your AI</h2>
-              <p className="text-foreground/70">Upload resort information to train your AI concierge</p>
+              <h2 className="text-2xl font-semibold mb-2">Train Your Widget</h2>
+              <p className="text-zinc-500 text-sm">Upload property guides to train your AI.</p>
             </div>
 
-            <div className="group border-2 border-dashed border-border/50 rounded-2xl p-16 text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer duration-500">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6 text-primary group-hover:scale-110 transition-transform">
-                <Upload className="w-8 h-8" />
+            <div className="border-2 border-dashed border-zinc-200 rounded-xl p-10 text-center hover:border-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mb-4 text-zinc-500">
+                <Upload className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-serif text-foreground mb-2">Archive Intelligence</h3>
-              <p className="text-foreground/50 font-light mb-6">Drop PDFs, guides, or policies to train your bespoke concierge.</p>
-              <Button variant="outline" className="rounded-full px-8 pointer-events-none">SELECT DOCUMENTS</Button>
+              <h3 className="text-sm font-medium text-zinc-900 mb-1">Upload Documents</h3>
+              <p className="text-zinc-500 text-xs mb-6 max-w-[200px]">PDF, DOCX, or TXT up to 10MB</p>
+              <Button size="sm" variant="secondary" className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 pointer-events-none">Select Files</Button>
             </div>
 
-            <div className="p-6 rounded-2xl bg-secondary/10 border border-border/50 italic font-serif text-foreground/60 leading-relaxed">
-              &quot;The secret of hospitality is to make guests feel at home even when you wish they were.&quot; 
-              <span className="block not-italic font-sans text-xs uppercase tracking-widest mt-4 font-bold text-foreground/40">— Curation Tip: Upload thorough policy documents for precise AI responses.</span>
+            <div className="p-4 rounded-lg bg-blue-50 border border-blue-100 flex gap-3 text-sm text-blue-800">
+              <div className="mt-0.5">ℹ️</div>
+              <p>For best results, upload your complete FAQ document, dining menus, and hotel policies. The AI widget will use this to accurately assist guests.</p>
             </div>
           </div>
         )}
 
         {/* Step 5: Finish */}
         {currentStep === 5 && (
-          <div className="space-y-8">
-            <div className="text-center py-16 animate-fade-in">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-10 text-primary">
-                <Sparkles className="w-12 h-12" />
-              </div>
-              <h2 className="text-5xl font-serif text-foreground mb-6">Your Presence is <span className="italic">Infinite</span></h2>
-              <p className="text-xl text-foreground/50 max-w-lg mx-auto font-light leading-relaxed">
-                Your bespoke AI concierge is fully orchestrated and ready to welcome guests with unparalleled grace.
-              </p>
+          <div className="space-y-8 text-center py-8 animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6 text-emerald-600">
+               <Check className="w-10 h-10" />
             </div>
-
-            <div className="p-6 rounded-xl bg-primary/5 border border-primary/20">
-              <h3 className="font-medium text-foreground mb-3">What's next?</h3>
-              <ul className="space-y-2 text-sm text-foreground/80">
-                <li>✓ View real-time guest interactions</li>
-                <li>✓ Monitor booking requests</li>
-                <li>✓ Customize your AI responses</li>
-                <li>✓ Embed Zuri on your website</li>
-              </ul>
+            
+            <div>
+              <h2 className="text-3xl font-semibold text-zinc-900 mb-4">Setup Complete</h2>
+              <p className="text-zinc-500 leading-relaxed max-w-sm mx-auto">
+                Your Zuri account is ready. Your AI widget has been configured with your property data and is prepared to assist guests.
+              </p>
             </div>
           </div>
         )}
 
+        {error && <p className="mt-6 text-sm text-red-600 p-3 bg-red-50 rounded-md border border-red-100">{error}</p>}
+
         {/* Navigation */}
-        <div className="mt-16 flex justify-between border-t border-border/50 pt-10">
+        <div className="mt-12 flex justify-between pt-6 border-t border-zinc-100">
           <Button
             onClick={handleBack}
             variant="ghost"
-            className="rounded-full px-8 text-foreground/40 hover:text-foreground transition-colors"
+            className="text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
             disabled={currentStep === 1}
           >
-            <ChevronLeft className="w-4 h-4 mr-2" /> RETURN
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back
           </Button>
 
           <Button
             onClick={handleNext}
-            className="rounded-full px-12 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 tracking-widest font-bold text-xs"
+            className="bg-zinc-900 text-white hover:bg-zinc-800 px-6 font-medium"
             disabled={!canProceed() || saving}
           >
-            {currentStep === 5 ? (saving ? 'FINALIZING SETUP...' : 'ENTER ORCHESTRATION PANEL') : 'CONTINUE JOURNEY'} <ChevronRight className="w-4 h-4 ml-2" />
+            {currentStep === 5 ? (saving ? 'Saving...' : 'Go to Dashboard') : 'Continue'} 
+            {currentStep !== 5 && <ChevronRight className="w-4 h-4 ml-1" />}
           </Button>
         </div>
-        {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
       </div>
     </div>
   )

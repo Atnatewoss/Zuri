@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Sparkles, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -34,76 +33,78 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="grid lg:grid-cols-2 min-h-screen">
+    <div className="min-h-screen bg-background font-sans">
+      <div className="flex min-h-screen">
         {/* Left Side - Visual */}
-        <div className="hidden lg:flex items-center justify-center bg-secondary/30 px-12 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--primary)_0%,transparent_70%)]" />
+        <div className="hidden lg:flex flex-col justify-between w-[45%] bg-zinc-50 p-12 border-r border-border relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+             {/* Subtle generic pattern instead of AI sparkles */}
+             <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                   <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                   </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+             </svg>
           </div>
-          <div className="text-center max-w-md relative z-10 animate-fade-in">
-            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-10 text-primary">
-              <Sparkles className="w-10 h-10" />
-            </div>
-            <h2 className="text-5xl font-serif text-foreground mb-8">
-              Welcome <span className="italic">Back</span>
+          
+          <Link href="/" className="text-xl font-bold tracking-tight text-zinc-900 uppercase relative z-10">
+            ZURI
+          </Link>
+          
+          <div className="max-w-md relative z-10 pb-20">
+            <h2 className="text-3xl font-medium text-zinc-900 mb-6 leading-tight">
+              Welcome back.
             </h2>
-            <p className="text-lg text-foreground/60 mb-12 leading-relaxed font-light">
-              Access your bespoke orchestration panel to refine and manage your resort&apos;s digital guest experience.
+            <p className="text-zinc-600 mb-8 leading-relaxed">
+              Sign in to manage your property setup, oversee guest interactions, and monitor your AI concierge performance.
             </p>
-            <div className="space-y-6 text-left">
-              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
-                <ArrowRight className="w-4 h-4 text-primary" />
-                <span>ORCHESTRATE INTERACTIONS</span>
-              </div>
-              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
-                <ArrowRight className="w-4 h-4 text-primary" />
-                <span>MANAGE PRESTIGE SERVICES</span>
-              </div>
-              <div className="flex gap-4 items-center text-sm font-medium tracking-widest text-foreground/40 border-b border-border/50 pb-4">
-                <ArrowRight className="w-4 h-4 text-primary" />
-                <span>INSIGHTS & ANALYTICS</span>
-              </div>
-            </div>
+          </div>
+          
+          <div className="text-xs text-zinc-400 relative z-10">
+            © 2026 Zuri Concierge
           </div>
         </div>
 
         {/* Right Side - Form */}
-        <div className="flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12">
+          {/* Mobile Header Logo */}
+          <Link href="/" className="lg:hidden absolute top-8 left-8 text-xl font-bold tracking-tight text-zinc-900 uppercase">
+            ZURI
+          </Link>
+
+          <div className="w-full max-w-[400px]">
             {/* Header */}
-            <div className="mb-12">
-              <Link href="/" className="text-3xl font-serif tracking-tight text-foreground flex items-center gap-2">
-                Zuri <span className="text-primary/60 text-xl font-sans font-light italic">Concierge</span>
-              </Link>
-              <h1 className="mt-10 text-4xl font-serif text-foreground">
-                Sign In
+            <div className="mb-8">
+              <h1 className="text-2xl font-medium text-zinc-900">
+                Sign in to your account
               </h1>
-              <p className="mt-3 text-foreground/50 font-light">
-                Secure access to your resort management suite
+              <p className="mt-2 text-sm text-zinc-500">
+                Enter your details to access your dashboard.
               </p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">Email</Label>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-medium text-zinc-700">Work Email</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="your@resort.com"
+                  placeholder="name@property.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-input border-border text-foreground placeholder:text-foreground/50"
+                  className="bg-white border-zinc-200 text-zinc-900 h-11 focus-visible:ring-primary"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-foreground">Password</Label>
-                  <Link href="#" className="text-sm text-primary hover:text-primary/80">
+                  <Label htmlFor="password" className="text-sm font-medium text-zinc-700">Password</Label>
+                  <Link href="#" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -115,30 +116,30 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-input border-border text-foreground placeholder:text-foreground/50"
+                  className="bg-white border-zinc-200 text-zinc-900 h-11 focus-visible:ring-primary"
                 />
               </div>
 
               <Button 
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                className="w-full h-11 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors mt-2 font-medium"
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </Button>
 
-              <p className="text-center text-sm text-foreground/70">
+              <p className="text-center text-sm text-zinc-500 pt-4">
                 Don't have an account?{' '}
-                <Link href="/signup" className="font-medium text-primary hover:text-primary/80">
+                <Link href="/signup" className="font-medium text-zinc-900 hover:underline">
                   Sign up
                 </Link>
               </p>
             </form>
 
             {/* Demo Info */}
-            <div className="mt-8 pt-6 border-t border-border/50">
-              <p className="text-xs text-foreground/60 text-center mb-4">
-                Demo credentials available. Try any email and password combination.
+            <div className="mt-8 pt-6 border-t border-zinc-200 bg-zinc-50/50 rounded-lg p-4 text-center border-dashed">
+              <p className="text-xs text-zinc-500">
+                Demo credentials active. Any email/password combination will work.
               </p>
             </div>
           </div>
