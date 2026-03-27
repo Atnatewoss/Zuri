@@ -6,12 +6,15 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { apiFetch } from '@/lib/api'
+import { setAccessToken, setRefreshToken, setTenantHotelId } from '@/lib/tenant'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -22,14 +25,32 @@ export default function LoginPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // Simulate login
-    setTimeout(() => {
+    setError(null)
+    
+    try {
+      const { access_token, refresh_token, resort } = await apiFetch<{ 
+        access_token: string, 
+        refresh_token: string,
+        resort: { hotel_id: string } 
+      }>('/api/auth/login', {
+        method: 'POST',
+        bodyJson: formData
+      });
+
+      // Save credentials and hotel context
+      setAccessToken(access_token);
+      setRefreshToken(refresh_token);
+      setTenantHotelId(resort.hotel_id);
+
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
+    } finally {
       setLoading(false)
-      router.push('/dashboard')
-    }, 1000)
+    }
   }
 
   return (
@@ -127,6 +148,12 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
+
+              {error && (
+                <div className="p-4 mt-5 text-[15px] text-red-600 bg-red-50 border border-red-100 rounded-lg animate-in fade-in slide-in-from-top-1">
+                  {error}
+                </div>
+              )}
 
               <p className="text-center text-[15px] text-zinc-500 pt-6">
                 Don't have an account?{' '}

@@ -49,6 +49,7 @@ class ResortSettings(SQLModel, table=True):
     description: str = "A luxury resort nestled in the Ethiopian highlands."
     location: str = "Addis Ababa, Ethiopia"
     email: str = "admin@kuriftu.com"
+    password_hash: str = ""
 
 
 class ChatLog(SQLModel, table=True):
@@ -120,11 +121,22 @@ class ResortCreate(BaseModel):
     resort_name: str
     location: str
     email: str
+    password: str
 
 
-class ResortSignupResponse(BaseModel):
+class ResortAuthResponse(BaseModel):
     resort: ResortSettings
-    session_token: str
+    access_token: str
+    refresh_token: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class TokenRefreshRequest(BaseModel):
+    refresh_token: str
 
 
 class DashboardStats(BaseModel):

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiFetch } from '@/lib/api'
-import { setSessionToken, setTenantHotelId } from '@/lib/tenant'
+import { setAccessToken, setRefreshToken, setTenantHotelId } from '@/lib/tenant'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -31,7 +31,11 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
     try {
-      const signup = await apiFetch<{ resort: { hotel_id: string; resort_name: string }; session_token: string }>(
+      const response = await apiFetch<{ 
+        resort: { hotel_id: string; resort_name: string }; 
+        access_token: string;
+        refresh_token: string;
+      }>(
         '/api/resorts/signup',
         {
           method: 'POST',
@@ -39,12 +43,14 @@ export default function SignupPage() {
             resort_name: formData.resortName,
             location: 'Pending setup',
             email: formData.email,
+            password: formData.password
           },
         }
       )
-      setTenantHotelId(signup.resort.hotel_id)
-      setSessionToken(signup.session_token)
-      router.push('/onboarding')
+      setTenantHotelId(response.resort.hotel_id)
+      setAccessToken(response.access_token)
+      setRefreshToken(response.refresh_token)
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')
     } finally {

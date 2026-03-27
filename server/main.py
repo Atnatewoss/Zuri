@@ -17,6 +17,7 @@ from app.api.settings import router as settings_router
 from app.api.embed import router as embed_router
 from app.api.resorts import router as resorts_router
 from app.api.generator import router as generator_router
+from app.api.auth import router as auth_router
 
 app = FastAPI(
     title="Zuri AI Concierge",
@@ -48,6 +49,7 @@ app.include_router(settings_router)
 app.include_router(embed_router)
 app.include_router(resorts_router)
 app.include_router(generator_router)
+app.include_router(auth_router)
 
 
 

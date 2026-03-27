@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 import re
 
-from app.core.auth import create_session_token
+from app.core.auth import create_token_pair, hash_password
 from app.core.database import get_session
-from app.models.schemas import ResortSettings, ResortCreate, ResortSignupResponse
+from app.models.schemas import ResortSettings, ResortCreate, ResortAuthResponse
 
 router = APIRouter(prefix="/api/resorts", tags=["Resorts"])
 
@@ -18,7 +18,7 @@ def slugify(text: str) -> str:
     text = re.sub(r'^-+|-+$', '', text)
     return text
 
-@router.post("/signup", response_model=ResortSignupResponse)
+@router.post("/signup", response_model=ResortAuthResponse)
 def signup_resort(request: ResortCreate, session: Session = Depends(get_session)):
     """
     Sign up a new resort. 
@@ -38,6 +38,7 @@ def signup_resort(request: ResortCreate, session: Session = Depends(get_session)
         resort_name=request.resort_name,
         location=request.location,
         email=request.email,
+        password_hash=hash_password(request.password),
         description=f"Welcome to {request.resort_name}."
     )
     
@@ -45,8 +46,12 @@ def signup_resort(request: ResortCreate, session: Session = Depends(get_session)
     session.commit()
     session.refresh(new_resort)
     
-    session_token = create_session_token(new_resort.hotel_id)
-    return ResortSignupResponse(resort=new_resort, session_token=session_token)
+    access_token, refresh_token = create_token_pair(new_resort.hotel_id)
+    return {
+        "resort": new_resort,
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    }
 
 
 @router.get("/{hotel_id}", response_model=ResortSettings)
