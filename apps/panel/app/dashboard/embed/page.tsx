@@ -77,13 +77,13 @@ export default function EmbedWidgetPage() {
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto flex flex-col relative w-full h-screen">
         <DashboardHeader
           title="Embed Widget"
           subtitle="Install Zuri on your website"
         />
 
-        <div className="p-8 space-y-8">
+        <div className="flex-1 p-8 md:p-12 lg:px-20 space-y-8 max-w-[1600px] w-full mx-auto pb-32">
           <div>
             <p className="text-foreground/70 w-full font-light tracking-tight">
               Add the AI Concierge chat widget to your website. Guests can access Zuri directly from your website to get assistance, make bookings, and ask questions.
@@ -135,87 +135,86 @@ export default function EmbedWidgetPage() {
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-lg font-medium text-foreground mb-4">Preview</h2>
-            <p className="text-sm text-foreground/70 mb-6">
-              This is how the widget will appear on your website:
-            </p>
+          {/* Final Polished Side-by-Side: Symmetrical Instructions (Left) and Mini-Preview (Right) */}
+          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+            {/* Instructions (Left) - Baseline Height */}
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
+                📋 Installation Instructions
+              </h3>
+              <ul className="space-y-4 text-zinc-600 font-medium list-none text-xs">
+                <li className="flex gap-2.5">
+                  <span className="text-primary font-bold">01</span>
+                  <span>Copy the code snippet above</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="text-primary font-bold">02</span>
+                  <span>Open your website's HTML editor or contact your web developer</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="text-primary font-bold">03</span>
+                  <span>Paste the code just before the <code className="bg-zinc-200 px-1 rounded text-xs">{"</body>"}</code> closing tag</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="text-primary font-bold">04</span>
+                  <span>Save and refresh your website</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="text-primary font-bold">05</span>
+                  <span>The Zuri chat widget should now appear in the bottom right corner</span>
+                </li>
+              </ul>
+            </div>
 
-            <div className="rounded-lg border border-border/50 bg-secondary/10 p-12 flex items-center justify-end relative h-96">
-              <div className="absolute bottom-6 right-6 space-y-3">
-                {/* Chat Widget Preview */}
-                <div className="w-80 rounded-xl shadow-2xl overflow-hidden bg-white border border-gray-200">
+            {/* Preview (Right) - Scaled down vertically to match instructions */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-medium text-zinc-900">Preview</h2>
+                <span className="text-[10px] text-zinc-500 italic">Live Widget Visual</span>
+              </div>
+
+              <div className="flex-1 rounded-xl border border-zinc-50 bg-zinc-50/30 flex items-center justify-center relative overflow-hidden group">
+                {/* Handheld-style Mini Widget - dramatically smaller vertical footprint */}
+                <div className="w-full max-w-[200px] rounded-xl shadow-lg border border-zinc-200 bg-white overflow-hidden scale-90 group-hover:scale-100 transition-transform duration-500">
                   {/* Header */}
-                  <div className="bg-gradient-to-r from-primary to-accent text-white p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                  <div className="bg-zinc-900 text-white p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px]">
                         ✨
                       </div>
-                      <span className="font-medium">Ask Zuri</span>
+                      <span className="font-medium text-[9px] tracking-tight">Ask Zuri</span>
                     </div>
-                    <button className="text-white/70 hover:text-white">_</button>
                   </div>
 
-                  {/* Chat Area */}
-                  <div className="p-4 space-y-4 h-64 bg-gray-50">
+                  {/* Chat Area - Shortened to match instruction height */}
+                  <div className="p-2.5 space-y-2 h-24 bg-zinc-50/50 overflow-y-auto no-scrollbar">
                     <div className="flex justify-start">
-                      <div className="bg-gray-200 text-gray-800 rounded-lg px-4 py-2 text-sm max-w-xs">
+                      <div className="bg-white text-zinc-700 rounded rounded-tl-none px-2 py-1 text-[8px] shadow-sm border border-zinc-100 max-w-[90%]">
                         Hello! How can I assist you today?
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <div className="bg-primary text-white rounded-lg px-4 py-2 text-sm max-w-xs">
+                      <div className="bg-zinc-900 text-white rounded rounded-tr-none px-2 py-1 text-[8px] shadow max-w-[90%]">
                         What activities are available?
                       </div>
                     </div>
                   </div>
 
-                  {/* Input */}
-                  <div className="p-3 border-t border-gray-200 bg-white">
-                    <input
-                      type="text"
-                      placeholder="Type your message..."
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      disabled
-                    />
+                  {/* Input Mockup */}
+                  <div className="p-2 border-t border-zinc-50 bg-white">
+                    <div className="w-full h-5 rounded-full bg-zinc-50 border border-zinc-100 flex items-center px-2 text-[7px] text-zinc-400 italic">
+                      Type your message...
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <p className="text-xs text-foreground/60 mt-4">
-              The floating chat button will appear in the bottom right corner of your website
-            </p>
-          </div>
-
-          {/* Instructions */}
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-4">
-            <h3 className="font-medium text-foreground">📋 Installation Instructions</h3>
-            <ol className="space-y-3 text-sm text-foreground/80 list-decimal list-inside">
-              <li>Copy the code snippet above</li>
-              <li>Open your website's HTML editor or contact your web developer</li>
-              <li>Paste the code just before the {'</body>'} closing tag</li>
-              <li>Save and refresh your website</li>
-              <li>The Zuri chat widget should now appear in the bottom right corner</li>
-            </ol>
-          </div>
-
-          {/* Support */}
-          <div className="rounded-xl border border-border/50 bg-secondary/20 p-6 space-y-4">
-            <h3 className="font-medium text-foreground">❓ Need Help?</h3>
-            <p className="text-sm text-foreground/70">
-              Having trouble installing the widget? Check our documentation or contact our support team.
-            </p>
-            <div className="flex gap-4">
-              <Button variant="outline" className="border-border text-foreground hover:bg-secondary/50">
-                View Documentation
-              </Button>
-              <Button variant="outline" className="border-border text-foreground hover:bg-secondary/50">
-                Contact Support
-              </Button>
+              <p className="text-[9px] text-zinc-400 mt-3 text-center italic">
+                The widget will float in your site&apos;s bottom right corner.
+              </p>
             </div>
           </div>
+          
         </div>
       </div>
     </div>

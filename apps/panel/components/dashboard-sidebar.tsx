@@ -18,8 +18,8 @@ const navGroups = [
   {
     title: 'Property Intelligence',
     items: [
-      { href: '/dashboard/services', label: 'Our Services', icon: Hotel },
-      { href: '/dashboard/knowledge', label: 'Company Documents', icon: FileText },
+      { href: '/dashboard/services', label: 'Resort Services', icon: Hotel },
+      { href: '/dashboard/knowledge', label: 'Resort Documents', icon: FileText },
     ]
   },
   {

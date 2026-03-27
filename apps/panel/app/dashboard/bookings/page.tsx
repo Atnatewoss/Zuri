@@ -59,13 +59,13 @@ export default function BookingsPage() {
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto flex flex-col relative w-full h-screen">
         <DashboardHeader
           title="Bookings"
           subtitle="View and manage all guest bookings and reservations"
         />
 
-        <div className="p-8">
+        <div className="flex-1 p-8 md:p-12 lg:px-20 max-w-[1600px] w-full mx-auto pb-32">
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="mb-6">
               <h2 className="text-lg font-medium text-foreground">Recent Bookings</h2>

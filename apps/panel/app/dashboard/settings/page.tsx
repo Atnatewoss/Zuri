@@ -84,13 +84,13 @@ export default function SettingsPage() {
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto flex flex-col relative w-full h-screen">
         <DashboardHeader
           title="Settings"
           subtitle="Manage your resort information and preferences"
         />
 
-        <div className="p-8 space-y-8 w-full">
+        <div className="flex-1 p-8 md:p-12 lg:px-20 space-y-8 max-w-[1600px] w-full mx-auto pb-32">
           {/* Resort Information */}
           <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 space-y-8 shadow-sm group">
             <div className="flex items-center gap-4">

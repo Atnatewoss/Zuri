@@ -3,18 +3,21 @@
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-import { BedDouble, Plus, Settings2, Trash2, CheckCircle2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { BedDouble, Plus, Trash2, Edit2, MoreHorizontal, Settings, X, PlusCircle } from 'lucide-react'
 
-const initialServices = [
-  { id: 1, name: 'Spa & Wellness', available: true },
-  { id: 2, name: 'Fine Dining', available: true },
-  { id: 3, name: 'Activities & Tours', available: true },
-  { id: 4, name: 'Room Service', available: true },
-  { id: 5, name: 'Concierge Desk', available: true },
+const dummyServices = [
+  { id: 1, name: 'Room Service' },
+  { id: 2, name: 'Spa & Wellness' },
+  { id: 3, name: 'Fine Dining' },
+  { id: 4, name: 'Activities & Tours' },
+  { id: 5, name: 'Concierge Desk' },
+  { id: 6, name: 'Airport Transfer' },
+  { id: 7, name: 'Housekeeping' },
+  { id: 8, name: 'Valet Parking' },
 ]
 
-const initialRooms = [
+const dummyRooms = [
   { id: 1, type: 'Standard Room', price: 150, available: 12 },
   { id: 2, type: 'Deluxe Room', price: 250, available: 8 },
   { id: 3, type: 'Suite', price: 450, available: 3 },
@@ -22,117 +25,202 @@ const initialRooms = [
 ]
 
 export default function ServicesPage() {
-  const [services] = useState(initialServices)
-  const [rooms] = useState(initialRooms)
+  const [tabs, setTabs] = useState(dummyServices)
+  const [activeTabId, setActiveTabId] = useState(tabs[0].id)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  
+  // Custom scrolling ref for tabs
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const activeTabName = tabs.find((t) => t.id === activeTabId)?.name || ''
 
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto flex flex-col relative w-full h-screen">
         <DashboardHeader
-          title="Hotel Services"
-          subtitle="Manage your resort's offerings and availability"
+          title="Resort Services"
+          subtitle="Manage your distinct property offerings and categories"
         />
 
-        <div className="p-8 space-y-8">
-          {/* Services Section */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-serif text-foreground">Guest Services</h2>
-              <Button className="rounded-full px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10">
-                <Plus className="w-4 h-4 mr-2" /> CREATE SERVICE
-              </Button>
+        <div className="flex-1 p-8 md:p-12 lg:px-20 flex flex-col gap-8 max-w-[1600px] w-full mx-auto pb-32">
+          
+          {/* Senior UI/UX Horizontal Tabs Bar */}
+          <div className="relative flex items-center w-full border-b border-zinc-200">
+            {/* The scrollable area with a right-fade mask */}
+            <div 
+              className="flex-1 overflow-x-auto no-scrollbar"
+              style={{ maskImage: 'linear-gradient(to right, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
+              ref={scrollRef}
+            >
+              <div className="flex items-center gap-1 pb-4 min-w-max pr-12">
+                {tabs.map((tab) => {
+                  const isActive = tab.id === activeTabId
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTabId(tab.id)}
+                      className={`relative px-5 py-2.5 text-sm font-medium rounded-full transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-zinc-900 text-white shadow-md scale-100' 
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 scale-95 hover:scale-100'
+                      }`}
+                    >
+                      {tab.name}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Service Name</th>
-                    <th className="px-4 py-4 text-left text-sm font-medium text-foreground/70">Status</th>
-                    <th className="px-4 py-4 text-right text-sm font-medium text-foreground/70">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                    {services.map((service) => (
-                      <tr key={service.id} className="group hover:bg-secondary/20 transition-all duration-300">
-                        <td className="px-6 py-5 font-serif text-lg text-foreground">{service.name}</td>
-                        <td className="px-6 py-5">
-                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
-                            <CheckCircle2 className="w-3 h-3" /> Available
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 rounded-full hover:bg-primary/10 text-foreground/40 hover:text-primary transition-all">
-                              <Settings2 className="w-4 h-4" />
-                            </button>
-                            <button className="p-2 rounded-full hover:bg-destructive/10 text-foreground/40 hover:text-destructive transition-all">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+            
+            {/* The right-edge Edit Button */}
+            <div className="pl-4 pb-4 border-l border-zinc-200 ml-2 shadow-[-10px_0_15px_-5px_var(--bg-background)] bg-background z-10 flex-shrink-0 flex items-center">
+              <button 
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:text-zinc-900 transition-colors shadow-sm"
+              >
+                <Settings className="w-4 h-4" />
+                Manage Tabs
+              </button>
             </div>
           </div>
 
-          {/* Rooms Section */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-medium text-foreground">Room Types</h2>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                + Add Room Type
-              </Button>
+          {/* Bottom Dynamic Content Area */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+             {activeTabName === 'Room Service' ? (
+                <RoomServiceContent rooms={dummyRooms} />
+             ) : (
+                <GenericServiceContent serviceName={activeTabName} />
+             )}
+          </div>
+          
+        </div>
+      </div>
+
+      {/* Senior CRUD Modal overlay */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh] border border-zinc-200/50">
+            <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <div>
+                <h3 className="text-xl font-medium text-zinc-900">Manage Categories</h3>
+                <p className="text-sm text-zinc-500 mt-1">Add, edit, or remove top-level service tabs.</p>
+              </div>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {rooms.map((room) => (
-                <div key={room.id} className="rounded-lg border border-border/50 p-6 hover:border-primary/30 hover:shadow-md transition-all">
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h3 className="text-xl font-serif text-foreground">{room.type}</h3>
-                      <p className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mt-2">{room.available} ROOMS VACANT</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                      <BedDouble className="w-6 h-6" />
-                    </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-zinc-50/30">
+              {tabs.map((tab) => (
+                <div key={tab.id} className="flex items-center gap-3 bg-white border border-zinc-200 rounded-xl p-3 pr-4 shadow-sm group">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400">
+                    <MoreHorizontal className="w-4 h-4" />
                   </div>
-
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-foreground/70">Price per Night</span>
-                      <span className="font-medium text-foreground">${room.price}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                      <span className="text-sm text-foreground/70">Occupancy</span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 flex-1 bg-primary/20 rounded-full overflow-hidden max-w-xs">
-                          <div
-                            className="h-full bg-primary"
-                            style={{ width: `${(room.available / 15) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-foreground/70">{Math.round((room.available / 15) * 100)}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-3 border-t border-border/50">
-                    <button className="flex-1 px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary/50 rounded transition-colors">
-                      Edit
-                    </button>
-                    <button className="flex-1 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded transition-colors">
-                      Remove
+                  <input 
+                    type="text"
+                    defaultValue={tab.name}
+                    className="flex-1 bg-transparent border-none text-sm font-medium text-zinc-900 focus:ring-0 px-0 outline-none"
+                  />
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
+              
+              <button className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-zinc-200 rounded-xl p-4 text-sm font-medium text-zinc-500 hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all">
+                <PlusCircle className="w-5 h-5" />
+                Add New Category
+              </button>
+            </div>
+            
+            <div className="p-5 border-t border-zinc-100 bg-white flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+              <Button className="bg-zinc-900 text-white" onClick={() => setIsEditModalOpen(false)}>Save Changes</Button>
             </div>
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+function RoomServiceContent({ rooms }: { rooms: any[] }) {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-serif text-zinc-900">Room Portfolio</h2>
+          <p className="text-zinc-500 mt-2">Manage physical room amenities, pricing, and specific traits.</p>
+        </div>
+        <Button className="rounded-full px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10">
+          <Plus className="w-4 h-4 mr-2" /> CREATE ROOM
+        </Button>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rooms.map((room) => (
+          <div key={room.id} className="group rounded-2xl border border-zinc-200 bg-white p-6 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-medium text-zinc-900">{room.type}</h3>
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
+                      {room.available} VACANT
+                    </span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform border border-primary/10">
+                  <BedDouble className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-zinc-100 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-zinc-500">Nightly Rate</span>
+                  <span className="text-lg font-semibold text-zinc-900">${room.price}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-lg hover:bg-zinc-100 hover:text-zinc-900 transition-colors">
+                  <Edit2 className="w-4 h-4" /> Edit Details
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function GenericServiceContent({ serviceName }: { serviceName: string }) {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-serif text-zinc-900">{serviceName} Catalog</h2>
+          <p className="text-zinc-500 mt-2">Add specific bookable items, internal menus, or policies for {serviceName}.</p>
+        </div>
+        <Button className="rounded-full px-6 bg-zinc-900 text-white hover:bg-zinc-800 shadow-xl shadow-black/10">
+          <Plus className="w-4 h-4 mr-2" /> ADD ITEM
+        </Button>
+      </div>
+      
+      <div className="rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 flex flex-col items-center justify-center p-20 text-center text-zinc-500 min-h-[400px]">
+        <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 mb-6">
+          <Plus className="w-6 h-6" />
+        </div>
+        <h3 className="text-xl font-medium text-zinc-900 mb-2">No items configured</h3>
+        <p className="max-w-sm mx-auto text-sm leading-relaxed">You haven't added any specific assets into the {serviceName} tab yet. Add items so the AI concierge can recommend them.</p>
+        <Button className="mt-6 bg-white border border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm">Create First Item</Button>
       </div>
     </div>
   )
