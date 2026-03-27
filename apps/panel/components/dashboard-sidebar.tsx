@@ -11,15 +11,15 @@ const navGroups = [
   {
     title: 'Daily Operations',
     items: [
-      { href: '/dashboard', label: 'Command Center', icon: LayoutDashboard, exact: true },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
       { href: '/dashboard/bookings', label: 'Guest Reservations', icon: Calendar },
     ]
   },
   {
     title: 'Property Intelligence',
     items: [
-      { href: '/dashboard/services', label: 'Service Directory', icon: Hotel },
-      { href: '/dashboard/knowledge', label: 'Training Documents', icon: FileText },
+      { href: '/dashboard/services', label: 'Our Services', icon: Hotel },
+      { href: '/dashboard/knowledge', label: 'Company Documents', icon: FileText },
     ]
   },
   {

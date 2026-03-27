@@ -1,41 +1,54 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Play, ArrowDown, ChevronRight, Mic, CreditCard, Languages } from 'lucide-react'
+import { Play, ArrowDown, Mic, CreditCard, ArrowUp } from 'lucide-react'
+import { SiteHeader } from '@/components/site-header'
 
 export default function LandingPage() {
+  const [showScrollTop, setShowScrollTop] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20 flex flex-col font-sans">
+    <div className="min-h-screen bg-background selection:bg-primary/20 flex flex-col font-sans relative">
       
-      {/* Navigation */}
-      <nav className="absolute top-0 w-full z-50 mix-blend-difference text-white">
-        <div className="mx-auto flex w-full max-w-[1920px] items-center justify-between px-8 lg:px-24 py-6">
-          <div className="text-2xl font-bold tracking-tighter uppercase flex items-center gap-2">
-            ZURI
-          </div>
-          
-          <div className="hidden lg:flex items-center gap-10 text-sm font-medium tracking-wide">
-            <Link href="#products" className="hover:opacity-70 transition-opacity">Products</Link>
-            <Link href="#success-stories" className="hover:opacity-70 transition-opacity">Success Stories</Link>
-            <Link href="#integrations" className="hover:opacity-70 transition-opacity">Integrations</Link>
-            <Link href="#contact" className="hover:opacity-70 transition-opacity">Contact Us</Link>
-          </div>
-          
-          <div className="flex items-center">
-            {/* Real button in white to contrast mix-blend-difference */}
-            <Button asChild className="rounded-full px-8 bg-white hover:bg-white/90 text-black font-semibold tracking-tight h-12">
-              <Link href="/signup">Book a Demo</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
+
+      {/* Floating Scroll to Top */}
+      <div 
+        className={`fixed bottom-8 right-8 z-50 transition-all duration-500 ease-in-out ${
+          showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+        }`}
+      >
+        <button 
+          onClick={scrollToTop}
+          className="w-14 h-14 bg-white shadow-xl shadow-black/10 border border-black/5 rounded-full flex items-center justify-center text-black hover:bg-zinc-50 hover:scale-110 transition-transform"
+        >
+           <ArrowUp className="w-6 h-6" />
+        </button>
+      </div>
 
       <main className="flex-1 w-full">
         {/* Full Viewport Hero Section */}
-        <section className="relative w-full h-screen min-h-[800px] flex flex-col items-center justify-center overflow-hidden bg-primary/95 text-primary-foreground">
-          {/* Faux Background Image gradient overlay to simulate the cinematic hotel vibe */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/50 z-0 mix-blend-multiply" />
+        <section className="relative w-full h-[100dvh] min-h-[800px] flex flex-col items-center justify-center overflow-hidden bg-primary/95 text-primary-foreground">
+          {/* Faux Background Image gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/50 z-0 mix-blend-multiply pointer-events-none" />
           
           <div className="relative z-10 text-center flex flex-col items-center w-full px-8 lg:px-24">
             <h1 className="text-xl sm:text-2xl font-medium tracking-wide mb-6 opacity-90">
@@ -54,18 +67,29 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom indicator */}
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 opacity-80 cursor-pointer hover:opacity-100 transition-opacity">
+          <div 
+            onClick={scrollToFeatures}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
+          >
             <span className="text-sm font-medium tracking-wide">Start exploring</span>
             <ArrowDown className="w-5 h-5 animate-bounce" />
           </div>
         </section>
 
+        {/* capabilities header */}
+        <section className="pt-32 pb-4 w-full bg-background border-b-0">
+          <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24 text-center">
+             <h2 className="text-4xl lg:text-5xl font-medium tracking-tight opacity-90">
+                Platform Capabilities
+             </h2>
+          </div>
+        </section>
+
         {/* Feature 1: The Widget */}
-        <section className="py-24 lg:py-32 w-full bg-background border-b border-border">
+        <section id="features" className="py-24 lg:py-32 w-full bg-background border-b border-border">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
                
-               {/* Text content */}
                <div className="max-w-xl">
                  <div className="text-sm font-semibold tracking-widest uppercase mb-6 opacity-60">01 / The Interface</div>
                  <h3 className="text-5xl lg:text-6xl xl:text-7xl font-medium tracking-tight mb-8 leading-[1.05]">
@@ -76,24 +100,22 @@ export default function LandingPage() {
                  </p>
                </div>
 
-               {/* Clean Mockup (No Slop) */}
-               <div className="bg-secondary rounded-3xl aspect-square xl:aspect-video flex items-center justify-center relative overflow-hidden border border-border h-fit py-12">
-                 {/* Abstract representation of a website with the widget */}
-                  <div className="absolute inset-10 bg-white rounded-2xl shadow-xl border border-black/5 overflow-hidden flex flex-col">
-                    <div className="h-16 border-b border-black/5 flex items-center px-8 bg-zinc-50">
-                      <div className="w-24 h-4 bg-zinc-200 rounded-sm"></div>
-                      <div className="ml-auto w-12 h-3 bg-zinc-200 rounded-sm border-r border-transparent"></div>
-                      <div className="ml-4 w-12 h-3 bg-zinc-200 rounded-sm"></div>
-                      <div className="ml-4 w-16 h-3 bg-zinc-800 rounded-sm"></div>
+               <div className="bg-secondary rounded-3xl xl:aspect-video flex items-center justify-center relative overflow-hidden border border-border h-fit py-12 px-6">
+                  <div className="w-full max-w-[600px] aspect-video bg-white rounded-2xl shadow-xl border border-black/5 overflow-hidden flex flex-col relative z-0">
+                    <div className="h-12 sm:h-16 border-b border-black/5 flex items-center px-6 bg-zinc-50 w-full shrink-0">
+                      <div className="w-20 sm:w-24 h-4 bg-zinc-200 rounded-sm"></div>
+                      <div className="ml-auto w-10 sm:w-12 h-3 bg-zinc-200 rounded-sm border-r border-transparent"></div>
+                      <div className="ml-4 w-10 sm:w-12 h-3 bg-zinc-200 rounded-sm hidden sm:block"></div>
+                      <div className="ml-4 w-12 sm:w-16 h-3 bg-zinc-800 rounded-sm"></div>
                     </div>
                     
                     {/* The Zuri Widget Mock at bottom right */}
-                    <div className="absolute bottom-8 right-8 w-80 h-[28rem] bg-white rounded-2xl shadow-2xl border border-black/10 flex flex-col overflow-hidden transition-transform duration-700 hover:scale-105">
-                      <div className="p-5 border-b border-black/5 flex items-center gap-3">
+                    <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-[280px] sm:w-[320px] h-80 sm:h-96 bg-white rounded-2xl shadow-2xl border border-black/10 flex flex-col overflow-hidden transition-transform duration-700 hover:scale-105 z-10">
+                      <div className="p-4 sm:p-5 border-b border-black/5 flex items-center gap-3 shrink-0">
                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                          <div className="font-medium text-sm">Zuri Concierge</div>
                       </div>
-                      <div className="p-5 flex-1 bg-zinc-50 flex flex-col gap-3 text-sm">
+                      <div className="p-4 sm:p-5 flex-1 bg-zinc-50 flex flex-col gap-3 text-sm overflow-hidden justify-end">
                          <div className="p-3 bg-white border border-black/5 rounded-xl rounded-tl-sm self-start w-[85%] shadow-sm">
                            How can I help you perfect your stay?
                          </div>
@@ -102,7 +124,7 @@ export default function LandingPage() {
                            "What time does the spa open on Sunday?"
                          </div>
                       </div>
-                      <div className="p-4 border-t border-black/5 bg-white flex gap-3 items-center">
+                      <div className="p-4 border-t border-black/5 bg-white flex gap-3 items-center shrink-0">
                         <div className="h-10 border border-black/10 rounded-full flex-1 px-4 flex items-center text-zinc-400 text-sm">
                           Speak or type...
                         </div>
@@ -115,29 +137,46 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Feature 2: Multilingual Voice - Now Visual First */}
+        {/* Feature 2: Multilingual Voice overlay magic */}
         <section className="py-24 lg:py-32 w-full bg-secondary border-b border-border">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
                
-               {/* Clean Typographic Visual NOW FIRST in HTML & Grid */}
-               <div className="bg-white rounded-3xl h-fit flex flex-col items-center justify-center p-8 lg:p-12 border border-border shadow-sm w-full">
-                 <div className="w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light">
-                   <span>English</span>
-                   <span className="opacity-40 tabular-nums font-mono text-xs tracking-widest">ENG</span>
+               {/* Language list with overlay transitions */}
+               <div className="bg-white rounded-3xl h-fit flex flex-col items-center justify-center py-6 px-4 lg:p-10 border border-border shadow-sm w-full overflow-hidden">
+                 
+                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
+                    <div className="absolute inset-0 bg-zinc-900 border-zinc-900 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                      Welcome to your stay
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">English</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ENG</span>
                  </div>
-                 <div className="w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light">
-                   <span>Amharic</span>
-                   <span className="opacity-40 tabular-nums font-mono text-xs tracking-widest">AMH</span>
+                 
+                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
+                    <div className="absolute inset-0 bg-emerald-700 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                      እንኳን ደህና መጡ
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Amharic</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">AMH</span>
                  </div>
-                 <div className="w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light">
-                   <span>Tigrinya</span>
-                   <span className="opacity-40 tabular-nums font-mono text-xs tracking-widest">TIR</span>
+                 
+                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
+                    <div className="absolute inset-0 bg-[#A68361] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                      እንቋዕ ብደሓን መጻእኩም
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Tigrinya</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">TIR</span>
                  </div>
-                 <div className="w-full flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light">
-                   <span>Oromifa</span>
-                   <span className="opacity-40 tabular-nums font-mono text-xs tracking-widest">ORM</span>
+                 
+                 <div className="group/lang relative w-full flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
+                    <div className="absolute inset-0 bg-[#D39D55] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                      Baga nagaan dhuftan
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Oromifa</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ORM</span>
                  </div>
+
                </div>
 
                <div className="max-w-xl">
@@ -154,8 +193,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Feature 3: Actions */}
-        <section className="py-24 lg:py-32 w-full bg-background border-b border-border">
+        {/* Feature 3: Actions  */}
+        <section id="integrations" className="py-24 lg:py-32 w-full bg-background border-b border-border">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
                
@@ -169,7 +208,6 @@ export default function LandingPage() {
                  </p>
                </div>
 
-               {/* Minimalist Action UI Graphic (Removed aspect-square to reduce excessive height) */}
                <div className="bg-primary/5 rounded-3xl h-fit flex items-center justify-center p-8 lg:p-16 border border-primary/10 w-full">
                  <div className="w-full max-w-md bg-white p-8 lg:p-10 rounded-2xl shadow-2xl border border-black/5 flex flex-col gap-8">
                    <div className="flex items-center gap-4 text-sm font-medium border-b border-black/5 pb-5">
@@ -192,6 +230,54 @@ export default function LandingPage() {
                  </div>
                </div>
                
+             </div>
+          </div>
+        </section>
+
+        {/* Frictionless Deployment Section */}
+        <section className="py-24 lg:py-32 w-full bg-zinc-50 border-b border-border">
+          <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
+             <div className="text-center max-w-2xl mx-auto mb-20">
+                <h2 className="text-5xl lg:text-6xl font-medium tracking-tight mb-6">
+                   Live in 5 minutes.
+                </h2>
+                <p className="text-xl opacity-70 font-light leading-relaxed">
+                   No engineering team required. Zuri is designed for immediate deployment. Just upload your PDFs and drop our script tag on your website.
+                </p>
+             </div>
+             
+             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                <div className="space-y-4">
+                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-6">
+                      1
+                   </div>
+                   <h4 className="text-xl font-medium">Create Account</h4>
+                   <p className="opacity-70 font-light">Register your property details and set up your admin profile.</p>
+                </div>
+                
+                <div className="space-y-4">
+                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-6">
+                      2
+                   </div>
+                   <h4 className="text-xl font-medium">Train the AI</h4>
+                   <p className="opacity-70 font-light">Upload your existing menus, policies, and service directories to instantly train your concierge.</p>
+                </div>
+                
+                <div className="space-y-4">
+                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-6">
+                      3
+                   </div>
+                   <h4 className="text-xl font-medium">Embed Script</h4>
+                   <p className="opacity-70 font-light">Copy our single-line JavaScript snippet and paste it into the root of your website.</p>
+                </div>
+                
+                <div className="space-y-4">
+                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-6">
+                      4
+                   </div>
+                   <h4 className="text-xl font-medium">Go Live</h4>
+                   <p className="opacity-70 font-light">Watch as your new AI concierge begins engaging and booking guests immediately.</p>
+                </div>
              </div>
           </div>
         </section>
