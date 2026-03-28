@@ -3,59 +3,34 @@
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { CheckCircle2, Clock, Eye, MoreHorizontal } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { apiFetch } from '@/lib/api'
+import { getTenantHotelId } from '@/lib/tenant'
 
-const bookings = [
-  {
-    id: 1,
-    guestName: 'Sarah Johnson',
-    service: 'Spa - Full Body Massage',
-    date: 'Mar 25, 2026',
-    time: '10:00 AM',
-    status: 'Confirmed',
-  },
-  {
-    id: 2,
-    guestName: 'Michael Chen',
-    service: 'Fine Dining - 8 PM Seating',
-    date: 'Mar 25, 2026',
-    time: '8:00 PM',
-    status: 'Confirmed',
-  },
-  {
-    id: 3,
-    guestName: 'Emma Williams',
-    service: 'Mountain Hiking Tour',
-    date: 'Mar 26, 2026',
-    time: '7:00 AM',
-    status: 'Confirmed',
-  },
-  {
-    id: 4,
-    guestName: 'David Martinez',
-    service: 'Room Service - Breakfast',
-    date: 'Mar 25, 2026',
-    time: '7:30 AM',
-    status: 'Pending',
-  },
-  {
-    id: 5,
-    guestName: 'Lisa Anderson',
-    service: 'Airport Transfer',
-    date: 'Mar 27, 2026',
-    time: '2:00 PM',
-    status: 'Confirmed',
-  },
-  {
-    id: 6,
-    guestName: 'James Thompson',
-    service: 'Wellness Class - Yoga',
-    date: 'Mar 26, 2026',
-    time: '6:00 AM',
-    status: 'Pending',
-  },
-]
+// No dummy data fallback for production
 
 export default function BookingsPage() {
+  const [bookingsList, setBookingsList] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadBookings() {
+      try {
+        const hotelId = getTenantHotelId()
+        if (!hotelId) return
+
+        const data = await apiFetch<any[]>(`/api/bookings?hotel_id=${encodeURIComponent(hotelId)}`)
+        setBookingsList(data || [])
+      } catch (error) {
+        console.error("Failed to load bookings", error)
+        setBookingsList([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadBookings()
+  }, [])
+
   return (
     <div className="flex bg-background min-h-screen">
       <DashboardSidebar />
@@ -84,19 +59,37 @@ export default function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                    {bookings.map((booking) => (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-zinc-400 text-sm italic">
+                          Loading bookings...
+                        </td>
+                      </tr>
+                    ) : bookingsList.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
+                          <div className="flex flex-col items-center justify-center">
+                            <Clock className="w-8 h-8 text-zinc-300 mb-3" />
+                            <p className="text-sm font-medium">No bookings found</p>
+                            <p className="text-xs text-zinc-400 mt-1">When guests make reservations, they will appear here.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : bookingsList.map((booking) => {
+                      const guestName = booking.guest_name || booking.guestName || 'Guest';
+                      return (
                       <tr key={booking.id} className="group hover:bg-secondary/20 transition-all duration-300">
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xs font-serif italic text-primary border border-primary/20">
-                              {booking.guestName[0]}
+                              {guestName ? guestName[0] : '?'}
                             </div>
-                            <span className="font-serif text-lg text-foreground">{booking.guestName}</span>
+                            <span className="font-serif text-lg text-foreground">{guestName}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5 text-sm font-medium text-foreground/60">{booking.service}</td>
-                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.date.toUpperCase()}</td>
-                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.time.toUpperCase()}</td>
+                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.date?.toUpperCase()}</td>
+                        <td className="px-6 py-5 text-sm text-foreground/40 font-light tracking-wide">{booking.time?.toUpperCase()}</td>
                         <td className="px-6 py-5">
                           <span
                             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
@@ -115,7 +108,7 @@ export default function BookingsPage() {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                 </tbody>
               </table>
             </div>
