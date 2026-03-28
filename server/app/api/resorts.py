@@ -3,10 +3,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 import re
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from app.core.auth import create_token_pair, hash_password
 from app.core.database import get_session
-from app.models.schemas import ResortSettings, ResortCreate, ResortAuthResponse
+from app.models.schemas import ResortSettings, ResortCreate, ResortAuthResponse, ResortPublic
 
 router = APIRouter(prefix="/api/resorts", tags=["Resorts"])
 
@@ -24,6 +28,7 @@ def signup_resort(request: ResortCreate, session: Session = Depends(get_session)
     Sign up a new resort. 
     Automatically generates a unique 'hotel_id' from the resort name.
     """
+    logger.info(f"Starting signup process for resort name: '{request.resort_name}'")
     base_id = slugify(request.resort_name)
     hotel_id = base_id
     
@@ -46,15 +51,18 @@ def signup_resort(request: ResortCreate, session: Session = Depends(get_session)
     session.commit()
     session.refresh(new_resort)
     
+    logger.info(f"Successfully created resort '{request.resort_name}' with hotel_id: {hotel_id}")
+    
     access_token, refresh_token = create_token_pair(new_resort.hotel_id)
     return {
         "resort": new_resort,
         "access_token": access_token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "is_onboarded": False
     }
 
 
-@router.get("/{hotel_id}", response_model=ResortSettings)
+@router.get("/{hotel_id}", response_model=ResortPublic)
 def get_resort(hotel_id: str, session: Session = Depends(get_session)):
     """Get a resort profile by its tenant hotel_id."""
     resort = session.exec(

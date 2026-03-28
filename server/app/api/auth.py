@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from app.core.auth import verify_password, create_token_pair, verify_token
 from app.core.database import get_session
-from app.models.schemas import ResortSettings, LoginRequest, ResortAuthResponse, TokenRefreshRequest
+from app.models.schemas import ResortSettings, LoginRequest, ResortAuthResponse, TokenRefreshRequest, Service
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -19,11 +19,17 @@ def login(request: LoginRequest, session: Session = Depends(get_session)):
     if not verify_password(request.password, resort.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
+    services_count = session.exec(
+        select(func.count(Service.id)).where(Service.hotel_id == resort.hotel_id)
+    ).one()
+    is_onboarded = services_count > 0
+    
     access_token, refresh_token = create_token_pair(resort.hotel_id)
     return {
         "resort": resort,
         "access_token": access_token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "is_onboarded": is_onboarded
     }
 
 @router.post("/refresh")

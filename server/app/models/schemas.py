@@ -1,7 +1,7 @@
 """SQLModel database tables and Pydantic request/response schemas."""
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel
 
@@ -50,6 +50,7 @@ class ResortSettings(SQLModel, table=True):
     location: str = "Addis Ababa, Ethiopia"
     email: str = "admin@kuriftu.com"
     password_hash: str = ""
+    allowed_domains: str = ""
 
 
 class ChatLog(SQLModel, table=True):
@@ -66,6 +67,7 @@ class ChatLog(SQLModel, table=True):
 class ChatRequest(BaseModel):
     message: str
     hotel_id: Optional[str] = None
+    language: str = "en-US"
 
 
 class ChatResponse(BaseModel):
@@ -115,6 +117,7 @@ class SettingsUpdate(BaseModel):
     description: Optional[str] = None
     location: Optional[str] = None
     email: Optional[str] = None
+    allowed_domains: Optional[str] = None
 
 
 class ResortCreate(BaseModel):
@@ -124,10 +127,20 @@ class ResortCreate(BaseModel):
     password: str
 
 
+class ResortPublic(BaseModel):
+    id: Optional[int]
+    hotel_id: str
+    resort_name: str
+    description: str
+    location: str
+    email: str
+    allowed_domains: str
+
 class ResortAuthResponse(BaseModel):
-    resort: ResortSettings
+    resort: ResortPublic
     access_token: str
     refresh_token: str
+    is_onboarded: bool = False
 
 
 class LoginRequest(BaseModel):
@@ -139,6 +152,18 @@ class TokenRefreshRequest(BaseModel):
     refresh_token: str
 
 
+class RecentInteraction(BaseModel):
+    id: int
+    title: str
+    description: str
+    channel: str
+    status: str
+    created_at: datetime
+
+class ChartDataPoint(BaseModel):
+    name: str
+    request: int
+
 class DashboardStats(BaseModel):
     total_requests: int
     resolved_requests: int
@@ -146,3 +171,19 @@ class DashboardStats(BaseModel):
     satisfaction_score: str
     total_documents: int
     documents_ready: int
+    # Property Info
+    resort_name: str = ""
+    admin_email: str = ""
+    # Dynamic trends
+    request_change_percent: float = 0.0
+    automation_change_percent: float = 0.0
+    reclaimed_change_percent: float = 0.0
+    recent_interactions: List[RecentInteraction] = []
+    chart_data: List[ChartDataPoint] = []
+    is_onboarded: bool = False
+
+class OnboardingRequest(BaseModel):
+    resort_name: str
+    location: str
+    description: str
+    currency: str = "USD"
