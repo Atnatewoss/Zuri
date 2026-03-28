@@ -12,9 +12,7 @@ engine = create_engine(
 )
 
 
-def init_db():
-    """Create all tables defined by SQLModel metadata."""
-    SQLModel.metadata.create_all(engine)
+# Removed init_db() as Alembic handles schema migrations via `alembic upgrade head`
 
 
 def get_session():
