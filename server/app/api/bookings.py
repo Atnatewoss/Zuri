@@ -5,20 +5,29 @@ from sqlmodel import Session, select
 from typing import List
 
 from app.core.database import get_session
+from app.core.auth import get_authenticated_hotel_id
 from app.models.schemas import Booking, BookingCreate, BookingUpdate
 
 router = APIRouter(prefix="/api/bookings", tags=["Bookings"])
 
 
 @router.get("", response_model=List[Booking])
-def list_bookings(hotel_id: str, session: Session = Depends(get_session)):
+def list_bookings(
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """List all bookings for a specific hotel."""
     return session.exec(select(Booking).where(Booking.hotel_id == hotel_id)).all()
 
 
 @router.post("", response_model=Booking)
-def create_booking(booking: BookingCreate, session: Session = Depends(get_session)):
+def create_booking(
+    booking: BookingCreate,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Create a new manual booking."""
+    booking.hotel_id = hotel_id
     db_booking = Booking.model_validate(booking)
     session.add(db_booking)
     session.commit()
@@ -29,9 +38,9 @@ def create_booking(booking: BookingCreate, session: Session = Depends(get_sessio
 @router.put("/{booking_id}", response_model=Booking)
 def update_booking_status(
     booking_id: int,
-    hotel_id: str,
     update: BookingUpdate,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
 ):
     """Update booking status (Confirm/Cancel)."""
     db_booking = session.get(Booking, booking_id)

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlmodel import Session, select
 from typing import List
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from app.core.auth import get_authenticated_hotel_id
 from app.core.database import get_session
@@ -24,8 +28,10 @@ def bulk_create_services(
     """Bulk create services from a multi-line string."""
     resolved_hotel_id = auth_hotel_id
     if hotel_id and hotel_id != auth_hotel_id:
+        logger.warning(f"Unauthorized bulk services creation attempt. Requested: {hotel_id}, Auth: {auth_hotel_id}")
         raise HTTPException(status_code=403, detail="Forbidden hotel_id access")
 
+    logger.info(f"Processing bulk create services for hotel_id '{resolved_hotel_id}'")
     created = []
     lines = data.strip().split("\n")
     for line in lines:
@@ -39,6 +45,7 @@ def bulk_create_services(
         created.append(db_service)
     
     session.commit()
+    logger.info(f"Successfully created {len(created)} services for hotel_id '{resolved_hotel_id}'")
     return {"count": len(created), "services": created}
 
 
@@ -52,8 +59,10 @@ def bulk_create_rooms(
     """Bulk create rooms from a multi-line string."""
     resolved_hotel_id = auth_hotel_id
     if hotel_id and hotel_id != auth_hotel_id:
+        logger.warning(f"Unauthorized bulk rooms creation attempt. Requested: {hotel_id}, Auth: {auth_hotel_id}")
         raise HTTPException(status_code=403, detail="Forbidden hotel_id access")
 
+    logger.info(f"Processing bulk create rooms for hotel_id '{resolved_hotel_id}'")
     created = []
     lines = data.strip().split("\n")
     for line in lines:
@@ -70,6 +79,7 @@ def bulk_create_rooms(
         created.append(db_room)
     
     session.commit()
+    logger.info(f"Successfully created {len(created)} rooms for hotel_id '{resolved_hotel_id}'")
     return {"count": len(created), "rooms": created}
 
 
@@ -90,8 +100,13 @@ def list_services(
 
 
 @router.post("/api/services", response_model=Service)
-def create_service(service: ServiceCreate, session: Session = Depends(get_session)):
+def create_service(
+    service: ServiceCreate,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Create a new service for a hotel."""
+    service.hotel_id = hotel_id
     db_service = Service.model_validate(service)
     session.add(db_service)
     session.commit()
@@ -100,7 +115,12 @@ def create_service(service: ServiceCreate, session: Session = Depends(get_sessio
 
 
 @router.put("/api/services/{service_id}", response_model=Service)
-def update_service(service_id: int, hotel_id: str, service: ServiceUpdate, session: Session = Depends(get_session)):
+def update_service(
+    service_id: int,
+    service: ServiceUpdate,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Update an existing service."""
     db_service = session.get(Service, service_id)
     if not db_service or db_service.hotel_id != hotel_id:
@@ -117,7 +137,11 @@ def update_service(service_id: int, hotel_id: str, service: ServiceUpdate, sessi
 
 
 @router.delete("/api/services/{service_id}")
-def delete_service(service_id: int, hotel_id: str, session: Session = Depends(get_session)):
+def delete_service(
+    service_id: int,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Remove a service."""
     db_service = session.get(Service, service_id)
     if not db_service or db_service.hotel_id != hotel_id:
@@ -144,8 +168,13 @@ def list_rooms(
 
 
 @router.post("/api/rooms", response_model=Room)
-def create_room(room: RoomCreate, session: Session = Depends(get_session)):
+def create_room(
+    room: RoomCreate,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Create a new room type/instance."""
+    room.hotel_id = hotel_id
     db_room = Room.model_validate(room)
     session.add(db_room)
     session.commit()
@@ -154,7 +183,12 @@ def create_room(room: RoomCreate, session: Session = Depends(get_session)):
 
 
 @router.put("/api/rooms/{room_id}", response_model=Room)
-def update_room(room_id: int, hotel_id: str, room: RoomUpdate, session: Session = Depends(get_session)):
+def update_room(
+    room_id: int,
+    room: RoomUpdate,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Update room availability or price."""
     db_room = session.get(Room, room_id)
     if not db_room or db_room.hotel_id != hotel_id:
@@ -171,7 +205,11 @@ def update_room(room_id: int, hotel_id: str, room: RoomUpdate, session: Session 
 
 
 @router.delete("/api/rooms/{room_id}")
-def delete_room(room_id: int, hotel_id: str, session: Session = Depends(get_session)):
+def delete_room(
+    room_id: int,
+    session: Session = Depends(get_session),
+    hotel_id: str = Depends(get_authenticated_hotel_id)
+):
     """Remove a room setup."""
     db_room = session.get(Room, room_id)
     if not db_room or db_room.hotel_id != hotel_id:
