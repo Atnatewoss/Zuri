@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import time
+import uuid
 from typing import Dict, Tuple
 
 from fastapi import Header, HTTPException
@@ -47,6 +48,9 @@ def create_token_pair(hotel_id: str) -> Tuple[str, str]:
     
     # Access Token
     access_payload = {
+        "jti": str(uuid.uuid4()),
+        "iss": "zuri-backend",
+        "aud": "zuri-api",
         "hotel_id": hotel_id,
         "type": "access",
         "iat": now,
@@ -56,6 +60,9 @@ def create_token_pair(hotel_id: str) -> Tuple[str, str]:
     
     # Refresh Token
     refresh_payload = {
+        "jti": str(uuid.uuid4()),
+        "iss": "zuri-backend",
+        "aud": "zuri-api",
         "hotel_id": hotel_id,
         "type": "refresh",
         "iat": now,
@@ -99,6 +106,12 @@ def verify_token(token: str, expected_type: str = "access") -> dict:
     
     if payload.get("type") != expected_type:
         raise HTTPException(status_code=401, detail=f"Invalid token type: expected {expected_type}")
+        
+    if payload.get("iss") != "zuri-backend":
+        raise HTTPException(status_code=401, detail="Invalid token issuer")
+        
+    if payload.get("aud") != "zuri-api":
+        raise HTTPException(status_code=401, detail="Invalid token audience")
         
     if not payload.get("hotel_id"):
         raise HTTPException(status_code=401, detail="Invalid token payload")
