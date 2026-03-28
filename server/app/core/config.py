@@ -25,7 +25,7 @@ CHROMA_DATABASE = os.getenv("CHROMA_DATABASE", "Zuri")
 # --- Gemini AI ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.0-flash")
-GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "text-embedding-004")
+GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
 
 # --- CORS ---
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
@@ -37,6 +37,12 @@ TOP_K_RESULTS = int(os.getenv("TOP_K_RESULTS", "5"))
 
 # --- Auth ---
 APP_SECRET_KEY = os.getenv("APP_SECRET_KEY", "dev-insecure-change-me")
+if ENV == "production":
+    if APP_SECRET_KEY == "dev-insecure-change-me":
+        raise ValueError("FATAL: Insecure APP_SECRET_KEY default used in production environment.")
+    if len(APP_SECRET_KEY) < 32:
+        raise ValueError("FATAL: APP_SECRET_KEY must be at least 32 characters in production.")
+
 SESSION_TOKEN_TTL_SECONDS = int(os.getenv("SESSION_TOKEN_TTL_SECONDS", "86400"))
 
 # --- Abuse Controls ---

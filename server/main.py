@@ -1,4 +1,4 @@
-"""Zuri AI Concierge — FastAPI Backend Server."""
+"""Zuri AI Concierge - FastAPI Backend Server."""
 
 import os
 import uvicorn
@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS, ENV
-from app.core.database import init_db
+# from app.core.database import init_db (removed for Alembic)
+from app.core.middleware import DynamicCORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.knowledge import router as knowledge_router
 from app.api.chat import router as chat_router
@@ -30,14 +31,8 @@ app = FastAPI(
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Dynamic CORS (Handles static CORS_ORIGINS + tenant-specific allowed_domains)
+app.add_middleware(DynamicCORSMiddleware)
 
 # Register routers
 app.include_router(knowledge_router)
@@ -52,10 +47,7 @@ app.include_router(generator_router)
 app.include_router(auth_router)
 
 
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
+# Removed startup db initialization for Alembic
 
 
 @app.get("/")
