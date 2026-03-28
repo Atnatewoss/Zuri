@@ -31,10 +31,11 @@ export default function LoginPage() {
     setError(null)
     
     try {
-      const { access_token, refresh_token, resort } = await apiFetch<{ 
+      const { access_token, refresh_token, resort, is_onboarded } = await apiFetch<{ 
         access_token: string, 
         refresh_token: string,
-        resort: { hotel_id: string } 
+        resort: { hotel_id: string },
+        is_onboarded: boolean
       }>('/api/auth/login', {
         method: 'POST',
         bodyJson: formData
@@ -45,7 +46,11 @@ export default function LoginPage() {
       setRefreshToken(refresh_token);
       setTenantHotelId(resort.hotel_id);
 
-      router.push('/dashboard');
+      if (!is_onboarded) {
+        router.push('/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password');
     } finally {
@@ -54,10 +59,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans dark:bg-white dark:text-zinc-900">
       <div className="flex min-h-screen">
         {/* Left Side - Visual */}
-        <div className="hidden lg:flex flex-col justify-between w-[50%] bg-zinc-50 p-16 xl:p-20 border-r border-border relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-between w-[50%] bg-zinc-50 p-16 xl:p-20 border-r border-zinc-200 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
              {/* Subtle generic pattern instead of AI sparkles */}
              <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -110,7 +115,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base font-medium text-zinc-700">Work Email</Label>
-                <Input
+                <input
                   id="email"
                   name="email"
                   type="email"
@@ -118,7 +123,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-white border-zinc-200 text-zinc-900 h-[52px] text-base px-4 rounded-xl shadow-sm focus-visible:ring-primary"
+                  className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
@@ -129,7 +134,7 @@ export default function LoginPage() {
                     Forgot password?
                   </Link>
                 </div>
-                <Input
+                <input
                   id="password"
                   name="password"
                   type="password"
@@ -137,7 +142,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-white border-zinc-200 text-zinc-900 h-[52px] text-base px-4 rounded-xl shadow-sm focus-visible:ring-primary"
+                  className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
@@ -163,12 +168,7 @@ export default function LoginPage() {
               </p>
             </form>
 
-            {/* Demo Info */}
-            <div className="mt-8 pt-5 border-t border-zinc-200 bg-zinc-50/50 rounded-lg p-4 text-center border-dashed">
-              <p className="text-xs text-zinc-500">
-                Demo credentials active. Any email/password combination will work.
-              </p>
-            </div>
+
           </div>
         </div>
       </div>
