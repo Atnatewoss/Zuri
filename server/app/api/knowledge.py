@@ -3,8 +3,12 @@
 import shutil
 from pathlib import Path
 from datetime import datetime
+import logging
 
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, BackgroundTasks
 from sqlmodel import Session, select
 
 from app.core.auth import get_authenticated_hotel_id
@@ -20,6 +24,7 @@ ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".csv"}
 
 @router.post("/upload")
 async def upload_document(
+    background_tasks: BackgroundTasks,
     hotel_id: str | None = None,
     file: UploadFile = File(...),
     auth_hotel_id: str = Depends(get_authenticated_hotel_id),
@@ -28,7 +33,10 @@ async def upload_document(
     """Upload a document and trigger the RAG ingestion pipeline for a specific hotel."""
     resolved_hotel_id = auth_hotel_id
     if hotel_id and hotel_id != auth_hotel_id:
+        logger.warning(f"Unauthorized upload attempt. Requested: {hotel_id}, Auth: {auth_hotel_id}")
         raise HTTPException(status_code=403, detail="Forbidden hotel_id access")
+
+    logger.info(f"Received file upload '{file.filename}' for hotel_id '{resolved_hotel_id}'")
 
     # Validate file extension
     suffix = Path(file.filename).suffix.lower()
@@ -48,6 +56,8 @@ async def upload_document(
         size_str = f"{file_size / 1024:.1f} KB"
     else:
         size_str = f"{file_size / (1024 * 1024):.1f} MB"
+        
+    logger.info(f"Saved file '{file.filename}' of size {size_str} to temporary path")
 
     # Create DB record
     doc = Document(
@@ -60,16 +70,11 @@ async def upload_document(
     session.add(doc)
     session.commit()
     session.refresh(doc)
+    logger.info(f"Created DB record for document '{file.filename}' with ID '{doc.id}'")
 
     # Run ingestion pipeline
-    try:
-        process_document(doc.id, file_path, file.filename, session)
-    except Exception:
-        pass  # Status is updated inside process_document
-    finally:
-        # Delete temp file — vectors are stored in ChromaDB Cloud
-        if file_path.exists():
-            file_path.unlink()
+    logger.info(f"Triggering ingestion pipeline for document '{file.filename}' in background")
+    background_tasks.add_task(process_document, doc.id, file_path, file.filename)
 
     session.refresh(doc)
     return doc

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from sqlmodel import Session
+from app.core.database import engine
 
 from app.models.schemas import Document
 from app.rag.ingest import extract_text
@@ -10,46 +11,54 @@ from app.rag.embedder import generate_embeddings
 from app.rag.vector_store import add_document, delete_document as vector_delete
 
 
-def process_document(doc_id: int, file_path: Path, filename: str, session: Session):
+def process_document(doc_id: int, file_path: Path, filename: str):
     """
     Ingestion pipeline: Extract text, chunk, embed, and store in ChromaDB.
     """
     try:
-        # 1. Extract text
-        text = extract_text(file_path)
-        if not text:
-            raise ValueError("No text extracted from document")
+        with Session(engine) as session:
+            try:
+                # 1. Extract text
+                text = extract_text(file_path)
+                if not text:
+                    raise ValueError("No text extracted from document")
 
-        # 2. Chunk text
-        chunks = chunk_text(text)
-        if not chunks:
-            raise ValueError("No chunks generated from document")
+                # 2. Chunk text
+                chunks = chunk_text(text)
+                if not chunks:
+                    raise ValueError("No chunks generated from document")
 
-        # 3. Generate embeddings
-        embeddings = generate_embeddings(chunks)
+                # 3. Generate embeddings
+                embeddings = generate_embeddings(chunks)
 
-        # 4. Get hotel_id from DB record
-        doc = session.get(Document, doc_id)
-        if not doc:
-            raise ValueError("Document record not found")
-        hotel_id = doc.hotel_id
+                # 4. Get hotel_id from DB record
+                doc = session.get(Document, doc_id)
+                if not doc:
+                    raise ValueError("Document record not found")
+                hotel_id = doc.hotel_id
 
-        # 5. Store in vector store
-        add_document(doc_id, hotel_id, chunks, embeddings, filename)
+                # 5. Store in vector store
+                add_document(doc_id, hotel_id, chunks, embeddings, filename)
 
-        # 6. Update status
-        doc.status = "Ready"
-        session.add(doc)
-        session.commit()
+                # 6. Update status
+                doc.status = "Ready"
+                session.add(doc)
+                session.commit()
 
-    except Exception as e:
-        print(f"Error processing document {doc_id}: {e}")
-        doc = session.get(Document, doc_id)
-        if doc:
-            doc.status = "Error"
-            session.add(doc)
-            session.commit()
-        raise e
+            except Exception as e:
+                print(f"Error processing document {doc_id}: {e}")
+                doc = session.get(Document, doc_id)
+                if doc:
+                    doc.status = "Error"
+                    session.add(doc)
+                    session.commit()
+    finally:
+        # Delete temp file — vectors are stored in ChromaDB Cloud
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except BaseException:
+                pass
 
 
 def remove_document(document_id: int):
