@@ -6,7 +6,7 @@ import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Upload, FileText, CheckCircle2, Clock, Lightbulb } from 'lucide-react'
 import { API_BASE_URL, apiFetch } from '@/lib/api'
-import { getTenantHotelId } from '@/lib/tenant'
+import { getTenantHotelId, getAccessToken } from '@/lib/tenant'
 
 type KnowledgeDocument = {
   id: number
@@ -78,7 +78,7 @@ export default function KnowledgeBasePage() {
         formData.append('file', file)
         const xhr = new XMLHttpRequest()
         xhr.open('POST', `${API_BASE_URL}/api/knowledge/upload?hotel_id=${encodeURIComponent(hotelId)}`)
-        const token = window.localStorage.getItem('zuri_session_token')
+        const token = getAccessToken()
         if (token) {
           xhr.setRequestHeader('Authorization', `Bearer ${token}`)
         }
@@ -138,7 +138,7 @@ export default function KnowledgeBasePage() {
           <div className="grid lg:grid-cols-5 gap-8">
             {/* Upload Section (Left 3 columns) */}
             <div
-              className="lg:col-span-3 group rounded-3xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 transition-all cursor-pointer duration-500 overflow-hidden relative flex flex-col items-center justify-center p-12 lg:p-16"
+              className="lg:col-span-3 group rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer duration-500 overflow-hidden relative flex flex-col items-center justify-center p-12 lg:p-16"
               onClick={openFileDialog}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,var(--primary)_0%,transparent_50%)] opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -147,8 +147,8 @@ export default function KnowledgeBasePage() {
                   <Upload className="w-6 h-6" />
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-zinc-900 mb-3 tracking-tight">Upload Knowledge</h3>
-              <p className="text-zinc-500 font-medium text-base mb-8 max-w-sm text-center leading-relaxed">Drop your resort&apos;s blueprints, guides, or policies to orchestrate the AI concierge.</p>
+              <h3 className="text-2xl font-semibold text-foreground mb-3 tracking-tight">Upload Knowledge</h3>
+              <p className="text-muted-foreground font-medium text-base mb-8 max-w-sm text-center leading-relaxed">Drop your resort&apos;s blueprints, guides, or policies to orchestrate the AI concierge.</p>
               <Button className="rounded-full px-8 h-12 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 font-medium">
                 {uploading ? 'UPLOADING...' : 'BROWSE DOCUMENTS'}
               </Button>
@@ -165,28 +165,28 @@ export default function KnowledgeBasePage() {
             </div>
 
             {/* Tips Section (Right 2 columns) */}
-            <div className="lg:col-span-2 rounded-3xl bg-zinc-50 border border-zinc-200 p-8 relative overflow-hidden group">
+            <div className="lg:col-span-2 rounded-3xl bg-card border border-border p-8 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Lightbulb className="w-40 h-40 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-900 mb-8 flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-card-foreground mb-8 flex items-center gap-3">
                 <Lightbulb className="w-5 h-5 text-primary" /> Refining Intelligence
               </h3>
-              <div className="space-y-6 text-sm text-zinc-500 font-medium leading-relaxed relative z-10">
+              <div className="space-y-6 text-sm text-muted-foreground font-medium leading-relaxed relative z-10">
                 <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-[10px] text-zinc-400 font-bold">01</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-border bg-background flex items-center justify-center text-[10px] text-muted-foreground font-bold">01</span>
                   <p>Include granular details about room categories, prestige amenities, and current pricing structures.</p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-[10px] text-zinc-400 font-bold">02</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-border bg-background flex items-center justify-center text-[10px] text-muted-foreground font-bold">02</span>
                   <p>Incorporate comprehensive resort protocols, check-in nuances, and the house code of conduct.</p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-[10px] text-zinc-400 font-bold">03</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-border bg-background flex items-center justify-center text-[10px] text-muted-foreground font-bold">03</span>
                   <p>Upload the latest culinary collections from all dining venues to ensure accurate guest recommendations.</p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-[10px] text-zinc-400 font-bold">04</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full border border-border bg-background flex items-center justify-center text-[10px] text-muted-foreground font-bold">04</span>
                   <p>Regularly refresh documents to reflect seasonal shifts in services, excursions, and exclusive experiences.</p>
                 </div>
               </div>
