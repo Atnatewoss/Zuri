@@ -76,44 +76,39 @@
     #zuri-mic-btn{background:#f0f0f0}
     #zuri-mic-btn svg{width:18px;height:18px;fill:#555}
 
-    /* == Voice Overlay (Premium Avatar Style) ================== */
-    #zuri-voice-overlay{position:absolute;inset:0;background:linear-gradient(145deg,#050505 0%,#0a0a1a 50%,#050a1a 100%);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;border-radius:16px;overflow:hidden;backdrop-filter:blur(10px)}
+    /* == Voice Overlay (Gemini Live Style) ====================== */
+    #zuri-voice-overlay{position:absolute;inset:0;background:linear-gradient(145deg,#0f0f0f 0%,#1a1a2e 50%,#16213e 100%);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;border-radius:16px;overflow:hidden}
     #zuri-voice-overlay.active{display:flex}
-    
-    .zuri-voice-close{position:absolute;top:14px;right:18px;background:rgba(255,255,255,.05);border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:11}
-    .zuri-voice-close:hover{background:rgba(255,255,255,.15);color:#fff;transform:rotate(90deg)}
 
-    .zuri-voice-lang{position:absolute;top:16px;left:18px;color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+    .zuri-voice-close{position:absolute;top:14px;right:18px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .zuri-voice-close:hover{background:rgba(255,255,255,.2);color:#fff}
 
-    /* Avatar Animation System */
-    .zuri-avatar-wrap{position:relative;width:180px;height:180px;margin-bottom:40px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .zuri-avatar-glow{position:absolute;inset:-20px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);border-radius:50%;filter:blur(20px);opacity:0;transition:opacity .5s}
-    .zuri-avatar-wrap.listening .zuri-avatar-glow{opacity:1;animation:zuri-glow-pulse 2s ease-in-out infinite}
-    
-    .zuri-avatar-ring{position:absolute;inset:-5px;border:1px solid rgba(255,255,255,0.1);border-radius:50%;transition:all .5s}
-    .zuri-avatar-wrap.listening .zuri-avatar-ring{inset:-15px;border-color:rgba(99,102,241,0.3);animation:zuri-ring-spin 8s linear infinite}
-    
-    .zuri-orb{width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;transition:all .3s;box-shadow:0 0 40px rgba(0,0,0,0.5)}
-    .zuri-avatar-wrap.talking .zuri-orb{transform:scale(1.05);border-color:rgba(255,255,255,0.3);box-shadow:0 0 60px rgba(99,102,241,0.2)}
-    
-    #zuri-avatar-body{transition:transform .2s ease;filter:drop-shadow(0 0 10px rgba(255,255,255,0.1))}
-    .zuri-avatar-wrap.talking #zuri-avatar-body{animation:zuri-mouth-move .2s infinite alternate}
+    .zuri-voice-lang{position:absolute;top:16px;left:18px;color:rgba(255,255,255,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase}
 
-    @keyframes zuri-glow-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.8;transform:scale(1.2)}}
-    @keyframes zuri-ring-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    @keyframes zuri-mouth-move{from{transform:scaleY(1)}to{transform:scaleY(1.08)}}
+    /* Orb animation */
+    .zuri-orb-wrap{position:relative;width:120px;height:120px;margin-bottom:32px}
+    .zuri-orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(99,102,241,.6),rgba(139,92,246,.3),transparent 70%);position:relative;display:flex;align-items:center;justify-content:center}
+    .zuri-orb svg{width:40px;height:40px;fill:rgba(255,255,255,.9)}
+    .zuri-ring{position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(139,92,246,.25)}
+
+    .zuri-orb-wrap.listening .zuri-orb{animation:zuri-breathe 1.5s ease-in-out infinite}
+    .zuri-orb-wrap.listening .zuri-ring{animation:zuri-ring-pulse 1.5s ease-in-out infinite}
+    .zuri-orb-wrap.processing .zuri-orb{animation:zuri-spin-glow 1.2s linear infinite}
+
+    @keyframes zuri-breathe{0%,100%{transform:scale(1);box-shadow:0 0 30px rgba(99,102,241,.2)}50%{transform:scale(1.08);box-shadow:0 0 50px rgba(139,92,246,.35)}}
+    @keyframes zuri-ring-pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.12);opacity:.6}}
+    @keyframes zuri-spin-glow{0%{box-shadow:0 0 20px rgba(99,102,241,.3);transform:rotate(0deg) scale(1)}50%{box-shadow:0 0 40px rgba(139,92,246,.5);transform:rotate(180deg) scale(1.04)}100%{box-shadow:0 0 20px rgba(99,102,241,.3);transform:rotate(360deg) scale(1)}}
 
     /* Live caption */
-    .zuri-live-caption{color:rgba(255,255,255,.9);font-size:16px;font-weight:400;text-align:center;max-width:85%;min-height:28px;line-height:1.6;transition:opacity .3s;padding:0 20px;font-family:serif;font-style:italic}
-    .zuri-live-caption.interim{color:rgba(255,255,255,.4)}
+    .zuri-live-caption{color:rgba(255,255,255,.85);font-size:15px;text-align:center;max-width:85%;min-height:24px;line-height:1.5;transition:opacity .2s;padding:0 10px}
+    .zuri-live-caption.interim{color:rgba(255,255,255,.5);font-style:italic}
 
-    .zuri-voice-status{color:rgba(255,255,255,.25);font-size:10px;font-weight:800;margin-top:20px;letter-spacing:2px;text-transform:uppercase}
+    .zuri-voice-status{color:rgba(255,255,255,.35);font-size:11px;margin-top:16px;letter-spacing:.5px;text-transform:uppercase}
 
     /* Stop button */
-    .zuri-stop-btn{margin-top:32px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
-    .zuri-stop-btn:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);transform:scale(1.1)}
-    .zuri-stop-btn .stop-square{width:14px;height:14px;background:rgba(255,255,255,.6);border-radius:2px}
-    .zuri-stop-btn:hover .stop-square{background:rgba(239,68,68,1)}
+    .zuri-stop-btn{margin-top:28px;width:48px;height:48px;border-radius:50%;background:rgba(239,68,68,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 4px 15px rgba(239,68,68,.3)}
+    .zuri-stop-btn:hover{transform:scale(1.1);box-shadow:0 4px 20px rgba(239,68,68,.5)}
+    .zuri-stop-btn .stop-square{width:16px;height:16px;background:#fff;border-radius:3px}
     `;
     const sEl = document.createElement('style');
     sEl.textContent = css;
@@ -121,57 +116,6 @@
 
     // == DOM ======================================================
     const langOptions = LANGS.map(l => `<option value="${l.code}">${l.flag} ${l.label}</option>`).join('');
-
-    let resortSettings = {
-        avatarClothing: 'Suit',
-        avatarColor: '#1a1a1a',
-        avatarSkinTone: 'Neutral'
-    };
-
-    async function fetchResortSettings() {
-        try {
-            const res = await fetch(`${apiUrl}/api/settings?hotel_id=${encodeURIComponent(hotelId)}`);
-            if (res.ok) {
-                const data = await res.ok ? await res.json() : {};
-                resortSettings = {
-                    avatarClothing: data.avatar_clothing || 'Suit',
-                    avatarColor: data.avatar_color || '#1a1a1a',
-                    avatarSkinTone: data.avatar_skin_tone || 'Neutral'
-                };
-                updateAvatarUI();
-            }
-        } catch (e) { console.warn('Zuri: failed to fetch settings', e); }
-    }
-
-    function updateAvatarUI() {
-        const avatarEl = document.getElementById('zuri-avatar-body');
-        if (!avatarEl) return;
-        
-        // Update to DiceBear SVG
-        const clothing = resortSettings.avatarClothing === 'Suit' ? 'blazerAndShirt' : 
-                          resortSettings.avatarClothing === 'Casual' ? 'collarAndSweater' : 'graphicShirt';
-        const skinHex = resortSettings.avatarSkinTone === 'Light' ? 'ffdbb4' :
-                        resortSettings.avatarSkinTone === 'Medium' ? 'edb98a' :
-                        resortSettings.avatarSkinTone === 'Dark' ? '614335' : 'd08b5b';
-        const color = resortSettings.avatarColor.replace('#', '');
-        
-        const avatarUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=Zuri&clothing=${clothing}&skinColor=${skinHex}&clothesColor=${color}&mouth=smile&eyes=happy&eyebrows=defaultNatural&top=shortCurly&facialHairProbability=0&accessoriesProbability=0&style=circle&backgroundColor=transparent`;
-        
-        avatarEl.innerHTML = `
-            <img 
-                src="${avatarUrl}" 
-                style="width:100%;height:100%;object-fit:cover;border-radius:50%" 
-                onerror="this.src='https://api.dicebear.com/9.x/initials/svg?seed=Zuri&backgroundColor=${color}'"
-            />`;
-
-
-        // Apply visual aura
-        const orb = document.querySelector('.zuri-orb');
-        if (orb) {
-            orb.style.background = `radial-gradient(circle at 35% 35%, ${resortSettings.avatarColor}99, ${resortSettings.avatarColor}44, transparent 70%)`;
-            orb.style.borderColor = `${resortSettings.avatarColor}66`;
-        }
-    }
 
     const container = document.createElement('div');
     container.id = 'zuri-widget-container';
@@ -195,20 +139,17 @@
                 </button>
             </div>
 
-            <!-- Voice Overlay (Premium Avatar Style) -->
+            <!-- Voice Overlay (Gemini Live-style) -->
             <div id="zuri-voice-overlay">
                 <button class="zuri-voice-close" id="zuri-voice-close">&times;</button>
                 <div class="zuri-voice-lang" id="zuri-voice-lang-label">English</div>
-                
-                <div class="zuri-avatar-wrap" id="zuri-avatar-wrap">
-                    <div class="zuri-avatar-glow"></div>
-                    <div class="zuri-avatar-ring"></div>
+                <div class="zuri-orb-wrap" id="zuri-orb-wrap">
+                    <div class="zuri-ring"></div>
                     <div class="zuri-orb">
-                        <div id="zuri-avatar-body" style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;"></div>
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                     </div>
                 </div>
-
-                <div class="zuri-live-caption" id="zuri-live-caption">Tap the avatar and start speaking...</div>
+                <div class="zuri-live-caption" id="zuri-live-caption">Tap the mic and start speaking...</div>
                 <div class="zuri-voice-status" id="zuri-voice-status">Listening</div>
                 <button class="zuri-stop-btn" id="zuri-stop-voice"><div class="stop-square"></div></button>
             </div>
@@ -218,7 +159,6 @@
         </div>
     `;
     document.body.appendChild(container);
-    fetchResortSettings();
 
     // == Element Refs =============================================
     const bubble      = document.getElementById('zuri-bubble');
@@ -231,7 +171,7 @@
     const msgBox      = document.getElementById('zuri-messages');
     const voiceOverlay = document.getElementById('zuri-voice-overlay');
     const voiceClose  = document.getElementById('zuri-voice-close');
-    const avatarWrap  = document.getElementById('zuri-avatar-wrap');
+    const orbWrap     = document.getElementById('zuri-orb-wrap');
     const liveCaption = document.getElementById('zuri-live-caption');
     const voiceStatus = document.getElementById('zuri-voice-status');
     const stopVoice   = document.getElementById('zuri-stop-voice');
@@ -279,7 +219,7 @@
 
         // Update voice overlay if active
         if (opts.fromVoice && voiceOverlay.classList.contains('active')) {
-            avatarWrap.className = 'zuri-avatar-wrap processing';
+            orbWrap.className = 'zuri-orb-wrap processing';
             voiceStatus.textContent = 'Thinking';
             liveCaption.textContent = '';
             liveCaption.className = 'zuri-live-caption';
@@ -308,9 +248,9 @@
                     resolveGhost(aiBubble);
                     // Go idle instead of auto-resuming
                     if (voiceOverlay.classList.contains('active')) {
-                        avatarWrap.className = 'zuri-avatar-wrap';
+                        orbWrap.className = 'zuri-orb-wrap';
                         voiceStatus.textContent = 'Idle';
-                        liveCaption.textContent = 'Tap the avatar to speak again';
+                        liveCaption.textContent = 'Tap the orb to speak again';
                     }
                 });
             } else {
@@ -323,7 +263,7 @@
             if (opts.fromVoice && voiceOverlay.classList.contains('active')) {
                 orbWrap.className = 'zuri-orb-wrap';
                 voiceStatus.textContent = 'Idle';
-                liveCaption.textContent = 'Tap the avatar to try again';
+                liveCaption.textContent = 'Tap the orb to try again';
             }
         }
     }
@@ -335,23 +275,12 @@
     function speak(text, onEnd) {
         if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
         window.speechSynthesis.cancel();
-        
-        if (voiceOverlay.classList.contains('active')) {
-            avatarWrap.classList.add('talking');
-        }
-
         const clean = text.replace(/[*_`#\[\]()>~]/g, '').replace(/<[^>]+>/g, '');
         const utter = new SpeechSynthesisUtterance(clean);
         utter.lang = langSel.value;
         utter.rate = 0.95;
-        utter.onend = () => { 
-            avatarWrap.classList.remove('talking');
-            if (onEnd) onEnd(); 
-        };
-        utter.onerror = () => { 
-            avatarWrap.classList.remove('talking');
-            if (onEnd) onEnd(); 
-        };
+        utter.onend = () => { if (onEnd) onEnd(); };
+        utter.onerror = () => { if (onEnd) onEnd(); };
         window.speechSynthesis.speak(utter);
     }
 
@@ -413,8 +342,8 @@
         isListening = true;
         accumulatedTranscript = '';
         recognition.lang = langSel.value;
-        avatarWrap.className = 'zuri-avatar-wrap listening';
-        voiceStatus.textContent = 'Listening (Tap avatar to send)';
+        orbWrap.className = 'zuri-orb-wrap listening';
+        voiceStatus.textContent = 'Listening (Tap orb to send)';
         liveCaption.textContent = 'Speak now...';
         liveCaption.className = 'zuri-live-caption interim';
         try { recognition.start(); } catch(e) {}
@@ -422,7 +351,7 @@
 
     function stopListening() {
         isListening = false;
-        avatarWrap.className = 'zuri-avatar-wrap';
+        orbWrap.className = 'zuri-orb-wrap';
         try { recognition.stop(); } catch(e) {}
     }
 
@@ -438,9 +367,9 @@
         voiceOverlay.classList.add('active');
         
         // Start in idle mode, wait for tap
-        avatarWrap.className = 'zuri-avatar-wrap';
+        orbWrap.className = 'zuri-orb-wrap';
         voiceStatus.textContent = 'Ready';
-        liveCaption.textContent = 'Tap the avatar to start speaking...';
+        liveCaption.textContent = 'Tap the orb to start speaking...';
         accumulatedTranscript = '';
     }
 
@@ -457,10 +386,10 @@
     voiceClose.onclick = () => exitVoiceMode();
     stopVoice.onclick = () => exitVoiceMode();
 
-    // Push-to-talk mechanic on the avatar
-    avatarWrap.style.cursor = 'pointer';
-    avatarWrap.onclick = () => {
-        if (avatarWrap.classList.contains('processing')) return; // Ignore while processing backend
+    // Push-to-talk mechanic on the orb
+    orbWrap.style.cursor = 'pointer';
+    orbWrap.onclick = () => {
+        if (orbWrap.classList.contains('processing')) return; // Ignore while processing backend
         
         if (isListening) {
             // Stop & Send
@@ -471,7 +400,7 @@
                 sendMessage(msg, { fromVoice: true });
             } else {
                 voiceStatus.textContent = 'Idle';
-                liveCaption.textContent = 'Tap the avatar to start speaking...';
+                liveCaption.textContent = 'Tap the orb to start speaking...';
             }
         } else {
             // Start

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Calendar, Hotel, FileText, Code, Settings, Moon, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Calendar, Hotel, FileText, Code, Settings, Moon } from 'lucide-react'
 import { useSidebarStore } from '@/store/sidebar'
 import { useTheme } from 'next-themes'
 import { Switch } from '@/components/ui/switch'
@@ -30,7 +30,6 @@ const navGroups = [
     title: 'System Setup',
     items: [
       { href: '/dashboard/embed', label: 'Widget Integrations', icon: Code },
-      { href: '/dashboard/persona', label: 'AI Persona', icon: Sparkles },
     ]
   }
 ]
