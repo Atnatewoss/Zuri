@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional, List
 from sqlmodel import SQLModel, Field
-from pydantic import BaseModel
+from pydantic import BaseModel, Field as PydanticField
 
 
 # ─── Database Tables ───────────────────────────────────────────
@@ -35,6 +35,7 @@ class Room(SQLModel, table=True):
 class Booking(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hotel_id: str = Field(index=True)
+    confirmation_code: Optional[str] = Field(default=None, index=True, unique=True)
     guest_name: str
     service: str
     date: str
@@ -51,6 +52,7 @@ class ResortSettings(SQLModel, table=True):
     email: str = "admin@kuriftu.com"
     password_hash: str = ""
     allowed_domains: str = ""
+    is_onboarded: bool = False
 
 
 class ChatLog(SQLModel, table=True):
@@ -68,6 +70,7 @@ class ChatRequest(BaseModel):
     message: str
     hotel_id: Optional[str] = None
     language: str = "en-US"
+    conversation_history: list[dict[str, str]] = PydanticField(default_factory=list)
 
 
 class ChatResponse(BaseModel):
@@ -112,12 +115,18 @@ class BookingUpdate(BaseModel):
     status: Optional[str] = None
 
 
+class PublicBookingCancelRequest(BaseModel):
+    confirmation_code: str
+    guest_name: str
+
+
 class SettingsUpdate(BaseModel):
     resort_name: Optional[str] = None
     description: Optional[str] = None
     location: Optional[str] = None
     email: Optional[str] = None
     allowed_domains: Optional[str] = None
+    is_onboarded: Optional[bool] = None
 
 
 class ResortCreate(BaseModel):
@@ -138,9 +147,11 @@ class ResortPublic(BaseModel):
 
 class ResortAuthResponse(BaseModel):
     resort: ResortPublic
-    access_token: str
-    refresh_token: str
     is_onboarded: bool = False
+
+
+class AuthRefreshResponse(BaseModel):
+    ok: bool = True
 
 
 class LoginRequest(BaseModel):
@@ -149,7 +160,7 @@ class LoginRequest(BaseModel):
 
 
 class TokenRefreshRequest(BaseModel):
-    refresh_token: str
+    refresh_token: Optional[str] = None
 
 
 class RecentInteraction(BaseModel):
