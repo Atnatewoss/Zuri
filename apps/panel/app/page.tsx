@@ -26,7 +26,13 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20 flex flex-col font-sans relative">
+    <div 
+      className="min-h-screen bg-white text-zinc-900 selection:bg-zinc-200 flex flex-col font-sans relative dark:bg-white dark:text-zinc-900"
+      style={{
+        '--primary': 'oklch(0.45 0.1 60)',
+        '--primary-foreground': 'oklch(1 0 0)'
+      } as React.CSSProperties}
+    >
       
       <SiteHeader />
 
@@ -60,10 +66,10 @@ export default function LandingPage() {
               Widget
             </h2>
             
-            <Button variant="outline" className="rounded-full bg-white text-black hover:bg-white/90 hover:text-black border-none h-14 px-8 text-base font-medium shadow-xl flex items-center gap-3">
-              <Play className="w-4 h-4 fill-black" />
+            <button className="rounded-full bg-white text-black hover:bg-white/90 hover:text-black border-none h-14 px-8 text-base font-medium shadow-xl flex items-center gap-3 transition-colors cursor-pointer">
+              <Play className="w-4 h-4 fill-black text-black" />
               Watch Video
-            </Button>
+            </button>
           </div>
 
           {/* Bottom indicator */}
@@ -77,7 +83,7 @@ export default function LandingPage() {
         </section>
 
         {/* capabilities header */}
-        <section className="pt-32 pb-4 w-full bg-background border-b-0">
+        <section className="pt-32 pb-4 w-full bg-white border-b-0">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24 text-center">
              <h2 className="text-4xl lg:text-5xl font-medium tracking-tight opacity-90">
                 Platform Capabilities
@@ -86,7 +92,7 @@ export default function LandingPage() {
         </section>
 
         {/* Feature 1: The Widget */}
-        <section id="features" className="py-24 lg:py-32 w-full bg-background border-b border-border">
+        <section id="features" className="py-24 lg:py-32 w-full bg-white border-b border-zinc-200">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
                
@@ -138,54 +144,86 @@ export default function LandingPage() {
         </section>
 
         {/* Feature 2: Multilingual Voice overlay magic */}
-        <section className="py-24 lg:py-32 w-full bg-secondary border-b border-border">
+        <section className="py-24 lg:py-32 w-full bg-zinc-50 border-b border-zinc-200">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
-             <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
+             <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-start relative">
                
                {/* Language list with overlay transitions */}
-               <div className="bg-white rounded-3xl h-fit flex flex-col items-center justify-center py-6 px-4 lg:p-10 border border-border shadow-sm w-full overflow-hidden">
+               <div className="flex flex-col gap-4 w-full">
                  
-                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
-                    <div className="absolute inset-0 bg-zinc-900 border-zinc-900 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-zinc-900 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
                       Welcome to your stay
                     </div>
                     <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">English</span>
-                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ENG</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ENG</span>
                  </div>
                  
-                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
-                    <div className="absolute inset-0 bg-emerald-700 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-emerald-700 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
                       እንኳን ደህና መጡ
                     </div>
                     <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Amharic</span>
-                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">AMH</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">AMH</span>
                  </div>
                  
-                 <div className="group/lang relative w-full border-b border-black/5 flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
-                    <div className="absolute inset-0 bg-[#A68361] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-[#A68361] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
                       እንቋዕ ብደሓን መጻእኩም
                     </div>
                     <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Tigrinya</span>
-                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">TIR</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">TIR</span>
                  </div>
                  
-                 <div className="group/lang relative w-full flex items-center justify-between py-6 lg:py-8 px-4 lg:px-8 text-xl lg:text-3xl font-light overflow-hidden rounded-md cursor-default">
-                    <div className="absolute inset-0 bg-[#D39D55] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-4 lg:px-8 text-white font-medium z-20">
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-[#D39D55] translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
                       Baga nagaan dhuftan
                     </div>
                     <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Oromifa</span>
-                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-xs tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ORM</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ORM</span>
                  </div>
 
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-blue-600 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
+                      Ku soo dhawaaw
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Somali</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">SOM</span>
+                 </div>
+
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-emerald-800 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20" style={{ direction: 'rtl' }}>
+                      مرحباً بكم
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Arabic</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ARA</span>
+                 </div>
+
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
+                      Bienvenue
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">French</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">FRA</span>
+                 </div>
+
+                 <div className="bg-white shadow-sm border border-black/5 hover:shadow-md transition-shadow group/lang relative w-full flex items-center justify-between py-8 lg:py-10 px-6 lg:px-10 text-xl lg:text-3xl font-light overflow-hidden rounded-2xl cursor-default shrink-0">
+                    <div className="absolute inset-0 bg-red-700 translate-y-full group-hover/lang:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center px-6 lg:px-10 text-white font-medium z-20">
+                      Benvenuto
+                    </div>
+                    <span className="relative z-10 transition-colors group-hover/lang:opacity-0 delay-75">Italian</span>
+                    <span className="relative z-10 opacity-40 tabular-nums font-mono text-sm tracking-widest transition-colors group-hover/lang:opacity-0 delay-75">ITA</span>
+                 </div>
+                 
                </div>
 
-               <div className="max-w-xl">
+               <div className="max-w-xl lg:sticky lg:top-[30vh] lg:pb-24">
                  <div className="text-sm font-semibold tracking-widest uppercase mb-6 opacity-60">02 / Universal Communication</div>
                  <h3 className="text-5xl lg:text-6xl xl:text-7xl font-medium tracking-tight mb-8 leading-[1.05]">
                    Native voice interactions.
                  </h3>
                  <p className="text-xl opacity-70 leading-relaxed font-light">
-                   No language barriers. Zuri speaks 4 languages flawlessly—English, Amharic, Tigrinya, and Oromifa. Guests can simply tap the microphone and speak naturally to receive tailored recommendations.
+                   No language barriers. Zuri speaks 8 languages flawlessly—English, Amharic, Tigrinya, Oromifa, Somali, Arabic, French, and Italian. Guests can simply tap the microphone and speak naturally to receive tailored recommendations.
                  </p>
                </div>
 
@@ -194,7 +232,7 @@ export default function LandingPage() {
         </section>
 
         {/* Feature 3: Actions  */}
-        <section id="integrations" className="py-24 lg:py-32 w-full bg-background border-b border-border">
+        <section id="integrations" className="py-24 lg:py-32 w-full bg-white border-b border-zinc-200">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-center">
                
@@ -222,7 +260,7 @@ export default function LandingPage() {
 
                    <div className="flex flex-col gap-2 pt-2">
                      <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest opacity-40">Status</div>
-                     <div className="flex items-center gap-3 bg-secondary/80 p-5 rounded-xl border border-black/5 shadow-inner">
+                     <div className="flex items-center gap-3 bg-zinc-100 p-5 rounded-xl border border-black/5 shadow-inner text-zinc-900">
                         <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
                         <span className="text-base font-medium">Transaction Complete</span>
                      </div>
@@ -235,7 +273,7 @@ export default function LandingPage() {
         </section>
 
         {/* Frictionless Deployment Section */}
-        <section className="py-24 lg:py-32 w-full bg-zinc-50 border-b border-border">
+        <section className="py-24 lg:py-32 w-full bg-zinc-50 border-b border-zinc-200">
           <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
              <div className="text-center max-w-2xl mx-auto mb-20">
                 <h2 className="text-5xl lg:text-6xl font-medium tracking-tight mb-6">

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiFetch } from '@/lib/api'
-import { setAccessToken, setRefreshToken, setTenantHotelId } from '@/lib/tenant'
+import { setAccessToken, setRefreshToken, setTenantHotelId, setTenantResortName } from '@/lib/tenant'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -48,9 +48,10 @@ export default function SignupPage() {
         }
       )
       setTenantHotelId(response.resort.hotel_id)
+      setTenantResortName(response.resort.resort_name)
       setAccessToken(response.access_token)
       setRefreshToken(response.refresh_token)
-      router.push('/dashboard')
+      router.push('/onboarding')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')
     } finally {
@@ -59,10 +60,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans dark:bg-white dark:text-zinc-900">
       <div className="flex min-h-screen">
         {/* Left Side - Visual */}
-        <div className="hidden lg:flex flex-col justify-between w-[50%] bg-zinc-50 p-16 xl:p-20 border-r border-border">
+        <div className="hidden lg:flex flex-col justify-between w-[50%] bg-zinc-50 p-16 xl:p-20 border-r border-zinc-200">
           <Link href="/" className="text-2xl font-bold tracking-tight text-zinc-900 uppercase">
             ZURI
           </Link>
@@ -108,20 +109,20 @@ export default function SignupPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="resortName" className="text-base font-medium text-zinc-700">Property Name</Label>
-                <Input
+                <input
                   id="resortName"
                   name="resortName"
                   placeholder="e.g. Grand Ocean Resort"
                   value={formData.resortName}
                   onChange={handleChange}
                   required
-                  className="bg-white border-zinc-200 text-zinc-900 h-[52px] text-base px-4 rounded-xl shadow-sm focus-visible:ring-primary"
+                  className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base font-medium text-zinc-700">Work Email</Label>
-                <Input
+                <input
                   id="email"
                   name="email"
                   type="email"
@@ -129,13 +130,13 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-white border-zinc-200 text-zinc-900 h-[52px] text-base px-4 rounded-xl shadow-sm focus-visible:ring-primary"
+                  className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-base font-medium text-zinc-700">Password</Label>
-                <Input
+                <input
                   id="password"
                   name="password"
                   type="password"
@@ -143,7 +144,7 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-white border-zinc-200 text-zinc-900 h-[52px] text-base px-4 rounded-xl shadow-sm focus-visible:ring-primary"
+                  className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
