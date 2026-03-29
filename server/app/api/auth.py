@@ -19,10 +19,7 @@ def login(request: LoginRequest, session: Session = Depends(get_session)):
     if not verify_password(request.password, resort.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    services_count = session.exec(
-        select(func.count(Service.id)).where(Service.hotel_id == resort.hotel_id)
-    ).one()
-    is_onboarded = services_count > 0
+    is_onboarded = resort.is_onboarded
     
     access_token, refresh_token = create_token_pair(resort.hotel_id)
     return {
