@@ -2,6 +2,10 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from app.core.auth import get_authenticated_hotel_id
 from app.core.database import get_session
@@ -60,13 +64,16 @@ def update_settings(
     ).first()
 
     if not settings:
+        logger.error(f"Failed to update settings: No settings found for hotel_id {resolved_hotel_id}")
         raise HTTPException(status_code=404, detail="Settings not found")
 
     update_data = update.model_dump(exclude_unset=True)
+    logger.info(f"Updating settings for hotel_id '{resolved_hotel_id}' with data: {update_data}")
     for key, value in update_data.items():
         setattr(settings, key, value)
 
     session.add(settings)
     session.commit()
     session.refresh(settings)
+    logger.info(f"Successfully updated settings for hotel_id '{resolved_hotel_id}'")
     return settings
