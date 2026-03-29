@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const geist = Geist({ subsets: ["latin"], variable: '--font-sans' });
@@ -36,9 +37,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased text-foreground bg-background selection:bg-primary/20">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

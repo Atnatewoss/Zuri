@@ -25,10 +25,12 @@ RULES:
 
 CONTEXT FROM RESORT KNOWLEDGE BASE:
 {context}
+
+IMPORTANT: Respond entirely in {language}.
 """
 
 
-def answer_question(question: str, hotel_id: str) -> dict:
+def answer_question(question: str, hotel_id: str, language: str = "English") -> dict:
     """
     Full RAG process: Retrieve chunks for hotel_id, format prompt, and generate answer via Gemini.
     """
@@ -57,7 +59,7 @@ def answer_question(question: str, hotel_id: str) -> dict:
 
     # 3. Generate response with Gemini
     client = _get_client()
-    system_instruction = SYSTEM_PROMPT.format(context=context)
+    system_instruction = SYSTEM_PROMPT.format(context=context, language=language)
 
     response = client.models.generate_content(
         model=GEMINI_CHAT_MODEL,
@@ -65,7 +67,7 @@ def answer_question(question: str, hotel_id: str) -> dict:
         config=genai.types.GenerateContentConfig(
             system_instruction=system_instruction,
             temperature=0.3,
-            max_output_tokens=1024,
+            max_output_tokens=4096,
         ),
     )
 

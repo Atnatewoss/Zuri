@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronRight, ChevronLeft, Upload, Check } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
-import { getTenantHotelId } from '@/lib/tenant'
+import { getTenantHotelId, getTenantResortName } from '@/lib/tenant'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -22,7 +22,15 @@ export default function OnboardingPage() {
     files: [] as string[],
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const resortName = getTenantResortName()
+    if (resortName) {
+      setFormData(prev => ({ ...prev, resortName }))
+    }
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -51,6 +59,39 @@ export default function OnboardingPage() {
     const newRooms = [...formData.rooms]
     newRooms[index] = { ...newRooms[index], [field]: value }
     setFormData({ ...formData, rooms: newRooms })
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const hotelId = getTenantHotelId()
+    if (!hotelId) {
+      setError('Session expired, please refresh')
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+    
+    try {
+      const uploadData = new FormData()
+      uploadData.append('file', file)
+      
+      await apiFetch(`/api/knowledge/upload?hotel_id=${encodeURIComponent(hotelId)}`, {
+        method: 'POST',
+        body: uploadData,
+      })
+      
+      setFormData(prev => ({
+        ...prev,
+        files: [...prev.files, file.name]
+      }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const canProceed = () => {
@@ -130,7 +171,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-20">
+    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-20 dark:bg-zinc-50 dark:text-zinc-900" style={{ zoom: 1.1 }}>
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
         <div className="mx-auto max-w-4xl px-8 py-5 flex items-center justify-between">
@@ -180,13 +221,13 @@ export default function OnboardingPage() {
             <div className="space-y-5">
               <div className="space-y-1.5">
                 <Label htmlFor="resortName" className="text-sm font-medium text-zinc-700">Property Name *</Label>
-                <Input
+                <input
                   id="resortName"
                   name="resortName"
                   placeholder="e.g. Grand Ocean Resort"
                   value={formData.resortName}
                   onChange={handleInputChange}
-                  className="bg-zinc-50 border-zinc-200"
+                  className="w-full h-10 px-3 py-2 text-sm rounded-md bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
 
@@ -198,20 +239,20 @@ export default function OnboardingPage() {
                   placeholder="Briefly describe your property and its unique features..."
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-zinc-200 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                   rows={4}
                 />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="location" className="text-sm font-medium text-zinc-700">Location *</Label>
-                <Input
+                <input
                   id="location"
                   name="location"
                   placeholder="e.g. Addis Ababa, Ethiopia"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="bg-zinc-50 border-zinc-200"
+                  className="w-full h-10 px-3 py-2 text-sm rounded-md bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
             </div>
@@ -234,7 +275,7 @@ export default function OnboardingPage() {
                       id={service}
                       checked={formData.services.includes(service)}
                       onCheckedChange={() => handleServiceChange(service)}
-                      className="data-[state=checked]:bg-zinc-900 border-zinc-300"
+                      className="data-[state=checked]:bg-zinc-900 data-[state=checked]:text-white border-zinc-300"
                     />
                     <span className="font-medium text-sm text-zinc-800">
                       {service}
@@ -259,21 +300,21 @@ export default function OnboardingPage() {
                 <div key={index} className="grid grid-cols-2 gap-4 p-5 rounded-xl border border-zinc-200 bg-zinc-50/50">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-zinc-500 uppercase">Room Type</Label>
-                    <Input
+                    <input
                       placeholder="e.g. Deluxe Suite"
                       value={room.type}
                       onChange={(e) => updateRoom(index, 'type', e.target.value)}
-                      className="bg-white border-zinc-200"
+                      className="w-full h-10 px-3 py-2 text-sm rounded-md bg-white border border-zinc-200 text-zinc-900 placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                     />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-zinc-500 uppercase">Price per Night</Label>
-                    <Input
+                    <input
                       placeholder="e.g. 250"
                       value={room.price}
                       type="number"
                       onChange={(e) => updateRoom(index, 'price', e.target.value)}
-                      className="bg-white border-zinc-200"
+                      className="w-full h-10 px-3 py-2 text-sm rounded-md bg-white border border-zinc-200 text-zinc-900 placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                     />
                   </div>
                 </div>
@@ -298,14 +339,39 @@ export default function OnboardingPage() {
               <p className="text-zinc-500 text-sm">Upload property guides to train your AI.</p>
             </div>
 
-            <div className="border-2 border-dashed border-zinc-200 rounded-xl p-10 text-center hover:border-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer flex flex-col items-center">
+            <label className="border-2 border-dashed border-zinc-200 rounded-xl p-10 text-center hover:border-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer flex flex-col items-center">
+              <input 
+                type="file" 
+                className="hidden" 
+                accept=".pdf,.docx,.txt"
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
               <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mb-4 text-zinc-500">
                 <Upload className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-medium text-zinc-900 mb-1">Upload Documents</h3>
+              <h3 className="text-sm font-medium text-zinc-900 mb-1">
+                {uploading ? 'Uploading...' : 'Upload Documents'}
+              </h3>
               <p className="text-zinc-500 text-xs mb-6 max-w-[200px]">PDF, DOCX, or TXT up to 10MB</p>
-              <Button size="sm" variant="secondary" className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 pointer-events-none">Select Files</Button>
-            </div>
+              <Button size="sm" variant="secondary" className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 pointer-events-none" disabled={uploading}>
+                Select Files
+              </Button>
+            </label>
+
+            {formData.files.length > 0 && (
+              <div className="mt-4 p-4 rounded-xl border border-zinc-200 bg-zinc-50/50">
+                <h4 className="text-sm font-medium text-zinc-900 mb-2">Uploaded Files:</h4>
+                <ul className="text-sm text-zinc-600 space-y-1">
+                  {formData.files.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                       <Check className="w-4 h-4 text-emerald-500" />
+                       {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="p-4 rounded-lg bg-blue-50 border border-blue-100 flex gap-3 text-sm text-blue-800">
               <div className="mt-0.5">ℹ️</div>

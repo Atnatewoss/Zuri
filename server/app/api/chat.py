@@ -1,4 +1,7 @@
 """Chat API — RAG-powered guest Q&A endpoint."""
+import logging
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlmodel import Session, select
@@ -8,13 +11,13 @@ from app.core.config import (
     CHAT_MAX_MESSAGE_LENGTH,
     CHAT_RATE_LIMIT_MAX_REQUESTS,
     CHAT_RATE_LIMIT_WINDOW_SECONDS,
+    ENV
 )
-from app.core.rate_limit import SlidingWindowRateLimiter
+from app.core.rate_limit import chat_rate_limiter
 from app.models.schemas import ChatRequest, ChatResponse, ResortSettings
 from app.services.chat_service import chat
 
 router = APIRouter(prefix="/api", tags=["Chat"])
-_chat_rate_limiter = SlidingWindowRateLimiter()
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -42,9 +45,31 @@ def chat_endpoint(
     if not exists:
         raise HTTPException(status_code=404, detail="Resort not found")
 
+    # Validate Origin
+    origin = http_request.headers.get("origin")
+    if exists.allowed_domains:
+        # e.g., "localhost:8080, kurifturesorts.com"
+        allowed_list = []
+        protocol = "http://" if ENV == "development" else "https://"
+        for d in exists.allowed_domains.split(","):
+            d = d.strip().rstrip("/")
+            if not d: continue
+            if not d.startswith("http://") and not d.startswith("https://"):
+                d = protocol + d
+            allowed_list.append(d)
+            
+        if allowed_list:
+            # If origin is something like "http://localhost:8080"
+            clean_origin = origin.strip().rstrip("/") if origin else ""
+            if clean_origin not in allowed_list:
+                raise HTTPException(
+                    status_code=403, 
+                    detail="Forbidden: Origin not allowed for this resort's widget."
+                )
+
     client_ip = (http_request.client.host if http_request.client else "unknown").strip()
     rate_limit_key = f"{hotel_id}:{client_ip}"
-    allowed = _chat_rate_limiter.allow(
+    allowed = chat_rate_limiter.allow(
         key=rate_limit_key,
         max_requests=CHAT_RATE_LIMIT_MAX_REQUESTS,
         window_seconds=CHAT_RATE_LIMIT_WINDOW_SECONDS,
@@ -52,11 +77,16 @@ def chat_endpoint(
     if not allowed:
         raise HTTPException(status_code=429, detail="Too many requests, please slow down")
 
-    result = chat(
-        message=request.message,
-        hotel_id=hotel_id,
-        session=session,
-    )
+    try:
+        result = chat(
+            message=request.message,
+            hotel_id=hotel_id,
+            language=request.language,
+            session=session,
+        )
+    except Exception as e:
+        logger.error(f"Chat error for hotel {hotel_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Chat processing error: {str(e)}")
     return ChatResponse(
         response=result["response"],
         sources=result["sources"],
