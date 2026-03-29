@@ -3,12 +3,13 @@
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useState, useRef, useEffect } from 'react'
 import { BedDouble, Plus, Trash2, Edit2, MoreHorizontal, Settings, X, PlusCircle } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
 
-// No dummy data fallback for production
 
 export default function ServicesPage() {
   const [tabs, setTabs] = useState<any[]>([])
@@ -16,34 +17,73 @@ export default function ServicesPage() {
   const [roomsList, setRoomsList] = useState<any[]>([])
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [newTabName, setNewTabName] = useState('')
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const hotelId = getTenantHotelId()
+      if (!hotelId) return
+
+      const [servicesData, roomsData] = await Promise.all([
+        apiFetch<any[]>(`/api/services?hotel_id=${encodeURIComponent(hotelId)}`),
+        apiFetch<any[]>(`/api/rooms?hotel_id=${encodeURIComponent(hotelId)}`)
+      ])
+      
+      setTabs(servicesData || [])
+      if (servicesData && servicesData.length > 0 && activeTabId === null) {
+        setActiveTabId(servicesData[0].id)
+      }
+      
+      setRoomsList(roomsData || [])
+    } catch (error) {
+      console.error("Failed to load services and rooms data", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const hotelId = getTenantHotelId()
-        if (!hotelId) return
-
-        const [servicesData, roomsData] = await Promise.all([
-          apiFetch<any[]>(`/api/services?hotel_id=${encodeURIComponent(hotelId)}`),
-          apiFetch<any[]>(`/api/rooms?hotel_id=${encodeURIComponent(hotelId)}`)
-        ])
-        
-        if (servicesData && servicesData.length > 0) {
-          setTabs(servicesData)
-          setActiveTabId(servicesData[0].id)
-        }
-        
-        if (roomsData && roomsData.length > 0) {
-          setRoomsList(roomsData)
-        }
-      } catch (error) {
-        console.error("Failed to load services and rooms data", error)
-      } finally {
-        setLoading(false)
-      }
-    }
     loadData()
   }, [])
+
+  const handleCreateTab = async () => {
+    if (!newTabName.trim()) return
+    setIsSubmitting(true)
+    try {
+      const hotelId = getTenantHotelId()
+      const result = await apiFetch<any>('/api/services', {
+        method: 'POST',
+        bodyJson: {
+          name: newTabName,
+          available: true,
+          hotel_id: hotelId
+        }
+      })
+      setTabs([...tabs, result])
+      setNewTabName('')
+      if (tabs.length === 0) setActiveTabId(result.id)
+    } catch (error) {
+      console.error("Failed to create service category", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteTab = async (id: number) => {
+    if (!confirm("Are you sure? All data in this category will be inaccessible.")) return
+    try {
+      await apiFetch(`/api/services/${id}`, { method: 'DELETE' })
+      const updated = tabs.filter(t => t.id !== id)
+      setTabs(updated)
+      if (activeTabId === id) {
+        setActiveTabId(updated.length > 0 ? updated[0].id : null)
+      }
+    } catch (error) {
+      console.error("Failed to delete service category", error)
+    }
+  }
   
   // Custom scrolling ref for tabs
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -61,7 +101,7 @@ export default function ServicesPage() {
 
         <div className="flex-1 p-8 md:p-12 lg:px-20 flex flex-col gap-8 max-w-[1600px] w-full mx-auto pb-32">
           
-          {/* Senior UI/UX Horizontal Tabs Bar */}
+          {/* Horizontal Tabs Bar */}
           <div className="relative flex items-center w-full border-b border-zinc-200">
             {/* The scrollable area with a right-fade mask */}
             <div 
@@ -122,9 +162,10 @@ export default function ServicesPage() {
                 <div className="rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center p-20 text-center text-muted-foreground min-h-[400px]">
                   <h3 className="text-xl font-medium text-foreground mb-2">No categories configured</h3>
                   <p className="max-w-sm mx-auto text-sm leading-relaxed">Click "Manage Tabs" or use the AI Generator to populate your services.</p>
+                  <Button onClick={() => setIsEditModalOpen(true)} className="mt-4">Setup Categories</Button>
                 </div>
-             ) : activeTabName === 'Room Service' ? (
-                <RoomServiceContent rooms={roomsList} />
+             ) : activeTabName === 'Room Service' || activeTabName.toLowerCase().includes('room') ? (
+                <RoomServiceContent rooms={roomsList} onUpdate={loadData} />
              ) : (
                 <GenericServiceContent serviceName={activeTabName} />
              )}
@@ -156,37 +197,118 @@ export default function ServicesPage() {
                   <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
                     <MoreHorizontal className="w-4 h-4" />
                   </div>
-                  <input 
-                    type="text"
-                    defaultValue={tab.name}
-                    className="flex-1 bg-transparent border-none text-sm font-medium text-card-foreground focus:ring-0 px-0 outline-none"
-                  />
+                  <div className="flex-1 text-sm font-medium text-card-foreground px-0 outline-none">
+                    {tab.name}
+                  </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors">
+                    <button 
+                      onClick={() => handleDeleteTab(tab.id)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
               
-              <button className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl p-4 text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all">
-                <PlusCircle className="w-5 h-5" />
-                Add New Category
-              </button>
+              <div className="flex items-center gap-2 bg-card border border-border rounded-xl p-2 pr-2 shadow-sm focus-within:ring-2 focus-within:ring-zinc-900/10 transition-all">
+                <input 
+                  type="text"
+                  placeholder="New category name..."
+                  value={newTabName}
+                  onChange={(e) => setNewTabName(e.target.value)}
+                  className="flex-1 bg-transparent border-none text-sm font-medium text-card-foreground focus:ring-0 px-2 outline-none"
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTab()}
+                />
+                <Button 
+                  onClick={handleCreateTab}
+                  disabled={isSubmitting || !newTabName.trim()}
+                  className="h-9 px-4 rounded-lg bg-foreground text-background hover:bg-foreground/90"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add
+                </Button>
+              </div>
             </div>
             
             <div className="p-5 border-t border-border bg-card flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-              <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={() => setIsEditModalOpen(false)}>Save Changes</Button>
+              <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={() => setIsEditModalOpen(false)}>Done</Button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   )
 }
 
-function RoomServiceContent({ rooms }: { rooms: any[] }) {
+function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () => void }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingRoom, setEditingRoom] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    type: '',
+    price: '',
+    available_count: ''
+  })
+
+  const handleOpenCreate = () => {
+    setEditingRoom(null)
+    setFormData({ type: '', price: '', available_count: '' })
+    setIsModalOpen(true)
+  }
+
+  const handleOpenEdit = (room: any) => {
+    setEditingRoom(room)
+    setFormData({ 
+      type: room.type, 
+      price: room.price.toString(), 
+      available_count: (room.available_count !== undefined ? room.available_count : room.available).toString()
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    try {
+      const hotelId = getTenantHotelId()
+      const payload = {
+        type: formData.type,
+        price: parseFloat(formData.price),
+        available_count: parseInt(formData.available_count),
+        hotel_id: hotelId
+      }
+
+      if (editingRoom) {
+        await apiFetch(`/api/rooms/${editingRoom.id}`, {
+          method: 'PUT',
+          bodyJson: payload
+        })
+      } else {
+        await apiFetch('/api/rooms', {
+          method: 'POST',
+          bodyJson: payload
+        })
+      }
+      setIsModalOpen(false)
+      onUpdate()
+    } catch (error) {
+      console.error("Failed to save room", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to remove this room type?")) return
+    try {
+      await apiFetch(`/api/rooms/${id}`, { method: 'DELETE' })
+      onUpdate()
+    } catch (error) {
+      console.error("Failed to delete room", error)
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -194,7 +316,7 @@ function RoomServiceContent({ rooms }: { rooms: any[] }) {
           <h2 className="text-3xl font-serif text-foreground">Room Portfolio</h2>
           <p className="text-muted-foreground mt-2">Manage physical room amenities, pricing, and specific traits.</p>
         </div>
-        <Button className="rounded-full px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10">
+        <Button onClick={handleOpenCreate} className="rounded-full px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10">
           <Plus className="w-4 h-4 mr-2" /> CREATE ROOM
         </Button>
       </div>
@@ -225,14 +347,82 @@ function RoomServiceContent({ rooms }: { rooms: any[] }) {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground bg-muted/50 border border-border rounded-lg hover:bg-muted hover:text-foreground transition-colors">
+                <button 
+                  onClick={() => handleOpenEdit(room)}
+                  className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground bg-muted/50 border border-border rounded-lg hover:bg-muted hover:text-foreground transition-colors"
+                >
                   <Edit2 className="w-4 h-4" /> Edit Details
+                </button>
+                <button 
+                  onClick={() => handleDelete(room.id)}
+                  className="w-10 h-10 flex items-center justify-center text-red-500 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-border">
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/30">
+              <h3 className="text-xl font-medium text-card-foreground">
+                {editingRoom ? 'Edit Room Type' : 'Create New Room Type'}
+              </h3>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Room Type Name</Label>
+                <Input 
+                  id="type"
+                  placeholder="e.g. Deluxe Ocean Suite" 
+                  value={formData.type} 
+                  onChange={(e) => setFormData({...formData, type: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (per night)</Label>
+                  <Input 
+                    id="price"
+                    type="number" 
+                    placeholder="350" 
+                    value={formData.price} 
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="count">Availability Count</Label>
+                  <Input 
+                    id="count"
+                    type="number" 
+                    placeholder="5" 
+                    value={formData.available_count} 
+                    onChange={(e) => setFormData({...formData, available_count: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-border bg-muted/30 flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-foreground text-background hover:bg-foreground/90">
+                {isSubmitting ? 'Saving...' : 'Save Room Type'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
@@ -261,3 +451,4 @@ function GenericServiceContent({ serviceName }: { serviceName: string }) {
     </div>
   )
 }
+
