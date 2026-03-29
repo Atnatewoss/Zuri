@@ -21,7 +21,6 @@ export default function SettingsPage() {
     description: store.description || '',
     location: store.location || '',
     email: store.email || '',
-    allowedDomains: store.allowedDomains || '',
   })
 
   const [saved, setSaved] = useState(false)
@@ -65,7 +64,6 @@ export default function SettingsPage() {
           description: settings.description || '',
           location: settings.location || '',
           email: settings.email || '',
-          allowedDomains: settings.allowed_domains || '',
         }
         store.setSettings({ ...fetchedData, isLoaded: true })
         setFormData(fetchedData)
@@ -94,7 +92,6 @@ export default function SettingsPage() {
           description: formData.description,
           location: formData.location,
           email: formData.email,
-          allowed_domains: formData.allowedDomains,
         },
       })
       store.setSettings(formData)
@@ -194,51 +191,6 @@ export default function SettingsPage() {
                 {saved && (
                   <span className="text-sm text-emerald-600 flex items-center gap-2 font-medium animate-in fade-in slide-in-from-left-2">
                     <CheckCircle2 className="w-4 h-4" /> Changes immortalized.
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Widget Deployment */}
-          <div className="rounded-2xl border border-border bg-card p-8 space-y-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-2xl font-serif text-card-foreground">Widget Access Control</h2>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mt-1">Manage AI widget deployment</p>
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="allowedDomains" className="text-muted-foreground">Allowed Domains</Label>
-                <p className="text-sm text-muted-foreground mb-3">Comma-separated list of website URLs where your Zuri chat widget is authorized to load. Unauthorized domains will be blocked. (e.g., <code className="bg-muted px-1 rounded text-foreground">https://your-resort.com</code>)</p>
-                <Input
-                  id="allowedDomains"
-                  name="allowedDomains"
-                  type="text"
-                  placeholder="http://localhost:8080, https://kuriftu.com"
-                  value={formData.allowedDomains}
-                  onChange={handleChange}
-                  className="bg-background border-border text-foreground"
-                />
-              </div>
-
-              <div className="flex items-center gap-6 pt-6 border-t border-border">
-                <Button
-                  onClick={handleSave}
-                  className="rounded-full px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-none"
-                >
-                  SAVE ACCESS SETTINGS
-                </Button>
-                {saved && (
-                  <span className="text-sm text-emerald-600 flex items-center gap-2 font-medium animate-in fade-in slide-in-from-left-2">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Rules updated.
                   </span>
                 )}
               </div>
