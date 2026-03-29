@@ -18,6 +18,8 @@ Zuri AI Concierge is a comprehensive hospitality AI platform designed to empower
 - **Embeddable Widget**: A lightweight JavaScript widget that can be integrated into any resort website.
 - **Service & Booking Management**: Track guest requests, staff efficiency, and service availability.
 - **Real-Time Dashboard**: Visualize guest activity and backend status with automated KPI calculation.
+- **Dynamic CORS Security**: Per-tenant allowed domains for the widget to prevent unauthorized embedding.
+- **Async Ingestion**: High-performance background processing for document uploads.
 
 ## Project Structure
 
@@ -25,6 +27,16 @@ Zuri AI Concierge is a comprehensive hospitality AI platform designed to empower
 - `server`: The Python FastAPI backend handling RAG processing and API endpoints.
 - `packages/widget`: The core JavaScript bundle for the embeddable guest widget.
 - `data`: Seed data and knowledge base documents for various resort tenants.
+
+## Security & Architecture
+
+The system has undergone a comprehensive remediation to ensure production readiness:
+
+- **Identity-First Security**: All tenant data access is strictly enforced via JWT-derived `hotel_id`, eliminating IDOR vulnerabilities.
+- **Dynamic CORS**: The backend uses a custom middleware to validate `Origin` headers against the database's allowed domains for each tenant.
+- **Performance**: Document ingestion is handled via FastAPI `BackgroundTasks` to ensure a non-blocking UI.
+- **Rate Limiting**: Integrated sliding window rate limiting for the chat API.
+
 
 ## Environment Configuration
 
