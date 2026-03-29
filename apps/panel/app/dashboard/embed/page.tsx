@@ -3,7 +3,9 @@
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
-import { Copy, Check } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Copy, Check, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { apiFetch, API_BASE_URL } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
@@ -16,6 +18,9 @@ export default function EmbedWidgetPage() {
   const [error, setError] = useState<string | null>(null)
   const [verifying, setVerifying] = useState(false)
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null)
+  const [allowedDomains, setAllowedDomains] = useState('')
+  const [savingDomains, setSavingDomains] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const fallbackSnippet = hotelId
     ? `<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${hotelId}" data-api-url="${API_BASE_URL}" async></script>`
@@ -30,12 +35,17 @@ export default function EmbedWidgetPage() {
     }
     setHotelId(tenantId)
 
-    apiFetch<{ snippet: string }>(`/api/embed/snippet/${encodeURIComponent(tenantId)}`)
-      .then((data) => {
-        setScriptCode(data.snippet)
+    // Fetch both snippet and settings
+    Promise.all([
+      apiFetch<{ snippet: string }>(`/api/embed/snippet/${encodeURIComponent(tenantId)}`),
+      apiFetch<{ allowed_domains: string }>(`/api/settings?hotel_id=${encodeURIComponent(tenantId)}`)
+    ])
+      .then(([snippetData, settingsData]) => {
+        setScriptCode(snippetData.snippet)
+        setAllowedDomains(settingsData.allowed_domains || '')
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load embed snippet')
+        setError(err instanceof Error ? err.message : 'Failed to load widget data')
         setScriptCode(`<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${tenantId}" data-api-url="${API_BASE_URL}" async></script>`)
       })
       .finally(() => {
@@ -71,6 +81,26 @@ export default function EmbedWidgetPage() {
       setVerifyMessage(err instanceof Error ? err.message : 'Verification failed')
     } finally {
       setVerifying(false)
+    }
+  }
+
+  const handleDomainsSave = async () => {
+    if (!hotelId) return
+    setSavingDomains(true)
+    setError(null)
+    try {
+      await apiFetch(`/api/settings?hotel_id=${encodeURIComponent(hotelId)}`, {
+        method: 'PUT',
+        bodyJson: {
+          allowed_domains: allowedDomains
+        },
+      })
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save access settings')
+    } finally {
+      setSavingDomains(false)
     }
   }
 
@@ -132,6 +162,51 @@ export default function EmbedWidgetPage() {
                 {verifying ? 'Verifying...' : 'Copy & Verify Install'}
               </Button>
               {verifyMessage && <p className="text-xs text-foreground/70">{verifyMessage}</p>}
+            </div>
+          </div>
+
+          {/* Widget Access Control */}
+          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                <Shield className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground tracking-tight">Widget Access Control</h2>
+                <p className="text-sm text-muted-foreground mt-1">Manage AI widget deployment security</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="allowedDomains" className="text-sm font-medium text-foreground/80">Authorized Domains</Label>
+                <div className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+                  Specify which domains are authorized to load your Zuri concierge. Use a comma-separated list for multiple sites. 
+                  (e.g., <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono text-xs border border-border">https://your-resort.com, http://localhost:3000</code>)
+                </div>
+                <Input
+                  id="allowedDomains"
+                  value={allowedDomains}
+                  onChange={(e) => setAllowedDomains(e.target.value)}
+                  placeholder="https://your-resort.com, http://localhost:8080"
+                  className="bg-background border-border text-foreground h-12 rounded-xl focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="flex items-center gap-6 pt-4 border-t border-border">
+                <Button
+                  onClick={handleDomainsSave}
+                  disabled={loading || savingDomains}
+                  className="rounded-full px-10 bg-primary text-primary-foreground hover:bg-primary/90 h-11 font-medium transition-all shadow-sm"
+                >
+                  {savingDomains ? 'Persisting...' : 'SAVE ACCESS SETTINGS'}
+                </Button>
+                {saveSuccess && (
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium animate-in fade-in slide-in-from-left-2 flex items-center gap-2">
+                    <Check className="w-4 h-4" /> Security rules updated.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
