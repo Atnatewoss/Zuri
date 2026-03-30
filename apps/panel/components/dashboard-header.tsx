@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { clearAuth } from '@/lib/tenant'
+import { API_BASE_URL } from '@/lib/api'
 import Link from 'next/link'
 import { useSidebarStore } from '@/store/sidebar'
 
@@ -20,11 +21,16 @@ export function DashboardHeader({ title, subtitle, resortName, adminEmail, loadi
   const [profileOpen, setProfileOpen] = useState(false)
   const router = useRouter()
 
-  const handleLogout = () => {
-    clearAuth()
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('zuri_resort_name')
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch {
+      // best effort
     }
+    clearAuth()
     router.push('/login')
   }
 

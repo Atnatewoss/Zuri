@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useEffect, useState } from 'react'
 import { Shield, CreditCard, Building2, AlertTriangle, CheckCircle2, Save } from 'lucide-react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, API_BASE_URL } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import { clearAuth, getTenantHotelId } from '@/lib/tenant'
 import { useSettingsStore } from '@/lib/store'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -25,7 +26,6 @@ export default function SettingsPage() {
 
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -69,7 +69,12 @@ export default function SettingsPage() {
         setFormData(fetchedData)
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load settings')
+        toast.error('Unable to load settings', {
+          description:
+            err instanceof Error
+              ? err.message
+              : 'We could not load your settings right now. Please try again.',
+        })
       })
       .finally(() => {
         setLoading(false)
@@ -79,11 +84,12 @@ export default function SettingsPage() {
   const handleSave = async () => {
     const hotelId = getTenantHotelId()
     if (!hotelId) {
-      setError('No resort session found.')
+      toast.error('Session missing', {
+        description: 'No resort session was found. Please sign in again.',
+      })
       return
     }
 
-    setError(null)
     try {
       await apiFetch(`/api/settings?hotel_id=${encodeURIComponent(hotelId)}`, {
         method: 'PUT',
@@ -98,11 +104,24 @@ export default function SettingsPage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save settings')
+      toast.error('Unable to save settings', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'We could not save your settings right now. Please try again.',
+      })
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch {
+      // best effort
+    }
     clearAuth()
     router.push('/login')
   }
@@ -132,9 +151,8 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-6">
+              <div className="space-y-6">
               {loading && <p className="text-sm text-muted-foreground">Loading settings...</p>}
-              {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="resortName" className="text-muted-foreground">Resort Name</Label>
                 <Input

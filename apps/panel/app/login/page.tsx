@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiFetch } from '@/lib/api'
-import { setAccessToken, setRefreshToken, setTenantHotelId } from '@/lib/tenant'
+import { setTenantHotelId } from '@/lib/tenant'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -28,12 +28,9 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
     
     try {
-      const { access_token, refresh_token, resort, is_onboarded } = await apiFetch<{ 
-        access_token: string, 
-        refresh_token: string,
+      const { resort, is_onboarded } = await apiFetch<{ 
         resort: { hotel_id: string },
         is_onboarded: boolean
       }>('/api/auth/login', {
@@ -41,9 +38,7 @@ export default function LoginPage() {
         bodyJson: formData
       });
 
-      // Save credentials and hotel context
-      setAccessToken(access_token);
-      setRefreshToken(refresh_token);
+      // Save hotel context (auth cookies are managed by backend)
       setTenantHotelId(resort.hotel_id);
 
       if (!is_onboarded) {
@@ -52,7 +47,12 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password');
+      toast.error('Sign-in failed', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'Unable to sign you in at this time. Please try again.',
+      });
     } finally {
       setLoading(false)
     }
@@ -123,6 +123,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
@@ -142,6 +143,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
@@ -153,12 +155,6 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
-
-              {error && (
-                <div className="p-4 mt-5 text-[15px] text-red-600 bg-red-50 border border-red-100 rounded-lg animate-in fade-in slide-in-from-top-1">
-                  {error}
-                </div>
-              )}
 
               <p className="text-center text-[15px] text-zinc-500 pt-6">
                 Don't have an account?{' '}

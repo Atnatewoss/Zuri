@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiFetch } from '@/lib/api'
-import { setAccessToken, setRefreshToken, setTenantHotelId, setTenantResortName } from '@/lib/tenant'
+import { setTenantHotelId, setTenantResortName } from '@/lib/tenant'
+import { toast } from 'sonner'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -16,7 +17,6 @@ export default function SignupPage() {
     password: '',
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,12 +29,9 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
     try {
       const response = await apiFetch<{ 
-        resort: { hotel_id: string; resort_name: string }; 
-        access_token: string;
-        refresh_token: string;
+        resort: { hotel_id: string; resort_name: string };
       }>(
         '/api/resorts/signup',
         {
@@ -49,11 +46,14 @@ export default function SignupPage() {
       )
       setTenantHotelId(response.resort.hotel_id)
       setTenantResortName(response.resort.resort_name)
-      setAccessToken(response.access_token)
-      setRefreshToken(response.refresh_token)
       router.push('/onboarding')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Signup failed')
+      toast.error('Sign-up failed', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'Unable to create your account right now. Please try again.',
+      })
     } finally {
       setLoading(false)
     }
@@ -116,6 +116,7 @@ export default function SignupPage() {
                   value={formData.resortName}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
@@ -130,6 +131,7 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
@@ -144,6 +146,7 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                   className="w-full h-[52px] bg-white border border-zinc-200 rounded-xl text-base px-4 shadow-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition-all font-sans"
                 />
               </div>
@@ -155,12 +158,6 @@ export default function SignupPage() {
               >
                 {loading ? 'Creating Account...' : 'Sign up'}
               </Button>
-
-              {error && (
-                <div className="p-4 mt-5 text-[15px] text-red-600 bg-red-50 border border-red-100 rounded-lg">
-                  {error}
-                </div>
-              )}
 
               <p className="text-center text-[15px] text-zinc-500 pt-6">
                 Already have an account?{' '}

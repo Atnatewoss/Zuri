@@ -1,6 +1,6 @@
 """Resort management API — signup and ID generation."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlmodel import Session, select
 import re
 import logging
@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-from app.core.auth import create_token_pair, hash_password
+from app.core.auth import create_token_pair, hash_password, set_auth_cookies
 from app.core.database import get_session
 from app.models.schemas import ResortSettings, ResortCreate, ResortAuthResponse, ResortPublic
 
@@ -23,7 +23,11 @@ def slugify(text: str) -> str:
     return text
 
 @router.post("/signup", response_model=ResortAuthResponse)
-def signup_resort(request: ResortCreate, session: Session = Depends(get_session)):
+def signup_resort(
+    request: ResortCreate,
+    response: Response,
+    session: Session = Depends(get_session),
+):
     """
     Sign up a new resort. 
     Automatically generates a unique 'hotel_id' from the resort name.
@@ -54,10 +58,9 @@ def signup_resort(request: ResortCreate, session: Session = Depends(get_session)
     logger.info(f"Successfully created resort '{request.resort_name}' with hotel_id: {hotel_id}")
     
     access_token, refresh_token = create_token_pair(new_resort.hotel_id)
+    set_auth_cookies(response, access_token, refresh_token)
     return {
         "resort": new_resort,
-        "access_token": access_token,
-        "refresh_token": refresh_token,
         "is_onboarded": False
     }
 

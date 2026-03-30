@@ -6,7 +6,8 @@ import { DashboardHeader } from '@/components/dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Upload, FileText, CheckCircle2, Clock, Lightbulb } from 'lucide-react'
 import { API_BASE_URL, apiFetch } from '@/lib/api'
-import { getTenantHotelId, getAccessToken } from '@/lib/tenant'
+import { getTenantHotelId } from '@/lib/tenant'
+import { toast } from 'sonner'
 
 type KnowledgeDocument = {
   id: number
@@ -22,7 +23,6 @@ export default function KnowledgeBasePage() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const loadDocuments = async (tenantId: string) => {
@@ -35,7 +35,9 @@ export default function KnowledgeBasePage() {
   useEffect(() => {
     const tenantId = getTenantHotelId()
     if (!tenantId) {
-      setError('No resort session found.')
+      toast.error('Session missing', {
+        description: 'No resort session was found. Please sign in again.',
+      })
       setLoading(false)
       return
     }
@@ -43,7 +45,12 @@ export default function KnowledgeBasePage() {
     setHotelId(tenantId)
     loadDocuments(tenantId)
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load documents')
+        toast.error('Unable to load documents', {
+          description:
+            err instanceof Error
+              ? err.message
+              : 'We could not load your documents right now. Please try again.',
+        })
       })
       .finally(() => {
         setLoading(false)
@@ -71,17 +78,13 @@ export default function KnowledgeBasePage() {
     if (!file || !hotelId) return
 
     setUploading(true)
-    setError(null)
     try {
       await new Promise<void>((resolve, reject) => {
         const formData = new FormData()
         formData.append('file', file)
         const xhr = new XMLHttpRequest()
         xhr.open('POST', `${API_BASE_URL}/api/knowledge/upload?hotel_id=${encodeURIComponent(hotelId)}`)
-        const token = getAccessToken()
-        if (token) {
-          xhr.setRequestHeader('Authorization', `Bearer ${token}`)
-        }
+        xhr.withCredentials = true
         xhr.upload.onprogress = (progressEvent) => {
           if (!progressEvent.lengthComputable) return
           setUploadProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100))
@@ -99,7 +102,12 @@ export default function KnowledgeBasePage() {
 
       await loadDocuments(hotelId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      toast.error('Upload failed', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'We could not upload this file right now. Please try again.',
+      })
     } finally {
       setUploading(false)
       setUploadProgress(0)
@@ -115,7 +123,12 @@ export default function KnowledgeBasePage() {
       })
       await loadDocuments(hotelId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete document')
+      toast.error('Unable to remove document', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'We could not remove this document right now. Please try again.',
+      })
     }
   }
 
@@ -197,7 +210,6 @@ export default function KnowledgeBasePage() {
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="text-lg font-medium text-foreground mb-6">Uploaded Files</h2>
             {loading && <p className="text-sm text-foreground/60 mb-4">Loading documents...</p>}
-            {error && <p className="text-sm text-destructive mb-4">{error}</p>}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

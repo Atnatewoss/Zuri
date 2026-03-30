@@ -7,12 +7,15 @@ import time
 import uuid
 from typing import Dict, Tuple
 
-from fastapi import Header, HTTPException
-from app.core.config import APP_SECRET_KEY
+from fastapi import Cookie, Header, HTTPException, Response
+from app.core.config import APP_SECRET_KEY, ENV
 
 # Token expiration times
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600  # 1 hour
 REFRESH_TOKEN_EXPIRE_SECONDS = 86400 * 7  # 7 days
+
+ACCESS_COOKIE_NAME = "zuri_access_token"
+REFRESH_COOKIE_NAME = "zuri_refresh_token"
 
 # Password hashing constants
 SALT_SIZE = 16
@@ -118,11 +121,52 @@ def verify_token(token: str, expected_type: str = "access") -> dict:
         
     return payload
 
-def get_authenticated_hotel_id(authorization: str | None = Header(default=None)) -> str:
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization header required")
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization scheme")
-    token = authorization.split(" ", 1)[1].strip()
+def get_authenticated_hotel_id(
+    authorization: str | None = Header(default=None),
+    access_cookie: str | None = Cookie(default=None, alias=ACCESS_COOKIE_NAME),
+) -> str:
+    token: str | None = None
+
+    if authorization:
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization scheme")
+        token = authorization.split(" ", 1)[1].strip()
+    elif access_cookie:
+        token = access_cookie.strip()
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
     payload = verify_token(token, expected_type="access")
     return str(payload["hotel_id"])
+
+
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    secure = ENV == "production"
+    same_site = "none" if secure else "lax"
+
+    response.set_cookie(
+        key=ACCESS_COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        secure=secure,
+        samesite=same_site,
+        max_age=ACCESS_TOKEN_EXPIRE_SECONDS,
+        path="/",
+    )
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        secure=secure,
+        samesite=same_site,
+        max_age=REFRESH_TOKEN_EXPIRE_SECONDS,
+        path="/",
+    )
+
+
+def clear_auth_cookies(response: Response) -> None:
+    secure = ENV == "production"
+    same_site = "none" if secure else "lax"
+    response.delete_cookie(ACCESS_COOKIE_NAME, path="/", secure=secure, samesite=same_site)
+    response.delete_cookie(REFRESH_COOKIE_NAME, path="/", secure=secure, samesite=same_site)
