@@ -15,6 +15,7 @@ export function SiteHeader({ darkText = false, hideNav = false }: { darkText?: b
           <div className="hidden lg:flex items-center gap-10 text-sm font-medium tracking-wide pointer-events-auto ml-16">
             <a href="/#features" className="hover:opacity-70 transition-opacity">Features</a>
             <a href="/#integrations" className="hover:opacity-70 transition-opacity">Integrations</a>
+            <a href="/#team" className="hover:opacity-70 transition-opacity">Team</a>
             <Link href="/contact" className="hover:opacity-70 transition-opacity">Contact Us</Link>
           </div>
         )}

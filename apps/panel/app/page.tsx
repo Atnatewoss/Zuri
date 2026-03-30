@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Play, ArrowDown, Mic, CreditCard, ArrowUp } from 'lucide-react'
+import { Play, ArrowDown, Mic, CreditCard, ArrowUp, Github, Linkedin } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 
 export default function LandingPage() {
@@ -24,6 +24,64 @@ export default function LandingPage() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  const teamMembers = [
+    {
+      name: 'Amer Abdulqeum',
+      photo: '/teams/Amer.jpg',
+      experience: '3+ yrs experience',
+      roles: [
+        { title: 'Fullstack Developer', company: 'Zemenay Tech', link: 'https://www.zemenaytech.com/' }
+      ],
+      bio: 'Builds and ships end-to-end web products at Zemenay Tech with a focus on scalable architecture and clean execution. Co-Founder at Exp-Ethiopia, turning real problems into production-ready tools.',
+      github: 'https://github.com/3mer77',
+      linkedin: 'https://www.linkedin.com/in/amer-al-ali/'
+    },
+    {
+      name: 'Atnatewos Hailealem',
+      photo: '/teams/atnatewos.jpg',
+      experience: '3+ yrs experience',
+      roles: [
+        { title: 'AI/ML Engineer', company: 'iCog Labs', link: 'https://icog-labs.com/' }
+      ],
+      bio: 'Backend and AI engineer shipping production APIs, RAG systems, and multi-agent workflows. Co-Founder at Exp-Ethiopia, and previously mentored 200+ web interns while building internal platforms.',
+      github: 'https://github.com/Atnatewoss',
+      linkedin: 'https://www.linkedin.com/in/atnatewoshw/'
+    },
+    {
+      name: 'Brook Teklebrhan',
+      photo: '/teams/Brook.jpg',
+      experience: '3+ yrs experience',
+      roles: [
+        { title: 'Mobile App Developer', company: 'Startup Garage', link: 'https://startupgarage.africa/' }
+      ],
+      bio: 'Mobile product builder focused on React Native delivery and fast iteration. Co-Founder at Exp-Ethiopia, driving app execution from idea to usable product.',
+      github: 'https://github.com/Brooktek',
+      linkedin: 'https://www.linkedin.com/in/brook-teklebrhan-687b11241/'
+    },
+    {
+      name: 'Yonatan Getachew',
+      photo: '/teams/yonatan.jpg',
+      experience: '2+ yrs experience',
+      roles: [
+        { title: 'Event Coordinator', company: 'Chewata Awaki', link: 'https://www.chewataawaqi.net/' }
+      ],
+      bio: 'Leads event execution and operations, including partner-facing programs with brands like Heineken. Co-Founder at Exp-Ethiopia, with hands-on ERP and product workflow experience.',
+      github: 'https://github.com/yonatannn111',
+      linkedin: '#'
+    },
+    {
+      name: 'Core Team Member',
+      photo: '',
+      experience: '2+ yrs experience',
+      roles: [
+        { title: 'Role to be put here' }
+      ],
+      bio: 'Core contributor supporting product execution, collaboration, and delivery across the team.',
+      github: 'https://github.com',
+      linkedin: '#'
+    }
+  ]
 
   return (
     <div 
@@ -52,11 +110,21 @@ export default function LandingPage() {
 
       <main className="flex-1 w-full">
         {/* Full Viewport Hero Section */}
-        <section className="relative w-full h-[100dvh] min-h-[800px] flex flex-col items-center justify-center overflow-hidden bg-primary/95 text-primary-foreground">
-          {/* Faux Background Image gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/50 z-0 mix-blend-multiply pointer-events-none" />
+        <section className="relative w-full h-[100dvh] min-h-[700px] flex flex-col items-center justify-center overflow-hidden bg-[#2b1d12] text-primary-foreground">
+          {/* Clean Pine-inspired gradient backdrop (no grain texture) */}
+          <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(120deg, #1f1712 0%, #5a3621 40%, #7a4a2a 72%, #2e1d14 100%)'
+            }}
+          />
+          <div className="absolute -top-40 -left-28 h-[540px] w-[540px] rounded-full bg-amber-200/25 blur-[130px] z-0 pointer-events-none" />
+          <div className="absolute top-16 right-[-120px] h-[500px] w-[500px] rounded-full bg-orange-400/20 blur-[120px] z-0 pointer-events-none" />
+          <div className="absolute -bottom-44 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-black/30 blur-[120px] z-0 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/35 z-0 pointer-events-none" />
           
-          <div className="relative z-10 text-center flex flex-col items-center w-full px-8 lg:px-24">
+          <div className="relative z-10 translate-y-6 md:translate-y-8 text-center flex flex-col items-center w-full px-8 lg:px-24">
             <h1 className="text-xl sm:text-2xl font-medium tracking-wide mb-6 opacity-90">
               Introducing
             </h1>
@@ -73,11 +141,11 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom indicator */}
-          <div 
+          <div
             onClick={scrollToFeatures}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
+            className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
           >
-            <span className="text-sm font-medium tracking-wide">Start exploring</span>
+            <span className="text-sm font-medium tracking-wide">Explore more</span>
             <ArrowDown className="w-5 h-5 animate-bounce" />
           </div>
         </section>
@@ -297,8 +365,8 @@ export default function LandingPage() {
                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-6">
                       2
                    </div>
-                   <h4 className="text-xl font-medium">Train the AI</h4>
-                   <p className="opacity-70 font-light">Upload your existing menus, policies, and service directories to instantly train your concierge.</p>
+                   <h4 className="text-xl font-medium">Upload Documents</h4>
+                   <p className="opacity-70 font-light">We train and give you AI and agent trained on your data that can help your guests have a better experience.</p>
                 </div>
                 
                 <div className="space-y-4">
@@ -317,6 +385,92 @@ export default function LandingPage() {
                    <p className="opacity-70 font-light">Watch as your new AI concierge begins engaging and booking guests immediately.</p>
                 </div>
              </div>
+          </div>
+        </section>
+
+        {/* Team Section */}
+        <section id="team" className="py-24 lg:py-32 w-full bg-white border-b border-zinc-200">
+          <div className="mx-auto w-full max-w-[1920px] px-8 lg:px-24">
+            <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
+              <h2 className="text-5xl lg:text-6xl font-medium tracking-tight mb-6">
+                Built by a startup team.
+              </h2>
+              <p className="text-xl opacity-70 font-light leading-relaxed">
+                Product-focused operators and engineers building AI for hospitality.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {teamMembers.map((member) => (
+                <article key={member.name} className="rounded-3xl border border-zinc-200 bg-zinc-50 p-8 lg:p-10 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="mb-6">
+                    <div className="mb-5 flex items-start gap-4">
+                      {member.photo ? (
+                        <img
+                          src={member.photo}
+                          alt={member.name}
+                          className="h-20 w-20 rounded-2xl object-cover border border-zinc-200"
+                        />
+                      ) : (
+                        <div className="h-20 w-20 rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-200 to-zinc-300 flex items-center justify-center text-zinc-700 text-xl font-semibold">
+                          TM
+                        </div>
+                      )}
+                      <div className="flex flex-1 flex-col gap-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-2xl font-medium tracking-tight">{member.name}</p>
+                          <div className="shrink-0 inline-flex rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium">
+                            {member.experience}
+                          </div>
+                        </div>
+                        <p className="text-base opacity-80 font-light leading-relaxed">
+                          {member.roles[0].title}
+                          {member.roles[0].company ? (
+                            <>
+                              {' '}@{' '}
+                              <a href={member.roles[0].link} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:opacity-70 transition-opacity font-normal">
+                                {member.roles[0].company}
+                              </a>
+                            </>
+                          ) : null}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-2">
+                      {member.roles.slice(1).map((role) => (
+                        <p key={`${member.name}-${role.title}`} className="text-base opacity-80 font-light leading-relaxed">
+                          {role.title}
+                          {role.company ? (
+                            <>
+                              {' '}@{' '}
+                              <a href={role.link} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:opacity-70 transition-opacity font-normal">
+                                {role.company}
+                              </a>
+                            </>
+                          ) : null}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="mb-8 text-sm leading-relaxed opacity-75 font-light">
+                    {member.bio}
+                  </p>
+
+                  <div className="mt-auto border-t border-zinc-200/80 pt-4 flex items-center gap-6 text-sm font-medium">
+                    <a href={member.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:opacity-70 transition-opacity">
+                      <Github className="w-4 h-4" />
+                      GitHub
+                    </a>
+                    <a href={member.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:opacity-70 transition-opacity">
+                      <Linkedin className="w-4 h-4" />
+                      LinkedIn
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
