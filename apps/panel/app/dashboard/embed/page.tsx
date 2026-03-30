@@ -9,13 +9,13 @@ import { Copy, Check, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { apiFetch, API_BASE_URL } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
+import { toast } from 'sonner'
 
 export default function EmbedWidgetPage() {
   const [copied, setCopied] = useState(false)
   const [hotelId, setHotelId] = useState<string | null>(null)
   const [scriptCode, setScriptCode] = useState('')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [verifying, setVerifying] = useState(false)
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null)
   const [allowedDomains, setAllowedDomains] = useState('')
@@ -29,7 +29,9 @@ export default function EmbedWidgetPage() {
   useEffect(() => {
     const tenantId = getTenantHotelId()
     if (!tenantId) {
-      setError('No resort session found. Please sign up or log in again.')
+      toast.error('Session missing', {
+        description: 'No resort session was found. Please sign in again.',
+      })
       setLoading(false)
       return
     }
@@ -45,7 +47,12 @@ export default function EmbedWidgetPage() {
         setAllowedDomains(settingsData.allowed_domains || '')
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load widget data')
+        toast.error('Unable to load widget data', {
+          description:
+            err instanceof Error
+              ? err.message
+              : 'We could not load widget data right now. Please try again.',
+        })
         setScriptCode(`<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${tenantId}" data-api-url="${API_BASE_URL}" async></script>`)
       })
       .finally(() => {
@@ -78,7 +85,12 @@ export default function EmbedWidgetPage() {
         setVerifyMessage('Verification could not confirm setup.')
       }
     } catch (err) {
-      setVerifyMessage(err instanceof Error ? err.message : 'Verification failed')
+      const description =
+        err instanceof Error
+          ? err.message
+          : 'We could not verify your embed setup right now. Please try again.'
+      setVerifyMessage(description)
+      toast.error('Verification failed', { description })
     } finally {
       setVerifying(false)
     }
@@ -87,7 +99,6 @@ export default function EmbedWidgetPage() {
   const handleDomainsSave = async () => {
     if (!hotelId) return
     setSavingDomains(true)
-    setError(null)
     try {
       await apiFetch(`/api/settings?hotel_id=${encodeURIComponent(hotelId)}`, {
         method: 'PUT',
@@ -98,7 +109,12 @@ export default function EmbedWidgetPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save access settings')
+      toast.error('Unable to save access settings', {
+        description:
+          err instanceof Error
+            ? err.message
+            : 'We could not save access settings right now. Please try again.',
+      })
     } finally {
       setSavingDomains(false)
     }
@@ -127,7 +143,6 @@ export default function EmbedWidgetPage() {
               Copy this code and paste it into the HTML of your website, right before the closing {'</body>'} tag.
             </p>
             {hotelId && <p className="text-xs text-foreground/60 mb-3">Resort ID: <span className="font-mono">{hotelId}</span></p>}
-            {error && <p className="text-sm text-destructive mb-3">{error}</p>}
 
             <div className="relative">
               <div className="bg-secondary/50 rounded-lg p-4 font-mono text-sm text-foreground overflow-x-auto border border-border/50">
@@ -179,18 +194,91 @@ export default function EmbedWidgetPage() {
 
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="allowedDomains" className="text-sm font-medium text-foreground/80">Authorized Domains</Label>
+                <Label className="text-sm font-medium text-foreground/80">Authorized Domains</Label>
                 <div className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
-                  Specify which domains are authorized to load your Zuri concierge. Use a comma-separated list for multiple sites. 
-                  (e.g., <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono text-xs border border-border">https://your-resort.com, http://localhost:3000</code>)
+                  Domains authorized to load your Zuri concierge. Add new domains below or remove existing ones.
                 </div>
-                <Input
-                  id="allowedDomains"
-                  value={allowedDomains}
-                  onChange={(e) => setAllowedDomains(e.target.value)}
-                  placeholder="https://your-resort.com, http://localhost:8080"
-                  className="bg-background border-border text-foreground h-12 rounded-xl focus:ring-primary/20"
-                />
+
+                {/* Domain chips */}
+                {(() => {
+                  const domainList = allowedDomains
+                    .split(',')
+                    .map(d => d.trim())
+                    .filter(Boolean)
+
+                  const removeDomain = (domainToRemove: string) => {
+                    const updated = domainList
+                      .filter(d => d !== domainToRemove)
+                      .join(', ')
+                    setAllowedDomains(updated)
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {domainList.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {domainList.map((domain) => (
+                            <span
+                              key={domain}
+                              className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20 group transition-colors"
+                            >
+                              <span className="font-mono text-xs">{domain}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeDomain(domain)}
+                                className="w-5 h-5 rounded-full flex items-center justify-center text-primary/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                aria-label={`Remove ${domain}`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic py-2">No domains configured yet. Your widget will not load on any external site.</p>
+                      )}
+                    </div>
+                  )
+                })()}
+
+                {/* Add new domain input */}
+                <div className="flex gap-2 pt-1">
+                  <Input
+                    id="newDomainInput"
+                    placeholder="https://your-resort.com"
+                    className="bg-background border-border text-foreground h-11 rounded-xl focus:ring-primary/20 flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        const input = e.currentTarget
+                        const val = input.value.trim()
+                        if (!val) return
+                        const existing = allowedDomains.split(',').map(d => d.trim()).filter(Boolean)
+                        if (!existing.includes(val)) {
+                          setAllowedDomains([...existing, val].join(', '))
+                        }
+                        input.value = ''
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 px-4 border-border"
+                    onClick={() => {
+                      const input = document.getElementById('newDomainInput') as HTMLInputElement
+                      const val = input?.value?.trim()
+                      if (!val) return
+                      const existing = allowedDomains.split(',').map(d => d.trim()).filter(Boolean)
+                      if (!existing.includes(val)) {
+                        setAllowedDomains([...existing, val].join(', '))
+                      }
+                      if (input) input.value = ''
+                    }}
+                  >
+                    + Add
+                  </Button>
+                </div>
               </div>
 
               <div className="flex items-center gap-6 pt-4 border-t border-border">

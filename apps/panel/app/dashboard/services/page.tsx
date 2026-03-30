@@ -6,15 +6,30 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState, useRef, useEffect } from 'react'
-import { BedDouble, Plus, Trash2, Edit2, MoreHorizontal, Settings, X, PlusCircle } from 'lucide-react'
+import { BedDouble, Plus, Trash2, Edit2, MoreHorizontal, Settings, X } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
+import { toast } from 'sonner'
 
+type ServiceCategory = {
+  id: number
+  hotel_id: string
+  name: string
+  available: boolean
+}
+
+type RoomItem = {
+  id: number
+  hotel_id: string
+  type: string
+  price: number
+  available_count: number
+}
 
 export default function ServicesPage() {
-  const [tabs, setTabs] = useState<any[]>([])
+  const [tabs, setTabs] = useState<ServiceCategory[]>([])
   const [activeTabId, setActiveTabId] = useState<number | null>(null)
-  const [roomsList, setRoomsList] = useState<any[]>([])
+  const [roomsList, setRoomsList] = useState<RoomItem[]>([])
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -27,8 +42,8 @@ export default function ServicesPage() {
       if (!hotelId) return
 
       const [servicesData, roomsData] = await Promise.all([
-        apiFetch<any[]>(`/api/services?hotel_id=${encodeURIComponent(hotelId)}`),
-        apiFetch<any[]>(`/api/rooms?hotel_id=${encodeURIComponent(hotelId)}`)
+        apiFetch<ServiceCategory[]>(`/api/services?hotel_id=${encodeURIComponent(hotelId)}`),
+        apiFetch<RoomItem[]>(`/api/rooms?hotel_id=${encodeURIComponent(hotelId)}`)
       ])
       
       setTabs(servicesData || [])
@@ -39,6 +54,12 @@ export default function ServicesPage() {
       setRoomsList(roomsData || [])
     } catch (error) {
       console.error("Failed to load services and rooms data", error)
+      toast.error('Unable to load services', {
+        description:
+          error instanceof Error
+            ? error.message
+            : 'We could not load services right now. Please try again.',
+      })
     } finally {
       setLoading(false)
     }
@@ -53,7 +74,10 @@ export default function ServicesPage() {
     setIsSubmitting(true)
     try {
       const hotelId = getTenantHotelId()
-      const result = await apiFetch<any>('/api/services', {
+      if (!hotelId) {
+        throw new Error('No resort session found.')
+      }
+      const result = await apiFetch<ServiceCategory>('/api/services', {
         method: 'POST',
         bodyJson: {
           name: newTabName,
@@ -66,6 +90,12 @@ export default function ServicesPage() {
       if (tabs.length === 0) setActiveTabId(result.id)
     } catch (error) {
       console.error("Failed to create service category", error)
+      toast.error('Unable to create category', {
+        description:
+          error instanceof Error
+            ? error.message
+            : 'We could not create this category right now. Please try again.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -82,6 +112,12 @@ export default function ServicesPage() {
       }
     } catch (error) {
       console.error("Failed to delete service category", error)
+      toast.error('Unable to delete category', {
+        description:
+          error instanceof Error
+            ? error.message
+            : 'We could not delete this category right now. Please try again.',
+      })
     }
   }
   
@@ -176,7 +212,7 @@ export default function ServicesPage() {
 
       {/* Senior CRUD Modal overlay */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh] border border-border">
             <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/30">
               <div>
@@ -241,9 +277,9 @@ export default function ServicesPage() {
   )
 }
 
-function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () => void }) {
+function RoomServiceContent({ rooms, onUpdate }: { rooms: RoomItem[], onUpdate: () => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRoom, setEditingRoom] = useState<any>(null)
+  const [editingRoom, setEditingRoom] = useState<RoomItem | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     type: '',
@@ -257,12 +293,12 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
     setIsModalOpen(true)
   }
 
-  const handleOpenEdit = (room: any) => {
+  const handleOpenEdit = (room: RoomItem) => {
     setEditingRoom(room)
     setFormData({ 
       type: room.type, 
       price: room.price.toString(), 
-      available_count: (room.available_count !== undefined ? room.available_count : room.available).toString()
+      available_count: room.available_count.toString()
     })
     setIsModalOpen(true)
   }
@@ -272,6 +308,9 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
     setIsSubmitting(true)
     try {
       const hotelId = getTenantHotelId()
+      if (!hotelId) {
+        throw new Error('No resort session found.')
+      }
       const payload = {
         type: formData.type,
         price: parseFloat(formData.price),
@@ -294,6 +333,12 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
       onUpdate()
     } catch (error) {
       console.error("Failed to save room", error)
+      toast.error('Unable to save room', {
+        description:
+          error instanceof Error
+            ? error.message
+            : 'We could not save this room right now. Please try again.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -306,6 +351,12 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
       onUpdate()
     } catch (error) {
       console.error("Failed to delete room", error)
+      toast.error('Unable to delete room', {
+        description:
+          error instanceof Error
+            ? error.message
+            : 'We could not delete this room right now. Please try again.',
+      })
     }
   }
 
@@ -330,7 +381,7 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
                   <h3 className="text-xl font-medium text-card-foreground">{room.type}</h3>
                   <div className="flex items-center gap-2 mt-3">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-widest bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      {room.available_count !== undefined ? room.available_count : room.available} VACANT
+                      {room.available_count} VACANT
                     </span>
                   </div>
                 </div>
@@ -366,7 +417,7 @@ function RoomServiceContent({ rooms, onUpdate }: { rooms: any[], onUpdate: () =>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
           <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-border">
             <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/30">
               <h3 className="text-xl font-medium text-card-foreground">
@@ -451,4 +502,3 @@ function GenericServiceContent({ serviceName }: { serviceName: string }) {
     </div>
   )
 }
-

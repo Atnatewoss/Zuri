@@ -7,8 +7,9 @@ import { DashboardHeader } from '@/components/dashboard-header'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ArrowUp, ArrowDown, Settings } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
-import { getTenantHotelId } from '@/lib/tenant'
+import { clearAuth, getTenantHotelId } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface RecentInteraction {
   id: number
@@ -60,9 +61,24 @@ export default function DashboardPage() {
           router.push('/onboarding')
           return
         }
+        if (!data.resort_name?.trim() || !data.admin_email?.trim()) {
+          clearAuth()
+          toast.error('Session invalid', {
+            description: 'Your resort profile is incomplete. Please sign in again.',
+          })
+          router.push('/login')
+          return
+        }
         setStats(data)
       } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error)
+        toast.error('Unable to load dashboard', {
+          description:
+            error instanceof Error
+              ? error.message
+              : 'We could not load your dashboard right now. Please try again.',
+        })
+        clearAuth()
+        router.push('/login')
       } finally {
         setLoading(false)
       }

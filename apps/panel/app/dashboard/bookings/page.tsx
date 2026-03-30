@@ -2,15 +2,24 @@
 
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard-header'
-import { CheckCircle2, Clock, Eye, MoreHorizontal } from 'lucide-react'
+import { CheckCircle2, Clock, Eye } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { apiFetch } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
+import { toast } from 'sonner'
 
 // No dummy data fallback for production
+type BookingItem = {
+  id: number
+  guest_name: string
+  service: string
+  date: string
+  time: string
+  status: string
+}
 
 export default function BookingsPage() {
-  const [bookingsList, setBookingsList] = useState<any[]>([])
+  const [bookingsList, setBookingsList] = useState<BookingItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -19,10 +28,16 @@ export default function BookingsPage() {
         const hotelId = getTenantHotelId()
         if (!hotelId) return
 
-        const data = await apiFetch<any[]>(`/api/bookings?hotel_id=${encodeURIComponent(hotelId)}`)
+        const data = await apiFetch<BookingItem[]>(`/api/bookings?hotel_id=${encodeURIComponent(hotelId)}`)
         setBookingsList(data || [])
       } catch (error) {
         console.error("Failed to load bookings", error)
+        toast.error('Unable to load bookings', {
+          description:
+            error instanceof Error
+              ? error.message
+              : 'We could not load bookings right now. Please try again.',
+        })
         setBookingsList([])
       } finally {
         setLoading(false)
@@ -76,7 +91,7 @@ export default function BookingsPage() {
                         </td>
                       </tr>
                     ) : bookingsList.map((booking) => {
-                      const guestName = booking.guest_name || booking.guestName || 'Guest';
+                      const guestName = booking.guest_name || 'Guest';
                       return (
                       <tr key={booking.id} className="group hover:bg-secondary/20 transition-all duration-300">
                         <td className="px-6 py-5">
