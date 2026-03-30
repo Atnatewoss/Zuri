@@ -11,8 +11,8 @@ from app.core.config import (
     CHAT_MAX_MESSAGE_LENGTH,
     CHAT_RATE_LIMIT_MAX_REQUESTS,
     CHAT_RATE_LIMIT_WINDOW_SECONDS,
-    ENV
 )
+from app.core.origin import is_origin_allowed
 from app.core.rate_limit import chat_rate_limiter
 from app.models.schemas import ChatRequest, ChatResponse, ResortSettings
 from app.services.chat_service import chat
@@ -47,25 +47,11 @@ def chat_endpoint(
 
     # Validate Origin
     origin = http_request.headers.get("origin")
-    if exists.allowed_domains:
-        # e.g., "localhost:8080, kurifturesorts.com"
-        allowed_list = []
-        protocol = "http://" if ENV == "development" else "https://"
-        for d in exists.allowed_domains.split(","):
-            d = d.strip().rstrip("/")
-            if not d: continue
-            if not d.startswith("http://") and not d.startswith("https://"):
-                d = protocol + d
-            allowed_list.append(d)
-            
-        if allowed_list:
-            # If origin is something like "http://localhost:8080"
-            clean_origin = origin.strip().rstrip("/") if origin else ""
-            if clean_origin not in allowed_list:
-                raise HTTPException(
-                    status_code=403, 
-                    detail="Forbidden: Origin not allowed for this resort's widget."
-                )
+    if exists.allowed_domains and not is_origin_allowed(exists.allowed_domains, origin):
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: Origin not allowed for this resort's widget.",
+        )
 
     client_ip = (http_request.client.host if http_request.client else "unknown").strip()
     rate_limit_key = f"{hotel_id}:{client_ip}"
@@ -82,11 +68,15 @@ def chat_endpoint(
             message=request.message,
             hotel_id=hotel_id,
             language=request.language,
+            conversation_history=request.conversation_history,
             session=session,
         )
     except Exception as e:
         logger.error(f"Chat error for hotel {hotel_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Chat processing error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="We could not process your request at this time. Please try again shortly.",
+        )
     return ChatResponse(
         response=result["response"],
         sources=result["sources"],

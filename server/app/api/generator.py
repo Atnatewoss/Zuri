@@ -2,10 +2,12 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+import logging
 from app.services.generator_service import generate_full_resort_data
 from app.core.auth import get_authenticated_hotel_id
 
 router = APIRouter(prefix="/api/generator", tags=["Data Generator"])
+logger = logging.getLogger(__name__)
 
 class GenerationRequest(BaseModel):
     hotel_id: str
@@ -30,4 +32,8 @@ def generate_resort_data(
         )
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+        logger.error("Resort data generation failed for hotel_id=%s: %s", hotel_id, e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to generate resort data right now. Please try again later.",
+        )

@@ -1,11 +1,11 @@
 """Zuri AI Concierge - FastAPI Backend Server."""
 
 import os
+import logging
 import uvicorn
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import CORS_ORIGINS, ENV
+from app.core.config import ENV
 # from app.core.database import init_db (removed for Alembic)
 from app.core.middleware import DynamicCORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +19,8 @@ from app.api.embed import router as embed_router
 from app.api.resorts import router as resorts_router
 from app.api.generator import router as generator_router
 from app.api.auth import router as auth_router
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Zuri AI Concierge",
@@ -62,6 +64,26 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy", "environment": ENV}
+
+@app.on_event("startup")
+def startup_checks():
+    """Emit operational warnings for in-memory controls in multi-process mode."""
+    worker_hint = (
+        os.getenv("UVICORN_WORKERS")
+        or os.getenv("WEB_CONCURRENCY")
+        or os.getenv("GUNICORN_WORKERS")
+        or "1"
+    )
+    try:
+        workers = int(worker_hint)
+    except ValueError:
+        workers = 1
+
+    if workers > 1:
+        logger.warning(
+            "Running with %s workers: in-memory rate limits and CORS caches are process-local.",
+            workers,
+        )
 
 
 if __name__ == "__main__":

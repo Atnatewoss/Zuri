@@ -29,7 +29,7 @@ def get_dashboard_stats(
     services_count = session.exec(
         select(func.count(Service.id)).where(Service.hotel_id == hotel_id)
     ).one()
-    is_onboarded = services_count > 0
+    is_onboarded = resort.is_onboarded or services_count > 0
 
     # Date boundaries for percentage checks
     now = datetime.utcnow()

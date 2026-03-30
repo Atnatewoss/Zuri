@@ -31,4 +31,5 @@ class SlidingWindowRateLimiter:
 
 # Initialize a global instance for general chat rate limiting
 chat_rate_limiter = SlidingWindowRateLimiter()
+public_booking_cancel_limiter = SlidingWindowRateLimiter()
 

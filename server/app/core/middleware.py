@@ -4,13 +4,19 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlmodel import Session, select
 import logging
+import threading
+import time
 
-from app.core.config import CORS_ORIGINS, ENV
+from app.core.config import CORS_ORIGINS, CORS_CACHE_TTL_SECONDS
 from app.core.database import engine
+from app.core.origin import normalize_allowed_domains, normalize_origin
 from app.models.schemas import ResortSettings
 
 logger = logging.getLogger(__name__)
 
+_cache_lock = threading.Lock()
+_hotel_origin_cache: dict[str, tuple[float, set[str]]] = {}
+_global_origin_cache: tuple[float, set[str]] = (0.0, set())
 class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         origin = request.headers.get("Origin")
@@ -19,14 +25,14 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
 
         # 1. Check static CORS_ORIGINS (e.g., the panel)
         if origin in CORS_ORIGINS:
-            response = await self._handle_request(request, call_next, origin)
-            return response
+            return await self._handle_request(request, call_next, origin)
 
         # 2. Check dynamic origins for the widget
-        # We look for X-Zuri-Hotel-Id header which the widget sends
+        # The widget sends X-Zuri-Hotel-Id header on real requests,
+        # but browser preflight OPTIONS requests do NOT carry custom headers.
         hotel_id = request.headers.get("X-Zuri-Hotel-Id")
-        
-        # Also check query params as a fallback for some widget requests
+
+        # Always check query params as fallback (works for both OPTIONS and real requests)
         if not hotel_id:
             hotel_id = request.query_params.get("hotel_id")
 
@@ -34,9 +40,11 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             if await self._is_origin_allowed(hotel_id, origin):
                 return await self._handle_request(request, call_next, origin)
 
-        # 3. Default behavior: if it's an OPTIONS request, we must return a response
+        # 3. For OPTIONS preflight without hotel_id (browser strips custom headers),
+        #    check if ANY resort has this origin in its allowed_domains.
         if request.method == "OPTIONS":
-            # If not allowed, we still need to return a response but without the allow header
+            if await self._is_origin_allowed_any_resort(origin):
+                return await self._handle_request(request, call_next, origin)
             return Response(status_code=204)
 
         # For other methods, just proceed (default CORS block by browser will happen)
@@ -45,29 +53,58 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def _is_origin_allowed(self, hotel_id: str, origin: str) -> bool:
         """Check if the origin is in the resort's allowed_domains list."""
         try:
+            clean_origin = normalize_origin(origin)
+            now = time.time()
+
+            with _cache_lock:
+                cached = _hotel_origin_cache.get(hotel_id)
+                if cached and cached[0] > now:
+                    return clean_origin in cached[1]
+
             with Session(engine) as session:
                 resort = session.exec(
                     select(ResortSettings).where(ResortSettings.hotel_id == hotel_id)
                 ).first()
-                
-                if not resort or not resort.allowed_domains:
-                    return False
 
-                # Basic normalization
-                clean_origin = origin.strip().lower().rstrip("/")
-                protocol = "http://" if ENV == "development" else "https://"
-                
-                allowed_list = []
-                for d in resort.allowed_domains.split(","):
-                    d = d.strip().lower().rstrip("/")
-                    if not d: continue
-                    if not d.startswith("http://") and not d.startswith("https://"):
-                        d = protocol + d
-                    allowed_list.append(d)
-                
-                return clean_origin in allowed_list
+            if not resort or not resort.allowed_domains:
+                with _cache_lock:
+                    _hotel_origin_cache[hotel_id] = (now + CORS_CACHE_TTL_SECONDS, set())
+                return False
+
+            allowed_set = normalize_allowed_domains(resort.allowed_domains)
+            with _cache_lock:
+                _hotel_origin_cache[hotel_id] = (now + CORS_CACHE_TTL_SECONDS, allowed_set)
+            return clean_origin in allowed_set
         except Exception as e:
             logger.error(f"Error checking dynamic CORS for hotel {hotel_id}: {e}")
+            return False
+
+    async def _is_origin_allowed_any_resort(self, origin: str) -> bool:
+        """Fallback for OPTIONS preflight: check if ANY resort allows this origin."""
+        try:
+            global _global_origin_cache
+            clean_origin = normalize_origin(origin)
+            now = time.time()
+
+            with _cache_lock:
+                cache_expires, cached_origins = _global_origin_cache
+                if cache_expires > now:
+                    return clean_origin in cached_origins
+
+            with Session(engine) as session:
+                resorts = session.exec(select(ResortSettings)).all()
+
+            all_origins: set[str] = set()
+            for resort in resorts:
+                if not resort.allowed_domains:
+                    continue
+                all_origins.update(normalize_allowed_domains(resort.allowed_domains))
+
+            with _cache_lock:
+                _global_origin_cache = (now + CORS_CACHE_TTL_SECONDS, all_origins)
+            return clean_origin in all_origins
+        except Exception as e:
+            logger.error(f"Error checking broad CORS: {e}")
             return False
 
     async def _handle_request(self, request, call_next, allowed_origin):

@@ -1,7 +1,12 @@
 from google import genai
 from app.core.config import GEMINI_API_KEY, GEMINI_CHAT_MODEL
 from app.rag.vector_store import query as vector_query
-from app.rag.booking_tools import get_room_availability, get_service_list, book_item
+from app.rag.booking_tools import (
+    get_room_availability,
+    get_service_list,
+    get_available_time_slots,
+    book_item,
+)
 
 _client = None
 
@@ -22,8 +27,16 @@ KNOWLEDGE BASE RULES:
 BOOKING & AGENT RULES:
 - You have tools to check room availability, list services, and place bookings.
 - ALWAYS check availability or the service list before confirming a booking to the guest.
-- If a guest wants to book but hasn't provided their Full Name, the Date, or the Item/Room Type, politely ask for the missing information.
-- Once all information is gathered, use the `book_item` tool.
+- For every booking attempt, call `list_available_time_slots` for the selected item and date before placing the booking.
+- Required booking fields:
+  - guest_name (required)
+  - item/room/service name (required)
+  - date in YYYY-MM-DD (required)
+  - time in HH:MM format (required)
+- If a guest wants to book and any required field is missing, ask only for the missing field(s).
+- If time is missing, ask for the preferred time and include a few available options from `list_available_time_slots`.
+- If requested time is unavailable, recommend available times and ask the guest to choose one.
+- As soon as all required fields are available and a valid time is selected, call `perform_booking` immediately.
 - After a successful booking, provide the guest with their confirmation code and a summary of their stay/service.
 
 CONTEXT FROM RESORT KNOWLEDGE BASE:
@@ -33,7 +46,37 @@ IMPORTANT: Respond entirely in {language}.
 """
 
 
-def answer_question(question: str, hotel_id: str, language: str = "English") -> dict:
+def _build_contents(
+    question: str,
+    conversation_history: list[dict[str, str]] | None = None,
+) -> list[genai.types.Content]:
+    contents: list[genai.types.Content] = []
+    for turn in conversation_history or []:
+        role = (turn.get("role") or "").strip().lower()
+        text = (turn.get("text") or "").strip()
+        if role not in {"user", "model"} or not text:
+            continue
+        contents.append(
+            genai.types.Content(
+                role=role,
+                parts=[genai.types.Part.from_text(text=text)],
+            )
+        )
+    contents.append(
+        genai.types.Content(
+            role="user",
+            parts=[genai.types.Part.from_text(text=question)],
+        )
+    )
+    return contents
+
+
+def answer_question(
+    question: str,
+    hotel_id: str,
+    language: str = "English",
+    conversation_history: list[dict[str, str]] | None = None,
+) -> dict:
     """
     Full Agentic RAG process: Retrieve chunks, provide tools, and handle function calling loop via Gemini.
     """
@@ -60,10 +103,14 @@ def answer_question(question: str, hotel_id: str, language: str = "English") -> 
         """Returns a list of spa, dining, and activity services available at this resort."""
         return get_service_list(hotel_id)
 
-    def perform_booking(guest_name: str, item_name: str, date: str, time: str = "TBD") -> dict:
+    def list_available_time_slots(item_name: str, date: str) -> list:
+        """Returns free HH:MM time slots for a room/service on a specific date."""
+        return get_available_time_slots(hotel_id, item_name, date)
+
+    def perform_booking(guest_name: str, item_name: str, date: str, time: str) -> dict:
         """
         Creates a formal booking in the system for a room or service.
-        Requires guest_name, item_name, and date.
+        Requires guest_name, item_name, date, and time.
         """
         return book_item(hotel_id, guest_name, item_name, date, time)
 
@@ -73,10 +120,10 @@ def answer_question(question: str, hotel_id: str, language: str = "English") -> 
 
     response = client.models.generate_content(
         model=GEMINI_CHAT_MODEL,
-        contents=question,
+        contents=_build_contents(question, conversation_history),
         config=genai.types.GenerateContentConfig(
             system_instruction=system_instruction,
-            tools=[list_available_rooms, list_resort_services, perform_booking],
+            tools=[list_available_rooms, list_resort_services, list_available_time_slots, perform_booking],
             automatic_function_calling=genai.types.AutomaticFunctionCallingConfig(disable=False),
             temperature=0.2,
             max_output_tokens=2048,
@@ -87,4 +134,3 @@ def answer_question(question: str, hotel_id: str, language: str = "English") -> 
         "response": response.text,
         "sources": sources,
     }
-
