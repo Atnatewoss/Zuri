@@ -35,12 +35,12 @@ This is the core engine for Zuri AI Concierge. It provides a multi-tenant RAG (R
 
 ## Database Migrations
 
-This project uses **SQLModel** and is set up for **Alembic** migrations.
-- To initialize a new migration: `uv run alembic revision --autogenerate -m "description"`
-- To apply migrations: `uv run alembic upgrade head`
+Migrations are currently managed as ordered SQL files under `server/migrations`.
+- To apply pending SQL migrations: `uv run python scripts/apply_sql_migrations.py`
+- Add new migration files using sortable names, e.g. `2026-03-30_add_x.sql`
 
 > [!IMPORTANT]
-> Since the remediation, `SQLModel.metadata.create_all` is disabled. You **must** use Alembic to manage schema changes.
+> `SQLModel.metadata.create_all` is disabled. Run migrations before starting the API in each environment.
 
 ## Security Features
 

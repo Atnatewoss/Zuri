@@ -8,3 +8,17 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
+      - key: ENV
+        value: production
+  - type: cron
+    name: zuri-backend-keepalive
+    runtime: python
+    rootDir: server
+    schedule: "*/14 * * * *"
+    buildCommand: "pip install uv && uv sync --frozen --no-dev"
+    startCommand: "uv run python scripts/ping_health.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: BACKEND_HEALTH_URL
+        sync: false

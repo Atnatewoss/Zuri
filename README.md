@@ -86,7 +86,16 @@ The backend uses a standard `.env` file (see `.env.example` in the `server` dire
 
 ### Render (Backend)
 
-The project includes a `render.yaml` Blueprint for simplified deployment on Render. Ensure the `rootDir` is set to `server` and provide the necessary environment variables in the Render dashboard.
+The project includes a `render.yaml` Blueprint for simplified deployment on Render.
+
+It provisions:
+- A web service (`zuri-backend`)
+- A cron keep-alive service (`zuri-backend-keepalive`) that pings `/health` every 14 minutes
+
+Set this env var on the cron service:
+- `BACKEND_HEALTH_URL=https://<your-backend-service>.onrender.com/health`
+
+Provide the required backend env vars in the Render dashboard (`DATABASE_URL`, `APP_SECRET_KEY`, Gemini/Chroma keys, and `CORS_ORIGINS`).
 
 ### Vercel (Frontend)
 
