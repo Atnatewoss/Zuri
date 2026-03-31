@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 _cache_lock = threading.Lock()
 _hotel_origin_cache: dict[str, tuple[float, set[str]]] = {}
 _global_origin_cache: tuple[float, set[str]] = (0.0, set())
+ALLOWED_CORS_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+ALLOWED_CORS_HEADERS = "Content-Type, Authorization, X-Zuri-Hotel-Id"
+
+
 class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         origin = request.headers.get("Origin")
@@ -115,6 +119,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
 
         response.headers["Access-Control-Allow-Origin"] = allowed_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = ALLOWED_CORS_METHODS
+        response.headers["Access-Control-Allow-Headers"] = ALLOWED_CORS_HEADERS
+        response.headers["Vary"] = "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
         return response
