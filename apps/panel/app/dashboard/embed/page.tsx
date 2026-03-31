@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Copy, Check, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { apiFetch, API_BASE_URL } from '@/lib/api'
+import { apiFetch, PUBLIC_API_BASE_URL } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
 import { toast } from 'sonner'
 
@@ -23,7 +23,7 @@ export default function EmbedWidgetPage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const fallbackSnippet = hotelId
-    ? `<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${hotelId}" data-api-url="${API_BASE_URL}" async></script>`
+    ? `<script src="${PUBLIC_API_BASE_URL}/api/embed/widget.js" data-hotel-id="${hotelId}" data-api-url="${PUBLIC_API_BASE_URL}" async></script>`
     : ''
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function EmbedWidgetPage() {
               ? err.message
               : 'We could not load widget data right now. Please try again.',
         })
-        setScriptCode(`<script src="${API_BASE_URL}/api/embed/widget.js" data-hotel-id="${tenantId}" data-api-url="${API_BASE_URL}" async></script>`)
+        setScriptCode(`<script src="${PUBLIC_API_BASE_URL}/api/embed/widget.js" data-hotel-id="${tenantId}" data-api-url="${PUBLIC_API_BASE_URL}" async></script>`)
       })
       .finally(() => {
         setLoading(false)
