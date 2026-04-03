@@ -19,6 +19,9 @@ from app.api.embed import router as embed_router
 from app.api.resorts import router as resorts_router
 from app.api.generator import router as generator_router
 from app.api.auth import router as auth_router
+from app.api.speech import router as speech_router
+from app.api.live_voice import router as live_voice_router
+from app.api.voice_interact import router as voice_interact_router
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,8 @@ app.include_router(embed_router)
 app.include_router(resorts_router)
 app.include_router(generator_router)
 app.include_router(auth_router)
+app.include_router(speech_router)
+app.include_router(live_voice_router)
 
 
 # Removed startup db initialization for Alembic

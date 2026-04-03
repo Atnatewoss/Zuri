@@ -78,6 +78,21 @@ class ChatResponse(BaseModel):
     sources: list[str] = []
 
 
+class SpeechTranscriptionResponse(BaseModel):
+    text: str
+
+
+class VoiceInteractionResponse(BaseModel):
+    user_text: str
+    ai_text: str
+    audio_base64: str
+
+
+class SpeechSynthesisRequest(BaseModel):
+    text: str
+    language: str = "English"
+
+
 class ServiceCreate(BaseModel):
     name: str
     available: bool = True

@@ -9,7 +9,11 @@ import time
 
 from app.core.config import CORS_ORIGINS, CORS_CACHE_TTL_SECONDS
 from app.core.database import engine
-from app.core.origin import normalize_allowed_domains, normalize_origin
+from app.core.origin import (
+    is_development_loopback_origin,
+    normalize_allowed_domains,
+    normalize_origin,
+)
 from app.models.schemas import ResortSettings
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,9 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def _is_origin_allowed(self, hotel_id: str, origin: str) -> bool:
         """Check if the origin is in the resort's allowed_domains list."""
         try:
+            if is_development_loopback_origin(origin):
+                return True
+
             clean_origin = normalize_origin(origin)
             now = time.time()
 
@@ -86,6 +93,9 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def _is_origin_allowed_any_resort(self, origin: str) -> bool:
         """Fallback for OPTIONS preflight: check if ANY resort allows this origin."""
         try:
+            if is_development_loopback_origin(origin):
+                return True
+
             global _global_origin_cache
             clean_origin = normalize_origin(origin)
             now = time.time()

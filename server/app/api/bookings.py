@@ -12,7 +12,7 @@ from app.core.config import (
     BOOKING_CANCEL_CODE_RATE_LIMIT_WINDOW_SECONDS,
     BOOKING_CANCEL_CODE_RATE_LIMIT_MAX_REQUESTS,
 )
-from app.core.origin import is_origin_allowed
+from app.core.origin import is_origin_allowed, origin_from_headers
 from app.core.rate_limit import public_booking_cancel_limiter
 from app.models.schemas import (
     Booking,
@@ -224,10 +224,12 @@ def _resolve_resort(session: Session, hotel_id: str) -> ResortSettings | None:
 
 
 def _enforce_allowed_origin(request: Request, resort: ResortSettings) -> None:
-    if resort.allowed_domains and not is_origin_allowed(
-        resort.allowed_domains,
+    origin = origin_from_headers(
         request.headers.get("origin"),
-    ):
+        request.headers.get("referer"),
+    )
+    allowed = is_origin_allowed(resort.allowed_domains, origin) if resort.allowed_domains else True
+    if resort.allowed_domains and not allowed:
         raise HTTPException(
             status_code=403,
             detail="Forbidden: Origin not allowed for this resort.",

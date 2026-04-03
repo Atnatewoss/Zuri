@@ -1,5 +1,6 @@
 """Chat API — RAG-powered guest Q&A endpoint."""
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ from app.core.config import (
     CHAT_RATE_LIMIT_MAX_REQUESTS,
     CHAT_RATE_LIMIT_WINDOW_SECONDS,
 )
-from app.core.origin import is_origin_allowed
+from app.core.origin import is_origin_allowed, origin_from_headers
 from app.core.rate_limit import chat_rate_limiter
 from app.models.schemas import ChatRequest, ChatResponse, ResortSettings
 from app.services.chat_service import chat
@@ -46,8 +47,12 @@ def chat_endpoint(
         raise HTTPException(status_code=404, detail="Resort not found")
 
     # Validate Origin
-    origin = http_request.headers.get("origin")
-    if exists.allowed_domains and not is_origin_allowed(exists.allowed_domains, origin):
+    origin = origin_from_headers(
+        http_request.headers.get("origin"),
+        http_request.headers.get("referer"),
+    )
+    allowed = is_origin_allowed(exists.allowed_domains, origin) if exists.allowed_domains else True
+    if exists.allowed_domains and not allowed:
         raise HTTPException(
             status_code=403,
             detail="Forbidden: Origin not allowed for this resort's widget.",
@@ -64,12 +69,20 @@ def chat_endpoint(
         raise HTTPException(status_code=429, detail="Too many requests, please slow down")
 
     try:
+        start_time = time.perf_counter()
         result = chat(
             message=request.message,
             hotel_id=hotel_id,
             language=request.language,
             conversation_history=request.conversation_history,
             session=session,
+        )
+        duration = time.perf_counter() - start_time
+        logger.info(
+            "chat_endpoint finished hotel_id=%s duration=%.2fs response_len=%d",
+            hotel_id,
+            duration,
+            len(result["response"]),
         )
     except Exception as e:
         logger.error(f"Chat error for hotel {hotel_id}: {e}", exc_info=True)
