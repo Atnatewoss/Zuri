@@ -134,6 +134,21 @@
     .zuri-booking-card-title{font-size:11px;font-weight:700;letter-spacing:.4px;color:#2f6b2f;text-transform:uppercase}
     .zuri-booking-card-code{font-size:13px;font-weight:700;color:#1a1a1a;margin-top:2px}
     .zuri-booking-card-meta{font-size:12px;color:#4a4a4a;margin-top:4px}
+    #zuri-cancel-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.56);backdrop-filter:blur(4px);z-index:1000000}
+    #zuri-cancel-modal.show{display:flex}
+    .zuri-cancel-modal-card{width:min(420px,100%);background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.24);padding:18px}
+    .zuri-cancel-modal-title{margin:0;font-size:18px;font-weight:700;color:#111827}
+    .zuri-cancel-modal-text{margin:10px 0 0;font-size:13px;line-height:1.6;color:#4b5563}
+    .zuri-cancel-modal-code{margin-top:10px;font-size:12px;font-weight:700;color:#111827;letter-spacing:.3px}
+    .zuri-cancel-modal-field{margin-top:14px}
+    .zuri-cancel-modal-label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:#374151}
+    .zuri-cancel-modal-input{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:13px;outline:none}
+    .zuri-cancel-modal-input:focus{border-color:#111827}
+    .zuri-cancel-modal-error{min-height:18px;margin-top:6px;font-size:11px;color:#b91c1c}
+    .zuri-cancel-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+    .zuri-cancel-modal-secondary{border:1px solid #d1d5db;background:#fff;color:#374151;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer}
+    .zuri-cancel-modal-primary{border:1px solid #dc2626;background:#dc2626;color:#fff;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer}
+    .zuri-cancel-modal-primary:disabled{opacity:.55;cursor:not-allowed}
     `;
     const sEl = document.createElement('style');
     sEl.textContent = css;
@@ -181,6 +196,22 @@
             <div id="zuri-booking-sync-header">Recent Concierge Bookings</div>
             <div id="zuri-booking-sync-list"></div>
         </div>
+        <div id="zuri-cancel-modal" role="alertdialog" aria-modal="true" aria-labelledby="zuri-cancel-modal-title" aria-describedby="zuri-cancel-modal-text">
+            <div class="zuri-cancel-modal-card">
+                <h4 class="zuri-cancel-modal-title" id="zuri-cancel-modal-title">Cancel booking?</h4>
+                <p class="zuri-cancel-modal-text" id="zuri-cancel-modal-text">Enter the guest full name exactly as booked to cancel this reservation.</p>
+                <div class="zuri-cancel-modal-code" id="zuri-cancel-modal-code"></div>
+                <div class="zuri-cancel-modal-field">
+                    <label class="zuri-cancel-modal-label" for="zuri-cancel-guest-name">Guest full name</label>
+                    <input id="zuri-cancel-guest-name" class="zuri-cancel-modal-input" type="text" autocomplete="name" />
+                    <div class="zuri-cancel-modal-error" id="zuri-cancel-modal-error"></div>
+                </div>
+                <div class="zuri-cancel-modal-actions">
+                    <button type="button" class="zuri-cancel-modal-secondary" id="zuri-cancel-modal-close">Keep Booking</button>
+                    <button type="button" class="zuri-cancel-modal-primary" id="zuri-cancel-modal-confirm" disabled>Cancel Booking</button>
+                </div>
+            </div>
+        </div>
         <div id="zuri-bubble">
             <svg viewBox="0 0 24 24"><path d="M20,2H4C2.9,2,2,2.9,2,4v18l4-4h14c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z"/></svg>
         </div>
@@ -205,13 +236,26 @@
     const voiceLangLbl = document.getElementById('zuri-voice-lang-label');
     const bookingSyncPanel = document.getElementById('zuri-booking-sync');
     const bookingSyncList = document.getElementById('zuri-booking-sync-list');
+    const cancelModal = document.getElementById('zuri-cancel-modal');
+    const cancelModalCode = document.getElementById('zuri-cancel-modal-code');
+    const cancelModalInput = document.getElementById('zuri-cancel-guest-name');
+    const cancelModalError = document.getElementById('zuri-cancel-modal-error');
+    const cancelModalClose = document.getElementById('zuri-cancel-modal-close');
+    const cancelModalConfirm = document.getElementById('zuri-cancel-modal-confirm');
 
     const BOOKING_STORE_KEY = `zuri:bookings:${hotelId}`;
     const BOOKING_STORE_MAX = 20;
+    const BOOKING_SYNC_AUTO_HIDE_MS = 12000;
+    const CANCELLED_BOOKING_HIDE_DELAY_MS = 6000;
     const CHAT_HISTORY_MAX = 20;
     const BOOKING_SYNC_POLL_MS = 15000;
     let bookingSyncTimer = null;
+    let bookingSyncHideTimer = null;
+    let bookingSyncVisible = false;
     let voiceCaptionTimer = null;
     const bookingsByCode = new Map();
+    const cancelledBookingTimers = new Map();
     let chatHistory = [];
+    let pendingCancellationCode = null;
+    let lastCancelTrigger = null;
 

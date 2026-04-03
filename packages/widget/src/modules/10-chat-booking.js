@@ -58,24 +58,53 @@
         voiceCaptionTimer = null;
     }
 
-    function splitCaptionChunks(text, maxChars = 140) {
-        const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+    function toSpokenText(text) {
+        const rendered = md(String(text || '')).replace(/<br\s*\/?>/gi, '\n');
+        const probe = document.createElement('div');
+        probe.innerHTML = rendered;
+        return (probe.textContent || probe.innerText || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function splitCaptionChunks(text, maxChars = 180) {
+        const normalized = toSpokenText(text);
         if (!normalized) return [];
-        const words = normalized.split(' ');
+
+        const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [normalized];
         const chunks = [];
         let current = '';
+        let searchStart = 0;
 
-        for (const word of words) {
-            const candidate = current ? `${current} ${word}` : word;
+        for (const sentence of sentences) {
+            const trimmed = sentence.trim();
+            if (!trimmed) continue;
+
+            const candidate = current ? `${current} ${trimmed}` : trimmed;
             if (candidate.length <= maxChars) {
                 current = candidate;
                 continue;
             }
-            if (current) chunks.push(current);
-            current = word;
+
+            if (current) {
+                const start = normalized.indexOf(current, searchStart);
+                chunks.push({
+                    text: current,
+                    start: start >= 0 ? start : searchStart,
+                });
+                searchStart = (start >= 0 ? start : searchStart) + current.length;
+            }
+            current = trimmed;
         }
 
-        if (current) chunks.push(current);
+        if (current) {
+            const start = normalized.indexOf(current, searchStart);
+            chunks.push({
+                text: current,
+                start: start >= 0 ? start : searchStart,
+            });
+        }
+
         return chunks;
     }
 
@@ -88,7 +117,15 @@
         liveCaption.textContent = text;
     }
 
-    function rotateVoiceCaption(text) {
+    function getCaptionChunkForChar(chunks, charIndex) {
+        if (!chunks.length) return '';
+        for (let i = chunks.length - 1; i >= 0; i--) {
+            if (charIndex >= chunks[i].start) return chunks[i].text;
+        }
+        return chunks[0].text;
+    }
+
+    function rotateVoiceCaption(text, durationMs) {
         clearVoiceCaptionRotation();
         const chunks = splitCaptionChunks(text);
         if (!chunks.length) {
@@ -97,14 +134,18 @@
         }
 
         let idx = 0;
-        setVoiceCaption(chunks[idx], { markdown: true });
+        setVoiceCaption(chunks[idx].text);
         if (chunks.length === 1) return;
 
+        const intervalMs = Math.max(2600, Math.min(5200, Math.round((durationMs || 0) / chunks.length) || 3200));
         voiceCaptionTimer = setInterval(() => {
             idx += 1;
-            if (idx >= chunks.length) idx = 0;
-            setVoiceCaption(chunks[idx], { markdown: true });
-        }, 2200);
+            if (idx >= chunks.length) {
+                clearVoiceCaptionRotation();
+                return;
+            }
+            setVoiceCaption(chunks[idx].text);
+        }, intervalMs);
     }
 
     function pushChatHistory(role, text) {
@@ -195,17 +236,66 @@
         addMessage('', 'ai', { html });
     }
 
+    function syncCancelModalState() {
+        if (!cancelModalConfirm || !cancelModalInput) return;
+        cancelModalConfirm.disabled = !cancelModalInput.value.trim();
+    }
+
+    function closeCancelModal() {
+        pendingCancellationCode = null;
+        if (cancelModal) cancelModal.classList.remove('show');
+        if (cancelModalInput) cancelModalInput.value = '';
+        if (cancelModalError) cancelModalError.textContent = '';
+        syncCancelModalState();
+        if (lastCancelTrigger) {
+            lastCancelTrigger.disabled = false;
+            lastCancelTrigger.focus();
+            lastCancelTrigger = null;
+        }
+    }
+
+    function openCancelModal(confirmationCode, triggerEl) {
+        pendingCancellationCode = confirmationCode;
+        lastCancelTrigger = triggerEl || null;
+        if (cancelModalCode) cancelModalCode.textContent = confirmationCode;
+        if (cancelModalInput) cancelModalInput.value = '';
+        if (cancelModalError) cancelModalError.textContent = '';
+        if (cancelModal) cancelModal.classList.add('show');
+        syncCancelModalState();
+        if (cancelModalClose) cancelModalClose.focus();
+    }
+
+    function clearBookingSyncHideTimer() {
+        if (!bookingSyncHideTimer) return;
+        clearTimeout(bookingSyncHideTimer);
+        bookingSyncHideTimer = null;
+    }
+
+    function hideBookingSyncPanel() {
+        bookingSyncVisible = false;
+        clearBookingSyncHideTimer();
+        if (bookingSyncPanel) bookingSyncPanel.classList.remove('show');
+    }
+
+    function showBookingSyncPanelTemporarily() {
+        bookingSyncVisible = true;
+        renderBookingSyncPanel();
+        clearBookingSyncHideTimer();
+        bookingSyncHideTimer = setTimeout(() => {
+            hideBookingSyncPanel();
+        }, BOOKING_SYNC_AUTO_HIDE_MS);
+    }
+
     function renderBookingSyncPanel() {
         if (!bookingSyncPanel || !bookingSyncList) return;
         const bookings = loadBookings();
         bookingsByCode.clear();
         if (!bookings.length) {
-            bookingSyncPanel.classList.remove('show');
+            hideBookingSyncPanel();
             bookingSyncList.innerHTML = '';
             return;
         }
 
-        bookingSyncPanel.classList.add('show');
         const items = bookings.slice(0, 6);
         for (const booking of items) {
             bookingsByCode.set((booking.confirmation_code || '').toUpperCase(), booking);
@@ -222,7 +312,7 @@
                     </span>
                     ${String(b.status || '').toLowerCase() === 'cancelled'
                         ? ''
-                        : `<button class="zuri-booking-sync-cancel" data-code="${escapeHtml(b.confirmation_code || '')}">Cancel</button>`}
+                        : `<button class="zuri-booking-sync-cancel" data-code="${escapeHtml(b.confirmation_code || '')}" aria-label="Cancel reservation ${escapeHtml(b.confirmation_code || 'booking')}">Cancel Booking</button>`}
                 </div>
             </div>
         `).join('');
@@ -231,9 +321,11 @@
             btn.onclick = () => {
                 const code = (btn.getAttribute('data-code') || '').toUpperCase();
                 if (!code) return;
-                cancelBookingFromWidget(code, btn);
+                openCancelModal(code, btn);
             };
         });
+
+        bookingSyncPanel.classList.toggle('show', bookingSyncVisible);
     }
 
     function markBookingCancelledLocally(code) {
@@ -246,21 +338,23 @@
         });
         saveBookings(updated);
         renderBookingSyncPanel();
+
+        if (cancelledBookingTimers.has(normalized)) {
+            clearTimeout(cancelledBookingTimers.get(normalized));
+        }
+        cancelledBookingTimers.set(normalized, setTimeout(() => {
+            const bookingsAfterDelay = loadBookings().filter(
+                (b) => (b.confirmation_code || '').toUpperCase() !== normalized
+            );
+            saveBookings(bookingsAfterDelay);
+            renderBookingSyncPanel();
+            cancelledBookingTimers.delete(normalized);
+        }, CANCELLED_BOOKING_HIDE_DELAY_MS));
     }
 
-    async function cancelBookingFromWidget(confirmationCode, btnEl) {
+    async function cancelBookingFromWidget(confirmationCode, guestName) {
         const booking = bookingsByCode.get((confirmationCode || '').toUpperCase());
         if (!booking) return;
-
-        const guestName = window.prompt(
-            `To cancel ${confirmationCode}, enter the guest full name exactly as booked:`,
-            booking.guest_name || ''
-        );
-        if (!guestName || !guestName.trim()) return;
-
-        if (btnEl) {
-            btnEl.disabled = true;
-        }
 
         try {
             const res = await fetch(`${apiUrl}/api/bookings/public/cancel?hotel_id=${encodeURIComponent(hotelId)}`, {
@@ -280,17 +374,14 @@
                 throw new Error(data?.detail || 'Unable to cancel booking right now.');
             }
 
+            closeCancelModal();
             markBookingCancelledLocally(confirmationCode);
             addMessage(`Booking ${confirmationCode} has been cancelled successfully.`, 'ai');
         } catch (err) {
-            addMessage(
-                err instanceof Error
-                    ? `Cancellation failed: ${err.message}`
-                    : 'Cancellation failed. Please try again.',
-                'ai'
-            );
-        } finally {
-            if (btnEl) btnEl.disabled = false;
+            if (cancelModalError) {
+                cancelModalError.textContent = err instanceof Error ? err.message : 'Cancellation failed. Please try again.';
+            }
+            if (cancelModalConfirm) cancelModalConfirm.disabled = false;
         }
     }
 
@@ -303,7 +394,7 @@
             ...existing.filter((item) => item.confirmation_code !== normalized.confirmation_code)
         ].filter(Boolean);
         saveBookings(deduped);
-        renderBookingSyncPanel();
+        showBookingSyncPanelTemporarily();
 
         const detail = { hotelId, booking, bookings: deduped.slice(0, BOOKING_STORE_MAX) };
         window.dispatchEvent(new CustomEvent('zuri:booking:created', { detail }));

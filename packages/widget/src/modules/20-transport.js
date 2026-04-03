@@ -28,7 +28,7 @@
                     message: text,
                     hotel_id: hotelId,
                     language: selectedLangName,
-                    conversation_history: chatHistory.slice(0, -1),
+                    conversation_history: chatHistory.slice(-7, -1),
                 })
             });
             const data = await res.json();
@@ -46,9 +46,13 @@
 
             // If in voice mode: speak the response, show it as live caption
             if (opts.fromVoice && voiceOverlay.classList.contains('active')) {
-                rotateVoiceCaption(aiText);
                 voiceStatus.textContent = 'Speaking';
-                speak(aiText, () => {
+                const spokenText = toSpokenText(aiText);
+                const captionChunks = splitCaptionChunks(spokenText);
+                if (captionChunks.length) {
+                    setVoiceCaption(captionChunks[0].text);
+                }
+                speak(spokenText, () => {
                     clearVoiceCaptionRotation();
                     resolveGhost(aiBubble);
                     // Go idle instead of auto-resuming
@@ -57,6 +61,13 @@
                         voiceStatus.textContent = 'Idle';
                         setVoiceCaption('Tap the orb to speak again');
                     }
+                }, (charIndex, estimatedDurationMs) => {
+                    if (!captionChunks.length) return;
+                    if (typeof charIndex === 'number' && charIndex >= 0) {
+                        setVoiceCaption(getCaptionChunkForChar(captionChunks, charIndex));
+                        return;
+                    }
+                    rotateVoiceCaption(spokenText, estimatedDurationMs);
                 });
             } else {
                 resolveGhost(aiBubble);
