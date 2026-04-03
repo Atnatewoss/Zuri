@@ -3,11 +3,12 @@ import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { ResortProvider } from '@/lib/resort-context'
 import './globals.css'
 
-const geist = Geist({ subsets: ["latin"], variable: '--font-sans' });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: '--font-mono' });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' });
+const geist = Geist({ subsets: ["latin"], variable: '--font-sans' })
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: '--font-mono' })
+const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' })
 
 export const metadata: Metadata = {
   title: 'Zuri | The Art of Exceptional Hospitality',
@@ -41,8 +42,10 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased text-foreground bg-background selection:bg-primary/20">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster richColors />
+          <ResortProvider>
+            {children}
+            <Toaster richColors />
+          </ResortProvider>
         </ThemeProvider>
         <Analytics />
       </body>

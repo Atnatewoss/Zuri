@@ -119,9 +119,9 @@ export default function LandingPage() {
                 'linear-gradient(120deg, #1f1712 0%, #5a3621 40%, #7a4a2a 72%, #2e1d14 100%)'
             }}
           />
-          <div className="absolute -top-40 -left-28 h-[540px] w-[540px] rounded-full bg-amber-200/25 blur-[130px] z-0 pointer-events-none" />
-          <div className="absolute top-16 right-[-120px] h-[500px] w-[500px] rounded-full bg-orange-400/20 blur-[120px] z-0 pointer-events-none" />
-          <div className="absolute -bottom-44 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-black/30 blur-[120px] z-0 pointer-events-none" />
+          <div className="absolute -top-40 -left-28 h-[540px] w-[540px] rounded-full bg-amber-200/25 blur-[130px] z-0 pointer-events-none isolate" />
+          <div className="absolute top-16 right-[-120px] h-[500px] w-[500px] rounded-full bg-orange-400/20 blur-[120px] z-0 pointer-events-none isolate" />
+          <div className="absolute -bottom-44 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-black/30 blur-[120px] z-0 pointer-events-none isolate" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/35 z-0 pointer-events-none" />
           
           <div className="relative z-10 translate-y-6 md:translate-y-8 text-center flex flex-col items-center w-full px-8 lg:px-24">

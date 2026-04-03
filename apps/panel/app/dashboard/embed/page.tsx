@@ -37,7 +37,7 @@ export default function EmbedWidgetPage() {
     }
     setHotelId(tenantId)
 
-    // Fetch both snippet and settings
+    // Only fetch snippet and allowed domains (resort info is global now)
     Promise.all([
       apiFetch<{ snippet: string }>(`/api/embed/snippet/${encodeURIComponent(tenantId)}`),
       apiFetch<{ allowed_domains: string }>(`/api/settings?hotel_id=${encodeURIComponent(tenantId)}`)

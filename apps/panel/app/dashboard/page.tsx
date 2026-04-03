@@ -10,6 +10,7 @@ import { apiFetch } from '@/lib/api'
 import { clearAuth, getTenantHotelId } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { useResort } from '@/lib/resort-context'
 
 interface RecentInteraction {
   id: number
@@ -45,6 +46,7 @@ interface DashboardStats {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const { resort } = useResort()
 
   const router = useRouter()
   useEffect(() => {
@@ -59,14 +61,6 @@ export default function DashboardPage() {
         const data = await apiFetch<DashboardStats>(`/api/dashboard/stats?hotel_id=${hotelId}`)
         if (!data.is_onboarded) {
           router.push('/onboarding')
-          return
-        }
-        if (!data.resort_name?.trim() || !data.admin_email?.trim()) {
-          clearAuth()
-          toast.error('Session invalid', {
-            description: 'Your resort profile is incomplete. Please sign in again.',
-          })
-          router.push('/login')
           return
         }
         setStats(data)
@@ -95,9 +89,6 @@ export default function DashboardPage() {
         <DashboardHeader 
           title="Executive Dashboard" 
           subtitle="Manage guest experiences, bookings, and platform integrations." 
-          resortName={stats?.resort_name}
-          adminEmail={stats?.admin_email}
-          loading={loading}
         />
 
         <div className="flex-1 overflow-auto w-full p-8 md:p-12 lg:px-20 mx-auto max-w-[1600px]">

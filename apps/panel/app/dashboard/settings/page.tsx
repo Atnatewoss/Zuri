@@ -10,18 +10,18 @@ import { Shield, CreditCard, Building2, AlertTriangle, CheckCircle2, Save } from
 import { apiFetch, API_BASE_URL } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import { clearAuth, getTenantHotelId } from '@/lib/tenant'
-import { useSettingsStore } from '@/lib/store'
+import { useResort } from '@/lib/resort-context'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const store = useSettingsStore()
+  const { resort, refreshResort } = useResort()
 
   const [formData, setFormData] = useState({
-    resortName: store.resortName || '',
-    description: store.description || '',
-    location: store.location || '',
-    email: store.email || '',
+    resortName: '',
+    description: '',
+    location: '',
+    email: '',
   })
 
   const [saved, setSaved] = useState(false)
@@ -35,38 +35,31 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
-    if (store.isLoaded) {
-      setLoading(false)
-      return
-    }
-
     const hotelId = getTenantHotelId()
     if (!hotelId) {
       router.push('/login')
       return
     }
 
-    Promise.all([
-      apiFetch<{ resort_name: string; description: string; location: string; email: string; allowed_domains: string }>(
-        `/api/settings?hotel_id=${encodeURIComponent(hotelId)}`
-      ),
-      apiFetch<{ is_onboarded: boolean }>(
-        `/api/dashboard/stats?hotel_id=${encodeURIComponent(hotelId)}`
-      )
-    ])
-      .then(([settings, stats]) => {
+    // Resort context already loaded the data, just check onboarding status
+    apiFetch<{ is_onboarded: boolean }>(
+      `/api/dashboard/stats?hotel_id=${encodeURIComponent(hotelId)}`
+    )
+      .then((stats) => {
         if (!stats.is_onboarded) {
           router.push('/onboarding')
           return
         }
-        const fetchedData = {
-          resortName: settings.resort_name || '',
-          description: settings.description || '',
-          location: settings.location || '',
-          email: settings.email || '',
+        // Initialize form from global resort state
+        if (resort) {
+          setFormData({
+            resortName: resort.resortName || '',
+            description: resort.description || '',
+            location: resort.location || '',
+            email: resort.email || '',
+          })
         }
-        store.setSettings({ ...fetchedData, isLoaded: true })
-        setFormData(fetchedData)
+        setLoading(false)
       })
       .catch((err) => {
         toast.error('Unable to load settings', {
@@ -79,7 +72,7 @@ export default function SettingsPage() {
       .finally(() => {
         setLoading(false)
       })
-  }, [])
+  }, [resort, router])
 
   const handleSave = async () => {
     const hotelId = getTenantHotelId()
@@ -100,7 +93,8 @@ export default function SettingsPage() {
           email: formData.email,
         },
       })
-      store.setSettings(formData)
+      // Refresh global resort state after save
+      await refreshResort()
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
@@ -133,9 +127,6 @@ export default function SettingsPage() {
         <DashboardHeader
           title="Settings"
           subtitle="Manage your resort information and preferences"
-          resortName={formData.resortName}
-          adminEmail={formData.email}
-          loading={loading}
         />
 
         <div className="flex-1 overflow-auto w-full p-8 md:p-12 lg:px-20 mx-auto max-w-[1600px] space-y-8 pb-32">

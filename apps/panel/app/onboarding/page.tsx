@@ -185,7 +185,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-20 dark:bg-zinc-50 dark:text-zinc-900" style={{ zoom: 1.1 }}>
+    <div className="relative min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-20 dark:bg-zinc-50 dark:text-zinc-900" style={{ zoom: 1.1 }}>
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
         <div className="mx-auto max-w-4xl px-8 py-5 flex items-center justify-between">
