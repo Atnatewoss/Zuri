@@ -103,7 +103,7 @@ export default function LandingPage() {
       ],
       bio: 'Leads event execution and operations, including partner-facing programs with brands like Heineken. Co-Founder at Exp-Ethiopia, with hands-on ERP and product workflow experience.',
       github: 'https://github.com/yonatannn111',
-      linkedin: '#'
+      linkedin: ''
     }
   ]
 
@@ -498,10 +498,12 @@ export default function LandingPage() {
                       <Github className="w-4 h-4" />
                       GitHub
                     </a>
-                    <a href={member.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:opacity-70 transition-opacity">
-                      <Linkedin className="w-4 h-4" />
-                      LinkedIn
-                    </a>
+                    {member.linkedin && (
+                      <a href={member.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:opacity-70 transition-opacity">
+                        <Linkedin className="w-4 h-4" />
+                        LinkedIn
+                      </a>
+                    )}
                   </div>
                 </article>
               ))}
