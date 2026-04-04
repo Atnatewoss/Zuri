@@ -145,7 +145,20 @@
     animation: float 6s ease-in-out 3s infinite;
   }
   
+  .animate-aura {
+    animation: aura 18s ease-in-out infinite alternate;
+  }
+  
+  .animate-aura-slow {
+    animation: aura 24s ease-in-out infinite alternate-reverse;
+  }
+  
+  .animate-aura-slower {
+    animation: aura 30s ease-in-out infinite alternate;
+  }
+  
   .animate-grow-x {
+
     animation: grow-x 2s ease-out forwards;
   }
 }
@@ -155,7 +168,15 @@
   50% { transform: translateY(-20px); }
 }
 
+@keyframes aura {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.8; }
+  33% { transform: translate(40px, -60px) scale(1.15); opacity: 1; }
+  66% { transform: translate(-30px, 30px) scale(0.9); opacity: 0.9; }
+  100% { transform: translate(0px, 0px) scale(1); opacity: 0.8; }
+}
+
 @keyframes grow-x {
+
   0% { transform: scaleX(0); transform-origin: left; }
   100% { transform: scaleX(1); transform-origin: left; }
 }
