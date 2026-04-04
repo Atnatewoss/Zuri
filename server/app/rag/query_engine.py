@@ -57,7 +57,9 @@ KNOWLEDGE BASE RULES:
 - Format responses professionally and warmly.
 
 BOOKING & AGENT RULES:
-- You have tools to check room availability, list services, and place bookings.
+- You have internal tools to check room availability, list services, and place bookings.
+- ALWAYS use the function calling interface for these tasks. 
+- NEVER output raw code blocks like `print(tools.perform_booking)` or `tools.book_item(...)`. Just call the function.
 - ALWAYS check availability or the service list before confirming a booking to the guest.
 - For every booking attempt, call `list_available_time_slots` for the selected item and date before placing the booking.
 - Required booking fields:
@@ -65,18 +67,19 @@ BOOKING & AGENT RULES:
   - item/room/service name (required)
   - date in YYYY-MM-DD (required)
   - time in HH:MM format (required)
-- If a guest wants to book and any required field is missing, ask only for the missing field(s).
-- If time is missing, ask for the preferred time and include a few available options from `list_available_time_slots`.
-- Requested time is unavailable, recommend available times and ask the guest to choose one.
+- If any required field is missing, ask the guest ONLY for the missing field(s) in {language}.
 - As soon as all required fields are available and a valid time is selected, call `perform_booking` immediately.
-- After a successful booking, provide the guest with their confirmation code and a summary of their stay/service.
+- After a successful booking, provide the guest with their confirmation code and a summary in {language}.
 
 CONTEXT FROM RESORT KNOWLEDGE BASE:
 {context}
 
-LANGUAGE RULES:
+LANGUAGE & REASONING RULES:
 - Respond entirely and ONLY in {language}.
-{language_instruction}
+- If the user provides info (name, date, time) in {language}, extract it and pass it to the tools in English/Standard formats (e.g., "April 7" becomes 2026-04-07).
+- {language_instruction}
+- NEVER hallucinate tools that are not in your provided toolkit.
+
 """
 
 
@@ -197,22 +200,21 @@ def answer_question(
         language=language,
         language_instruction=_get_language_instruction(language)
     )
-    should_enable_tools = _looks_like_booking_request(question)
+    
+    # Always provide tools to avoid "I know tools but can't find them" hallucinations
     generate_config = genai.types.GenerateContentConfig(
         system_instruction=system_instruction,
-        temperature=0.15,
+        temperature=0.1,
         max_output_tokens=768,
-    )
-    if should_enable_tools:
-        generate_config.tools = [
+        tools=[
             list_available_rooms,
             list_resort_services,
             list_available_time_slots,
             perform_booking,
-        ]
-        generate_config.automatic_function_calling = (
-            genai.types.AutomaticFunctionCallingConfig(disable=False)
-        )
+        ],
+        automatic_function_calling=genai.types.AutomaticFunctionCallingConfig(disable=False)
+    )
+
 
     response = client.models.generate_content(
         model=GEMINI_CHAT_MODEL,
@@ -220,12 +222,12 @@ def answer_question(
         config=generate_config,
     )
     logger.info(
-        "chat_rag_completed hotel_id=%s tools=%s sources=%s elapsed_ms=%s",
+        "chat_rag_completed hotel_id=%s tools=always sources=%s elapsed_ms=%s",
         hotel_id,
-        should_enable_tools,
         len(sources),
         round((time.perf_counter() - start_time) * 1000),
     )
+
 
     return {
         "response": response.text,
