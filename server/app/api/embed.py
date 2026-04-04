@@ -86,7 +86,6 @@ def verify_embed_install(
         "snippet": snippet,
     }
 
-
 @router.get("/widget.js")
 def serve_widget_js():
     """Serves the embeddable widget bundle directly from source."""

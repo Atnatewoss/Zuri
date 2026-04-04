@@ -52,6 +52,7 @@ app.include_router(generator_router)
 app.include_router(auth_router)
 app.include_router(speech_router)
 app.include_router(live_voice_router)
+app.include_router(voice_interact_router)
 
 
 # Removed startup db initialization for Alembic
