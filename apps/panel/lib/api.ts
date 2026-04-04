@@ -4,8 +4,9 @@ const isProduction = process.env.NEXT_PUBLIC_APP_ENV === "production";
 const DEV_URL = process.env.NEXT_PUBLIC_API_URL_DEV;
 const PROD_URL = process.env.NEXT_PUBLIC_API_URL_PROD;
 
-export const API_BASE_URL = "";
-export const PUBLIC_API_BASE_URL = (isProduction ? PROD_URL : DEV_URL) ?? "";
+export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (isProduction ? PROD_URL : DEV_URL);
+export const API_BASE_URL = PUBLIC_API_BASE_URL;
+
 
 type ApiRequestInit = RequestInit & {
   bodyJson?: unknown;
