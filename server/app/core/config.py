@@ -32,7 +32,13 @@ GEMINI_TTS_MODEL = os.getenv("GEMINI_TTS_MODEL", "gemini-2.5-flash-preview-tts")
 GEMINI_LIVE_MODEL = os.getenv("GEMINI_LIVE_MODEL", "models/gemini-2.5-flash-native-audio-latest")
 
 # --- CORS ---
-CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
+_ALWAYS_ALLOWED = [
+    "https://www.zuriai.et",
+    "https://zuriai.et",
+    "http://localhost:3000",
+]
+_env_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+CORS_ORIGINS = list(set(_ALWAYS_ALLOWED + _env_origins))
 
 # --- RAG ---
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "500"))
