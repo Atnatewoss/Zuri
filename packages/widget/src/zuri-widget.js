@@ -1,29 +1,30 @@
-(function() {
+(function () {
     // == Config ==================================================
     const scriptTag = document.currentScript;
-    const hotelId   = scriptTag.getAttribute('data-hotel-id');
-    const apiUrl    = scriptTag.getAttribute('data-api-url') || 'http://localhost:8000';
+    const hotelId = scriptTag.getAttribute('data-hotel-id');
+    const apiUrl = scriptTag.getAttribute('data-api-url') || 'http://localhost:8000';
     if (!hotelId) { console.error('Zuri widget: missing data-hotel-id'); return; }
 
     const LIVE_VOICE_DEBUG = true;
     const LANGS = [
-        { code: 'en-US', label: 'EN',  flag: '🇬🇧', name: 'English' },
-        { code: 'am-ET', label: 'አማ',  flag: '🇪🇹', name: 'Amharic' },
-        { code: 'ti-ET', label: 'ትግ',  flag: '🇪🇷', name: 'Tigrinya' },
-        { code: 'om-ET', label: 'ኦሮ',  flag: '🇪🇹', name: 'Oromifa' },
-        { code: 'so-SO', label: 'So',  flag: '🇸🇴', name: 'Somali' },
-        { code: 'ar-SA', label: 'عر',  flag: '🇸🇦', name: 'Arabic' },
-        { code: 'fr-FR', label: 'FR',  flag: '🇫🇷', name: 'French' },
-        { code: 'it-IT', label: 'IT',  flag: '🇮🇹', name: 'Italian' },
+        { code: 'en-US', label: 'EN', flag: '🇬🇧', name: 'English' },
+        { code: 'am-ET', label: 'አማ', flag: '🇪🇹', name: 'Amharic' },
+        { code: 'ti-ET', label: 'ትግ', flag: '🇪🇷', name: 'Tigrinya' },
+        { code: 'om-ET', label: 'ኦሮ', flag: '🇪🇹', name: 'Oromifa' },
+        { code: 'so-SO', label: 'So', flag: '🇸🇴', name: 'Somali' },
+        { code: 'ar-SA', label: 'عر', flag: '🇸🇦', name: 'Arabic' },
+        { code: 'fr-FR', label: 'FR', flag: '🇫🇷', name: 'French' },
+        { code: 'it-IT', label: 'IT', flag: '🇮🇹', name: 'Italian' },
     ];
 
     // == Lightweight Markdown ====================================
     function md(t) {
         if (!t) return '';
         return t
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
             .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.+?)\*/g, '<em>$1</em>')
             .replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>')
@@ -36,18 +37,20 @@
     // == Styles ==================================================
     const css = `
     :root {
-        --zuri-primary: #FFFFFF;
-        --zuri-accent: #00F2FF;
-        --zuri-glass-bg: rgba(5, 5, 10, 0.94);
-        --zuri-glass-border: rgba(255, 255, 255, 0.1);
-        --zuri-glass-edge: rgba(255, 255, 255, 0.05);
-        --zuri-glass-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
-        --zuri-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        --zuri-primary: #007AFF; 
+        --zuri-glass-bg: rgba(22, 22, 28, 0.72);
+        --zuri-glass-material: rgba(22, 22, 28, 0.75);
+        --zuri-glass-border-light: rgba(255, 255, 255, 0.18);
+        --zuri-blur: 40px;
+        --zuri-vibrancy: saturate(180%) brightness(1.1);
+        --zuri-radius-window: 36px;
+        --zuri-shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        --zuri-glass-shadow-deep: 0 40px 80px rgba(0, 0, 0, 0.35);
         --zuri-text: #FFFFFF;
-        --zuri-text-muted: rgba(255, 255, 255, 0.45);
-        --zuri-user-bg: rgba(255, 255, 255, 0.1);
-        --zuri-ai-bg: rgba(255, 255, 255, 0.05);
+        --zuri-text-muted: rgba(255, 255, 255, 0.6);
+        --zuri-ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
+
 
     #zuri-widget-container {
         position: fixed;
@@ -169,18 +172,20 @@
     .zuri-chat-window {
         position: relative; 
         width: 560px; height: 480px;
-        background: rgba(10, 10, 20, 0.94);
-        backdrop-filter: blur(48px) saturate(200%);
-        -webkit-backdrop-filter: blur(48px) saturate(200%);
-        border-radius: 32px;
-        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), var(--zuri-inner-glow);
+        background: var(--zuri-glass-material);
+        backdrop-filter: var(--zuri-blur) var(--zuri-vibrancy);
+        -webkit-backdrop-filter: var(--zuri-blur) var(--zuri-vibrancy);
+        border-radius: var(--zuri-radius-window);
+        border: 1px solid var(--zuri-glass-border-light);
+        box-shadow: var(--zuri-shadow-heavy);
         display: none; flex-direction: column; overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.08);
         pointer-events: auto;
         transform: scale(0.9); opacity: 0;
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        animation: zuri-cluely-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: all 0.6s var(--zuri-ease);
+        animation: zuri-cluely-rise 0.6s var(--zuri-ease) forwards;
     }
+
+
     .zuri-chat-window.active { display: flex; }
     @keyframes zuri-cluely-rise {
         from { opacity: 0; transform: scale(0.8) translateY(40px); }
@@ -210,9 +215,9 @@
     }
     .zuri-msg.ai { 
         background: transparent; align-self: flex-start; border: none; box-shadow: none;
-        padding-left: 0; padding-right: 20px;
+        padding-left: 0; padding-right: 20px; padding-bottom: 4px;
         color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,0.4);
-        display: flex; flex-direction: column; gap: 8px;
+        display: flex; flex-direction: column; gap: 4px;
     }
     .zuri-tts-btn {
         width: 28px; height: 28px; border-radius: 50%;
@@ -225,6 +230,36 @@
     .zuri-tts-btn:hover { background: rgba(255,255,255,0.15); opacity: 1 !important; transform: scale(1.1); }
     .zuri-tts-btn svg { width: 14px; height: 14px; fill: #fff; }
     .zuri-msg-text { display: inline-block; width: 100%; white-space: pre-wrap; }
+    .zuri-msg-text strong { font-weight: 700; color: #fff; }
+    .zuri-msg-text em { font-style: italic; opacity: 0.9; }
+    .zuri-msg-text ul { padding-left: 18px; margin: 8px 0; }
+    .zuri-msg-text li { margin-bottom: 4px; }
+    .zuri-msg-text code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+    
+    .zuri-copy-btn {
+        position: absolute; left: 0; bottom: -28px; transform: scale(0.8);
+        width: 24px; height: 24px; border-radius: 6px;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: 0.3s; opacity: 0;
+        margin-top: 8px; /* High-level spacing */
+    }
+    .zuri-msg.user .zuri-copy-btn { left: auto; right: 0; bottom: -28px; }
+    .zuri-msg.ai .zuri-copy-btn { bottom: -28px; }
+
+
+    .zuri-msg:hover .zuri-copy-btn { opacity: 0.6; transform: scale(1); }
+    .zuri-copy-btn:hover { background: rgba(255,255,255,0.15); opacity: 1 !important; }
+    .zuri-copy-btn svg { width: 12px; height: 12px; fill: #fff; }
+    
+    .zuri-copy-tooltip {
+        position: absolute; left: 0; bottom: -24px; background: #00F2FF; color: #000;
+        font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800;
+        opacity: 0; transition: 0.3s; pointer-events: none;
+    }
+    .zuri-msg.user .zuri-copy-tooltip { left: auto; right: 0; }
+    .zuri-copy-btn.copied + .zuri-copy-tooltip { opacity: 1; transform: translateY(4px); }
+
 
     /* Cluely-Inspired Recessed Action Bar */
     .zuri-chat-input-area { padding: 24px 32px 32px 32px; background: transparent; border: none; }
@@ -326,13 +361,13 @@
 
     .zuri-voice-card {
         width: 560px; height: 480px;
-        background: rgba(10, 10, 20, 0.98);
-        backdrop-filter: blur(64px) saturate(300%) contrast(110%);
-        -webkit-backdrop-filter: blur(64px) saturate(300%) contrast(110%);
+        background: var(--zuri-glass-bg);
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
         border-radius: 48px;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.95), var(--zuri-inner-glow);
+        border: 0.5px solid var(--zuri-glass-border);
+        box-shadow: var(--zuri-glass-shadow-deep);
         transform: scale(0.9);
         pointer-events: auto;
         animation: zuri-shroud-blur 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -376,28 +411,97 @@
     /* Booking Sync & Modal Spatial Materials */
     .zuri-sync-panel {
         position: fixed; left: 32px; bottom: 32px; width: 340px;
-        background: var(--zuri-glass-bg); backdrop-filter: blur(48px) saturate(200%);
-        -webkit-backdrop-filter: blur(48px) saturate(200%);
-        border: 1px solid var(--zuri-glass-border); border-radius: 28px;
-        box-shadow: var(--zuri-glass-shadow); padding: 24px;
-        display: none; flex-direction: column; gap: 16px; z-index: 999998;
-        transform: scale(0.9); transform-origin: bottom left;
+        background: var(--zuri-glass-bg); backdrop-filter: blur(48px) saturate(210%);
+        -webkit-backdrop-filter: blur(48px) saturate(210%);
+        border: 0.5px solid var(--zuri-glass-border); border-radius: 28px;
+        box-shadow: var(--zuri-glass-shadow-deep); padding: 24px;
+        display: none; flex-direction: column; gap: 16px; z-index: 1000005;
+
+        transform: scale(0.8); opacity: 0; transform-origin: bottom left;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .zuri-sync-list { display: flex; flex-direction: column; gap: 12px; max-height: 480px; overflow-y: auto; scrollbar-width: none; }
+    .zuri-sync-panel.visible { display: flex; opacity: 1; transform: scale(0.9); }
+    .zuri-sync-close {
+        position: absolute; top: 16px; right: 16px;
+        width: 24px; height: 24px; border-radius: 50%;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: 0.3s; opacity: 0.4;
+    }
+    .zuri-sync-close:hover { background: rgba(255,255,255,0.15); opacity: 1; transform: scale(1.1); }
+    .zuri-sync-close svg { width: 12px; height: 12px; fill: #fff; }
+
+    .zuri-sync-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; scrollbar-width: none; padding-bottom: 10px; }
     .zuri-sync-list::-webkit-scrollbar { display: none; }
+
+    .zuri-booking-sync-item {
+        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 6px;
+        transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+    }
+    .zuri-booking-sync-item:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+    
+    .zuri-booking-sync-code { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 0.5px; opacity: 0.9; }
+    .zuri-booking-sync-meta { font-size: 11px; opacity: 0.5; color: #fff; margin-bottom: 2px; }
+    
+    .zuri-booking-sync-status { 
+        position: absolute; top: 18px; right: 18px;
+        font-size: 9px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; 
+        border-radius: 20px; background: rgba(48, 209, 88, 0.12); color: #30D158; 
+        border: 1px solid rgba(48, 209, 88, 0.2);
+    }
+    .zuri-booking-sync-status.cancelled { background: rgba(255, 59, 48, 0.12); color: #FF3B30; border-color: rgba(255, 59, 48, 0.2); }
+    
+    .zuri-booking-sync-time { font-size: 10px; color: #fff; opacity: 0.4; font-weight: 600; margin-bottom: 4px; }
+    
+    .zuri-booking-sync-cancel {
+        margin-top: 6px; background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.15);
+        color: #FF3B30; font-size: 10px; font-weight: 800; padding: 10px; border-radius: 12px;
+        cursor: pointer; transition: 0.25s; width: 100%; text-align: center;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .zuri-booking-sync-cancel:hover { background: #FF3B30; color: #fff; transform: scale(1.01); box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3); }
+
 
     .zuri-modal-overlay {
         position: fixed; inset: 0; background: rgba(0,0,0,0.4);
         backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center;
-        z-index: 1000005; padding: 24px;
+        z-index: 1000020; padding: 24px;
+
     }
     .zuri-modal-card {
-        max-width: 420px; width: 100%; padding: 32px;
-        background: var(--zuri-glass-bg); border-radius: 32px;
-        border: 1px solid var(--zuri-glass-border); 
-        box-shadow: 0 40px 120px rgba(0,0,0,0.5);
-        transform: scale(0.9);
+        max-width: 300px; width: 100%; padding: 28px 24px;
+        background: var(--zuri-glass-material); border-radius: 40px;
+        backdrop-filter: var(--zuri-blur) var(--zuri-vibrancy);
+        -webkit-backdrop-filter: var(--zuri-blur) var(--zuri-vibrancy);
+        border: 0.5px solid var(--zuri-glass-border-light); 
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.35);
+        transform: scale(0.92); transition: all 0.5s var(--zuri-ease);
+        text-align: center;
     }
+
+
+    .zuri-modal-overlay.visible { opacity: 1; }
+    .zuri-modal-overlay.visible .zuri-modal-card { transform: scale(1); }
+
+    .zuri-conf-code-box {
+        background: rgba(255,255,255,0.03); border-radius: 20px; padding: 20px;
+        margin-bottom: 28px; border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(10px); cursor: pointer; transition: 0.3s;
+        position: relative; overflow: hidden;
+    }
+    .zuri-conf-code-box:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .zuri-conf-code-box:active { transform: translateY(0) scale(0.98); }
+    
+    .zuri-copy-badge {
+        position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 800;
+        color: var(--zuri-primary); text-transform: uppercase; letter-spacing: 1px;
+        opacity: 0; transition: 0.3s; transform: translateY(5px);
+    }
+    .zuri-conf-code-box:hover .zuri-copy-badge { opacity: 0.6; transform: translateY(0); }
+    .zuri-conf-code-box.copied .zuri-copy-badge { opacity: 1; color: #30D158; }
+
     `;
     const sEl = document.createElement('style');
     sEl.textContent = css;
@@ -466,6 +570,9 @@
 
         <!-- Booking Sync Panel -->
         <div id="zuri-booking-sync" class="zuri-sync-panel">
+            <button id="zuri-sync-close" class="zuri-sync-close" title="Dismiss">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
             <div style="font-size:11px; font-weight:800; color:#fff; text-transform:uppercase; letter-spacing:1.5px; opacity:0.6;">Reservations</div>
             <div id="zuri-booking-sync-list" class="zuri-sync-list"></div>
         </div>
@@ -483,6 +590,31 @@
                 </div>
             </div>
         </div>
+
+        <div id="zuri-conf-modal" class="zuri-modal-overlay">
+            <div class="zuri-modal-card">
+                <div style="width: 52px; height: 52px; background: rgba(48, 209, 88, 0.2); border: 1px solid rgba(48, 209, 88, 0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 20px rgba(48, 209, 88, 0.3);">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="#30D158"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #fff;">Confirmed!</h4>
+                <p style="margin: 0 0 16px 0; font-size: 12px; color: var(--zuri-text-muted);">Your reservation at Kuriftu is secured.</p>
+                
+                <div id="zuri-conf-code-tap" class="zuri-conf-code-box" style="padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;" title="Click to Copy">
+                    <div id="zuri-conf-code-val" style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 2px;">-------</div>
+                    <button class="zuri-btn-glass" style="width: 28px; height: 28px; border-radius: 6px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="white" style="opacity: 0.6;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    </button>
+                    <div class="zuri-copy-badge" id="zuri-conf-copy-text" style="top:4px; right:6px;">Click to Copy</div>
+                </div>
+                <div id="zuri-conf-details-val" style="font-size: 11px; color: #fff; opacity: 0.6; margin-top: -10px; margin-bottom: 20px; text-align: center;">Processing...</div>
+
+                <button id="zuri-conf-done" class="zuri-btn-glass" style="width: 100%; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #007AFF, #00C2FF); color: #fff; font-size: 14px; font-weight: 700; border: none; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3); pointer-events: auto; cursor: pointer;">Great!</button>
+            </div>
+        </div>
+
+
+
+
     `;
     document.body.appendChild(container);
 
@@ -495,12 +627,12 @@
     const sendBtn = container.querySelector('#zuri-send-btn');
     const micBtn = container.querySelector('#zuri-mic-trigger');
     const notificationBadge = container.querySelector('#zuri-notification-badge');
-    
+
     // Custom Dropdown Refs
     const langPill = container.querySelector('#zuri-lang-pill');
     const langMenu = container.querySelector('#zuri-lang-menu');
     const langItems = container.querySelectorAll('.zuri-lang-item');
-    
+
     // Voice Overlay Refs
     const voiceOverlay = container.querySelector('#zuri-voice-overlay');
     const voiceClose = container.querySelector('#zuri-voice-close');
@@ -508,7 +640,7 @@
     const voiceCaption = container.querySelector('#zuri-voice-caption');
     const orbWrap = container.querySelector('#zuri-orb-wrap');
     const stopVoice = container.querySelector('#zuri-stop-voice');
-    
+
     // Notification Badge State
     let hasUnreadMessages = false;
 
@@ -521,9 +653,21 @@
     const cancelModalConfirm = container.querySelector('#zuri-cancel-confirm');
     const cancelModalClose = container.querySelector('#zuri-cancel-close');
     const cancelModalError = container.querySelector('#zuri-cancel-error');
+    const syncCloseBtn = container.querySelector('#zuri-sync-close');
+
+    // Conf Modal Refs
+    const confModal = container.querySelector('#zuri-conf-modal');
+    const confCodeVal = container.querySelector('#zuri-conf-code-val');
+    const confDetailsVal = container.querySelector('#zuri-conf-details-val');
+    const confDoneBtn = container.querySelector('#zuri-conf-done');
+    const confCodeTap = container.querySelector('#zuri-conf-code-tap');
+    const confCopyText = container.querySelector('#zuri-conf-copy-text');
+
+
+
 
     let selectedLang = 'en-US'; // Track manually for custom dropdown
-    
+
     // Helper: Get Selected Language Name
     function getSelectedLanguageName() {
         return LANGS.find(l => l.code === selectedLang)?.name || 'English';
@@ -541,7 +685,7 @@
             const flag = item.querySelector('span').textContent;
             selectedLang = code;
             langPill.textContent = flag;
-            
+
             langItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             langMenu.classList.remove('active');
@@ -558,7 +702,7 @@
     const CANCELLED_BOOKING_HIDE_DELAY_MS = 6000;
     const CHAT_HISTORY_MAX = 20;
     const BOOKING_SYNC_POLL_MS = 15000;
-    
+
     let bookingSyncTimer = null;
     let bookingSyncHideTimer = null;
     let bookingSyncVisible = false;
@@ -566,7 +710,17 @@
     let voiceCaptionTimer = null;
     const bookingsByCode = new Map();
     const cancelledBookingTimers = new Map();
+    const currentSessionBookings = new Set();
     let chatHistory = [];
+
+    function pushChatHistory(role, text) {
+        chatHistory.push({ role, text });
+        if (chatHistory.length > CHAT_HISTORY_MAX) chatHistory.shift();
+    }
+    function getChatHistory() {
+        return chatHistory;
+    }
+
     // == Toggle Chat =============================================
     function renderChatGreeting() {
         msgBox.innerHTML = '';
@@ -583,10 +737,10 @@
         container.classList.add('active');
         bubble.classList.add('hidden');
         chatWin.classList.add('active');
-        
-        // Ensure sync panel is hidden when chat is open to avoid layout glitches
-        if (bookingSyncPanel) bookingSyncPanel.style.display = 'none';
-        
+
+        chatWin.classList.add('active');
+
+
         if (!msgBox.children.length) renderChatGreeting();
         input.focus();
     }
@@ -595,32 +749,35 @@
         container.classList.remove('active');
         chatWin.classList.remove('active');
         bubble.classList.remove('hidden');
-        
+
         // Hide booking sync panel (left side modal)
         if (bookingSyncPanel) {
-            bookingSyncPanel.style.display = 'none';
+            bookingSyncPanel.classList.remove('visible');
+            setTimeout(() => {
+                if (!bookingSyncPanel.classList.contains('visible')) bookingSyncPanel.style.display = 'none';
+            }, 500);
         }
-        
+
         exitVoiceMode();
     }
 
     // ✦ Enhanced Bubble Interactions ============================
-    
+
     // Ripple Effect on Click
     function createRipple(event) {
         const ripple = document.createElement('span');
         ripple.className = 'zuri-ripple';
-        
+
         const rect = bubble.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
         ripple.style.width = ripple.style.height = size + 'px';
         ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
         ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
-        
+
         bubble.appendChild(ripple);
         setTimeout(() => ripple.remove(), 600);
     }
-    
+
     // Show Notification Badge
     function showNotificationBadge() {
         if (!hasUnreadMessages && notificationBadge) {
@@ -629,7 +786,7 @@
             notificationBadge.classList.add('visible');
         }
     }
-    
+
     // Hide Notification Badge
     function hideNotificationBadge() {
         if (hasUnreadMessages && notificationBadge) {
@@ -638,7 +795,7 @@
             notificationBadge.classList.remove('visible');
         }
     }
-    
+
     bubble.onclick = (e) => {
         createRipple(e);
         if (chatWin.classList.contains('active')) {
@@ -648,7 +805,7 @@
             hideNotificationBadge(); // Clear badge when opening chat
         }
     };
-    
+
     // Keyboard Accessibility - Enter/Space to open
     bubble.onkeydown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -692,7 +849,7 @@
         const div = document.createElement('div');
         div.className = `zuri-msg ${type}`;
         if (opts.ghost) div.classList.add('ghost');
-        
+
         div.dataset.text = text;
         div.dataset.type = type;
         div.dataset.opts = JSON.stringify(opts);
@@ -710,11 +867,44 @@
         } else {
             const span = document.createElement('span');
             span.className = 'zuri-msg-text';
-            span.textContent = text;
+            span.innerHTML = md(text);
             div.appendChild(span);
         }
 
-        // Add TTS button for AI messages
+        // Add Copy Button
+        const copyBtn = document.createElement('div');
+        copyBtn.className = 'zuri-copy-btn';
+        copyBtn.title = 'Copy to clipboard';
+        copyBtn.innerHTML = `
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        `;
+        // const tooltip = document.createElement('div');
+        // tooltip.className = 'zuri-copy-tooltip';
+        // tooltip.textContent = 'Copied!';
+
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.classList.add('copied');
+                copyBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                `;
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    `;
+                }, 2000);
+            });
+        };
+
+        div.appendChild(copyBtn);
+        // div.appendChild(tooltip);
+
+
+
+        // Add TTS button for AI messages (Temporarily disabled per request)
+        /*
         if (type === 'ai') {
             const ttsBtn = document.createElement('div');
             ttsBtn.className = 'zuri-tts-btn';
@@ -726,6 +916,7 @@
             };
             div.appendChild(ttsBtn);
         }
+        */
 
         msgBox.appendChild(div);
         msgBox.scrollTop = msgBox.scrollHeight;
@@ -865,10 +1056,32 @@
     function saveBookings(bookings) {
         try {
             localStorage.setItem(BOOKING_STORE_KEY, JSON.stringify(bookings.slice(0, BOOKING_STORE_MAX)));
-        } catch (_) {}
+        } catch (_) { }
+    }
+
+    function formatDateDetailed(d) {
+        if (!d || d === 'TBD') return d;
+        try {
+            const date = new Date(d.includes('-') ? d : d + 'T00:00:00');
+            if (isNaN(date)) return d;
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } catch (_) { return d; }
+    }
+
+    function formatTimeAMPM(t) {
+        if (!t || t === 'TBD') return t;
+        if (t.includes('AM') || t.includes('PM')) return t;
+        try {
+            const [h, m] = t.split(':');
+            const hour = parseInt(h);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const h12 = hour % 12 || 12;
+            return `${h12}:${m || '00'} ${ampm}`;
+        } catch (_) { return t; }
     }
 
     function normalizeBooking(raw) {
+
         if (!raw) return null;
         const code = (raw.confirmation_code || '').toUpperCase();
         if (!code) return null;
@@ -915,7 +1128,91 @@
             </div>
         `;
         addMessageContent(addMessage('', 'ai', { html }));
+        showBookingConfirmationModal(booking);
     }
+
+    function showBookingConfirmationModal(booking) {
+        if (!booking || !confModal) return;
+        confCodeVal.textContent = booking.confirmation_code || 'Confirmed';
+        confDetailsVal.textContent = `${booking.service || 'Reservation'} on ${formatDateDetailed(booking.date)} @ ${formatTimeAMPM(booking.time)}`;
+
+        
+        // Re-bind click handlers to ensure responsiveness on current DOM
+        if (confDoneBtn) {
+            confDoneBtn.onclick = (e) => {
+                if (e) e.stopPropagation();
+                closeConfirmationModal();
+            };
+        }
+        
+        if (confCodeTap) {
+            confCodeTap.onclick = (e) => {
+                if (e) e.stopPropagation();
+                copyToClipboard(confCodeVal.textContent, confCodeTap, confCopyText);
+            };
+        }
+
+
+        confModal.style.display = 'flex';
+        setTimeout(() => confModal.classList.add('visible'), 10);
+    }
+
+
+    function closeConfirmationModal() {
+        if (!confModal) return;
+        confModal.classList.remove('visible');
+        setTimeout(() => {
+            if (!confModal.classList.contains('visible')) confModal.style.display = 'none';
+        }, 500);
+    }
+
+    function copyToClipboard(text, el, badgeEl) {
+        if (!text) return;
+        
+        const performCopy = () => {
+            if (el) {
+                el.classList.add('copied');
+                el.style.borderColor = '#30D158';
+                el.style.background = 'rgba(48, 209, 88, 0.1)';
+            }
+            if (badgeEl) {
+                badgeEl.textContent = 'Copied!';
+                badgeEl.style.color = '#30D158';
+            }
+            setTimeout(() => {
+                if (el) {
+                    el.classList.remove('copied');
+                    el.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    el.style.background = 'rgba(255, 255, 255, 0.03)';
+                }
+                if (badgeEl) {
+                    badgeEl.textContent = 'Click to Copy';
+                    badgeEl.style.color = 'var(--zuri-primary)';
+                }
+            }, 2000);
+        };
+
+        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            if (successful) performCopy();
+        } catch (err) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(performCopy);
+            }
+        }
+    }
+
+
+
 
     function publishBookingSync(booking) {
         if (!booking || !booking.confirmation_code) return;
@@ -930,9 +1227,14 @@
             list.unshift(normalized);
         }
         saveBookings(list);
+        
+        // Mark as current session booking
+        currentSessionBookings.add(normalized.confirmation_code);
+        
         renderBookingSyncPanel();
-        showBookingSyncPanelTemporarily();
+        showBookingSyncPanel();
     }
+
 
     function markBookingCancelledLocally(code) {
         const list = loadBookings();
@@ -955,6 +1257,7 @@
         }
     }
 
+    /* 
     async function cancelBookingFromWidget(confirmationCode, guestName) {
         if (!cancelModalConfirm || !cancelModalError) return;
 
@@ -979,6 +1282,7 @@
             cancelModalConfirm.disabled = false;
         }
     }
+    */
 
     function syncCancelModalState() {
         if (!cancelModalInput || !cancelModalConfirm) return;
@@ -1004,36 +1308,64 @@
 
     function renderBookingSyncPanel() {
         if (!bookingSyncList || !bookingSyncPanel) return;
-        const list = loadBookings();
+        const allBookings = loadBookings();
+        // ONLY show bookings from current session
+        const list = allBookings.filter(b => currentSessionBookings.has(b.confirmation_code));
+        
         if (list.length === 0) {
-            bookingSyncPanel.style.display = 'none';
+
+            bookingSyncPanel.classList.remove('visible');
+            setTimeout(() => {
+                if (!bookingSyncPanel.classList.contains('visible')) bookingSyncPanel.style.display = 'none';
+            }, 500);
             return;
         }
 
         bookingSyncList.innerHTML = list.map(b => `
             <div class="zuri-booking-sync-item">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <div class="zuri-booking-sync-code">${escapeHtml(b.confirmation_code)}</div>
-                        <div class="zuri-booking-sync-meta">${escapeHtml(b.service)}</div>
-                    </div>
-                    <div class="zuri-booking-sync-status ${b.status?.toLowerCase() === 'cancelled' ? 'cancelled' : ''}">${escapeHtml(b.status || 'Confirmed')}</div>
-                </div>
-                <div class="zuri-booking-sync-time">${escapeHtml(b.date)} at ${escapeHtml(b.time)}</div>
-                ${b.status?.toLowerCase() !== 'cancelled' ? `<button class="zuri-booking-sync-cancel" onclick="window._zuriOpenCancel('${escapeHtml(b.confirmation_code)}')">Cancel Stay</button>` : ''}
+                <div class="zuri-booking-sync-code">${escapeHtml(b.confirmation_code)}</div>
+                <div class="zuri-booking-sync-status">${escapeHtml(b.status || 'Confirmed')}</div>
+                <div class="zuri-booking-sync-meta">${escapeHtml(b.service)}</div>
+                <div class="zuri-booking-sync-time">${formatDateDetailed(b.date)} at ${formatTimeAMPM(b.time)}</div>
             </div>
+
         `).join('');
 
-        window._zuriOpenCancel = (code) => openCancelModal(code);
+        window._zuriOpenCancel = (code) => { /* Disabled */ };
     }
 
-    function showBookingSyncPanelTemporarily() {
+    function hideBookingSyncPanel() {
         if (!bookingSyncPanel) return;
+        bookingSyncPanel.classList.remove('visible');
+        setTimeout(() => {
+            if (!bookingSyncPanel.classList.contains('visible')) bookingSyncPanel.style.display = 'none';
+        }, 500);
+    }
+
+    function showBookingSyncPanel() {
+
+        if (!bookingSyncPanel) return;
+
+
         bookingSyncPanel.style.display = 'flex';
-        if (bookingSyncHideTimer) clearTimeout(bookingSyncHideTimer);
-        bookingSyncHideTimer = setTimeout(() => {
-            bookingSyncPanel.style.display = 'none';
-        }, BOOKING_SYNC_AUTO_HIDE_MS);
+        // Small timeout to allow display property to be registered for the transition
+        setTimeout(() => bookingSyncPanel.classList.add('visible'), 20);
+
+        if (bookingSyncHideTimer) {
+            clearTimeout(bookingSyncHideTimer);
+            bookingSyncHideTimer = null;
+        }
+    }
+
+    if (syncCloseBtn) {
+        syncCloseBtn.onclick = (e) => {
+            if (e) e.stopPropagation();
+            if (bookingSyncHideTimer) clearTimeout(bookingSyncHideTimer);
+            bookingSyncPanel.classList.remove('visible');
+            setTimeout(() => {
+                if (!bookingSyncPanel.classList.contains('visible')) bookingSyncPanel.style.display = 'none';
+            }, 500);
+        };
     }
 
     async function syncBookingsFromServer() {
@@ -1054,7 +1386,7 @@
             }
             saveBookings(merged);
             renderBookingSyncPanel();
-        } catch (_) {}
+        } catch (_) { }
     }
 
     syncBookingsFromServer();
@@ -1077,19 +1409,20 @@
             orbWrap.className = 'zuri-orb-wrap processing';
             voiceStatus.textContent = 'Thinking';
             clearVoiceCaptionRotation();
-            setVoiceCaption('');
+            setVoiceCaption('Thinking...');
         }
 
+
         try {
-            const selectedLangName = LANGS.find(l => l.code === selectedLang)?.name || 'English';
             const res = await fetch(`${apiUrl}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Zuri-Hotel-Id': hotelId },
                 body: JSON.stringify({
                     message: text,
                     hotel_id: hotelId,
-                    language: selectedLangName,
-                    conversation_history: chatHistory.slice(-7, -1),
+                    language: selectedLang,
+                    conversation_history: getChatHistory(),
+                    session_id: 'widget-session'
                 })
             });
             const data = await res.json();
@@ -1104,7 +1437,7 @@
             }
             const aiBubble = addMessageContent(addMessage(aiText, 'ai', { ghost: opts.fromVoice }));
             pushChatHistory('model', aiText);
-            
+
             // Show notification badge if chat is closed and new message arrives
             if (!chatWin.classList.contains('active')) {
                 showNotificationBadge();
@@ -1152,12 +1485,11 @@
     }
 
     async function sendVoiceInteract(blob) {
-        const selectedLangName = LANGS.find((l) => l.code === selectedLang)?.name || 'English';
         const formData = new FormData();
         formData.append('audio', blob, `voice-input.${blob.type.includes('webm') ? 'webm' : 'wav'}`);
         formData.append('hotel_id', hotelId);
-        formData.append('language', selectedLangName);
-        formData.append('conversation_history_json', JSON.stringify(chatHistory.slice(-7)));
+        formData.append('language', selectedLang);
+        formData.append('conversation_history_json', JSON.stringify(getChatHistory()));
 
         const userBubble = addMessageContent(addMessage('...', 'user', { ghost: true }));
         const aiBubble = addMessageContent(addMessage('...', 'ai', { ghost: true }));
@@ -1293,6 +1625,9 @@
     }
 
     function shouldUseLiveVoice() {
+        // Exclude languages that behave poorly with the Multimodal Live API
+        const UNSUPPORTED_LIVE_LANGS = ['am-ET', 'om-ET', 'ti-ET', 'ar-SA', 'so-SO'];
+        if (UNSUPPORTED_LIVE_LANGS.includes(selectedLang)) return false;
         return true;
     }
 
@@ -1393,7 +1728,7 @@
                 liveSocket.send(JSON.stringify({ type: 'close' }));
             }
             liveSocket.close();
-        } catch (_) {}
+        } catch (_) { }
         liveSocket = null;
     }
 
@@ -1473,10 +1808,10 @@
                 const fullText = (accumulatedTranscript + ' ' + interim).trim();
                 if (fullText) {
                     setVoiceCaption(fullText, { interim: !!interim });
-                    liveUserTranscript = fullText; 
+                    liveUserTranscript = fullText;
                 }
             };
-            try { phantomRecognition.start(); } catch(_) {}
+            try { phantomRecognition.start(); } catch (_) { }
         }
 
         liveSocket.onmessage = (event) => {
@@ -1529,7 +1864,7 @@
             }
         };
         liveSocket.onclose = () => {
-            if (phantomRecognition) { try { phantomRecognition.stop(); } catch(_) {} }
+            if (phantomRecognition) { try { phantomRecognition.stop(); } catch (_) { } }
             cleanupLiveInputStream();
             liveSocket = null;
             if (!voiceModeActive) return;
@@ -1663,7 +1998,7 @@
 
     // == STT =====================================================
     const GEMINI_TRANSCRIBE_LANGS = new Set(['ar-SA', 'am-ET', 'ti-ET', 'om-ET', 'so-SO']);
-    const GEMINI_TTS_LANGS = new Set(['ti-ET', 'om-ET', 'so-SO']);
+    const GEMINI_TTS_LANGS = new Set(['am-ET', 'ti-ET', 'om-ET', 'ar-SA', 'so-SO']);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isListening = false;
@@ -1699,19 +2034,19 @@
                 if (event.results[i].isFinal) { finalChunk += t; } else { interim += t; }
             }
 
-    // Live caption — shows Ge'ez / Latin in real-time for trust
-    if (interim) {
-        clearVoiceCaptionRotation();
-        setVoiceCaption((accumulatedTranscript + ' ' + interim).trim(), { interim: true });
-        voiceStatus.textContent = `Listening (${getSelectedLanguageName()})`;
-    }
+            // Live caption — shows Ge'ez / Latin in real-time for trust
+            if (interim) {
+                clearVoiceCaptionRotation();
+                setVoiceCaption((accumulatedTranscript + ' ' + interim).trim(), { interim: true });
+                voiceStatus.textContent = `Listening (${getSelectedLanguageName()})`;
+            }
 
-    if (finalChunk) {
-        accumulatedTranscript += ' ' + finalChunk;
-        clearVoiceCaptionRotation();
-        setVoiceCaption(accumulatedTranscript.trim());
-        voiceStatus.textContent = `${getSelectedLanguageName()} Ready`;
-    }
+            if (finalChunk) {
+                accumulatedTranscript += ' ' + finalChunk;
+                clearVoiceCaptionRotation();
+                setVoiceCaption(accumulatedTranscript.trim());
+                voiceStatus.textContent = `${getSelectedLanguageName()} Ready`;
+            }
         };
 
         recognition.onerror = (e) => {
@@ -1727,7 +2062,7 @@
         recognition.onend = () => {
             // Auto-restart if we're still in voice mode and still listening natively
             if (voiceModeActive && isListening) {
-                try { recognition.start(); } catch(e) {}
+                try { recognition.start(); } catch (e) { }
             }
         };
     }
@@ -1871,7 +2206,7 @@
         voiceStatus.textContent = 'Listening (Tap orb to send)';
         clearVoiceCaptionRotation();
         setVoiceCaption('Speak now...', { interim: true });
-        try { recognition.start(); } catch(e) {}
+        try { recognition.start(); } catch (e) { }
     }
 
     function stopListening() {
@@ -1880,13 +2215,30 @@
             cleanupLiveInputStream();
             orbWrap.className = 'zuri-orb-wrap processing';
             voiceStatus.textContent = 'Thinking';
-            setVoiceCaption(liveUserTranscript.trim() || 'Thinking...');
-            if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
-                liveSocket.send(JSON.stringify({ type: 'end' }));
+            
+            const transcript = liveUserTranscript.trim();
+            setVoiceCaption(transcript || 'Thinking...');
+
+            // FAIL-SAFE: If socket is NOT open or was never established, fall back to Standard REST immediately
+            if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) {
+                console.warn('Zuri: Live WebSocket not ready, falling back to REST.');
+                if (transcript) {
+                    sendMessage(transcript, { fromVoice: true });
+                } else {
+                    // Reset if nothing to send
+                    voiceStatus.textContent = 'Ready';
+                    orbWrap.className = 'zuri-orb-wrap';
+                }
+                if (phantomRecognition) { try { phantomRecognition.stop(); } catch (_) { } }
+                return;
             }
-            if (phantomRecognition) { try { phantomRecognition.stop(); } catch(_) {} }
+
+            // Standard Live submission
+            liveSocket.send(JSON.stringify({ type: 'end' }));
+            if (phantomRecognition) { try { phantomRecognition.stop(); } catch (_) { } }
             return;
         }
+
 
         if (shouldUseGeminiTranscription()) {
             isListening = false;
@@ -1901,7 +2253,7 @@
 
         isListening = false;
         orbWrap.className = 'zuri-orb-wrap';
-        try { recognition.stop(); } catch(e) {}
+        try { recognition.stop(); } catch (e) { }
     }
 
     // == Voice Mode (Overlay) ====================================
@@ -1910,15 +2262,15 @@
             alert('Voice input is not supported in this browser. Please use Google Chrome.');
             return;
         }
-        
+
         // Show Selected Language instead of "System Ready"
         const selectedLanguageName = LANGS.find(l => l.code === selectedLang)?.name || 'English';
         voiceStatus.textContent = `${getSelectedLanguageName()} Active`;
         setVoiceCaption('Initializing...');
-        
+
         voiceModeActive = true;
         voiceOverlay.classList.add('active');
-        
+
         // Start Listening Immediately
         accumulatedTranscript = '';
         startListening();
@@ -1929,9 +2281,9 @@
             voiceModeActive = false;
             stopListening();
             cleanupLiveInputStream();
-            
+
             if (typeof liveSocket !== 'undefined' && liveSocket && typeof liveSocket.close === 'function') {
-                try { liveSocket.close(); } catch(e) {}
+                try { liveSocket.close(); } catch (e) { }
                 liveSocket = null;
             }
 
@@ -1946,7 +2298,7 @@
             // All ghost messages become solid when exiting voice
             try {
                 msgBox.querySelectorAll('.ghost').forEach(el => resolveGhost(el));
-            } catch(e) {}
+            } catch (e) { }
         }
     }
 
@@ -1960,11 +2312,21 @@
     // Push-to-talk mechanic on the orb
     orbWrap.style.cursor = 'pointer';
     orbWrap.onclick = () => {
-        if (orbWrap.classList.contains('processing') || pendingVoiceTranscription) return; // Ignore while processing backend
+        // Prevent click if currently speaking/remote audio is playing
+        if (remoteAudio && !remoteAudio.paused) {
+            stopRemoteAudioPlayback();
+            clearVoiceCaptionRotation();
+            orbWrap.className = 'zuri-orb-wrap';
+            voiceStatus.textContent = `${getSelectedLanguageName()} Ready`;
+            setVoiceCaption('Tap the orb to start speaking...');
+            return;
+        }
 
-        // Check if actively listening OR if voice overlay is just opened but hasn't started yet
-        const isActivelyListening = isListening || (voiceModeActive && voiceOverlay.classList.contains('active'));
-        
+        if (orbWrap.classList.contains('processing') || pendingVoiceTranscription) return;
+
+        // Check if actively listening
+        const isActivelyListening = isListening;
+
         if (isActivelyListening) {
             // Stop & Send
             stopListening();
@@ -2017,6 +2379,29 @@
             if (e.target === cancelModal) closeCancelModal();
         };
     }
+
+    if (confDoneBtn) {
+        confDoneBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeConfirmationModal();
+        });
+    }
+    if (confModal) {
+        confModal.addEventListener('click', (e) => {
+            if (e.target === confModal) closeConfirmationModal();
+        });
+    }
+
+
+    if (syncCloseBtn) {
+        syncCloseBtn.onclick = (e) => {
+            if (e) e.stopPropagation();
+            hideBookingSyncPanel();
+        };
+    }
+
+
+
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && cancelModal && cancelModal.classList.contains('show')) {
