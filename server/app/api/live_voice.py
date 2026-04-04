@@ -187,9 +187,16 @@ async def live_voice_websocket(
         ),
     )
 
-    last_error: Exception | None = None
     try:
-        for model_name in dict.fromkeys(LIVE_MODEL_FALLBACKS):
+        # Deduplicate and ensure 'models/' prefix
+        models_to_try = []
+        for m in LIVE_MODEL_FALLBACKS:
+            if m:
+                full_name = f"models/{m}" if not m.startswith("models/") else m
+                if full_name not in models_to_try:
+                    models_to_try.append(full_name)
+
+        for model_name in models_to_try:
             try:
                 async with client.aio.live.connect(
                     model=model_name,
@@ -321,5 +328,11 @@ async def live_voice_websocket(
         logger.error("live voice websocket failed hotel_id=%s error=%s", hotel_id, error, exc_info=True)
 
     logger.error("live voice unavailable hotel_id=%s last_error=%s", hotel_id, last_error)
-    await websocket.send_json({"type": "error", "message": "Live voice is unavailable right now."})
-    await websocket.close()
+    try:
+        from starlette.websockets import WebSocketState
+        if websocket.client_state != WebSocketState.DISCONNECTED:
+            await websocket.send_json({"type": "error", "message": "Live voice is unavailable right now."})
+            await websocket.close()
+    except Exception:
+        pass
+
