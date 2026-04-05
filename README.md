@@ -8,8 +8,6 @@ Zuri is a professional, action-oriented AI Concierge designed for the 2026 Hospi
 
 In Ethiopia and across East Africa, guests often face delays due to phone-based support, limited-hour front desks, or language barriers. Zuri solves this by turning a property's knowledge (PDFs, menus, handbooks) into an **Action-Capable Agent** that handles inquiries and bookings instantly.
 
-## 📺 [Watch the Demo Video](https://youtu.be/RUp7V8arhIA)
-
 ## Key Features
 
 - **Native Multilingual Support**: Built-in, high-fidelity support for **Amharic, Oromifa, and Tigrinya**, alongside major international languages.
@@ -19,13 +17,19 @@ In Ethiopia and across East Africa, guests often face delays due to phone-based 
 - **Multi-Tenant Dashboard**: Manage knowledge bases, review live transcripts, and monitor bookings in a unified command center.
 - **Privacy & Security**: Per-tenant data isolation and dynamic domain whitelisting (CORS) for production-grade safety.
 
+## Demo Video
+
+[![Zuri AI Demo](https://img.youtube.com/vi/RUp7V8arhIA/0.jpg)](https://youtu.be/RUp7V8arhIA)
+
+*Click the image above to watch the full platform walkthrough.*
+
 ## Technology Stack
 
 | Category | Stack |
 |:---|:---|
 | **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) |
 | **Backend** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![SQLModel](https://img.shields.io/badge/SQLModel-EC4899?style=flat-square) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![ChromaDB](https://img.shields.io/badge/ChromaDB-3B82F6?style=flat-square) |
-| **AI Engine** | ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8B5CF6?style=flat-square&logo=google&logoColor=white) ![RAG](https://img.shields.io/badge/RAG-Integration-pink?style=flat-square) |
+| **AI Engine** | ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8B5CF6?style=flat-square&logo=google&logoColor=white) ![Addis AI](https://img.shields.io/badge/Addis_AI-Integrating-blue?style=flat-square) ![RAG](https://img.shields.io/badge/RAG-Integration-pink?style=flat-square) |
 | **Deployment** | ![Render](https://img.shields.io/badge/Render-46E3B7?style=flat-square&logo=render&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) |
 
 ## Project Structure
