@@ -126,11 +126,10 @@ export default function LandingPage() {
               Widget
             </h2>
 
-            <Link href="/signup">
-              <button className="rounded-full bg-white text-black hover:bg-white/90 hover:text-black border-none h-14 px-8 text-base font-medium shadow-xl flex items-center gap-3 transition-colors cursor-pointer">
-                Book a Demo
-              </button>
-            </Link>
+            <button className="rounded-full bg-white text-black hover:bg-white/90 hover:text-black border-none h-14 px-8 text-base font-medium shadow-xl flex items-center gap-3 transition-colors cursor-pointer">
+              <Play className="w-4 h-4 fill-black text-black" />
+              Watch Video
+            </button>
           </div>
 
           {/* Bottom indicator */}
