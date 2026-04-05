@@ -160,7 +160,6 @@ export default function DashboardPage() {
           <div className="bg-card border border-border rounded-xl shadow-sm mb-8 overflow-hidden">
              <div className="px-6 py-5 border-b border-border flex justify-between items-center bg-muted/30">
                <h3 className="text-sm font-medium text-card-foreground">Guest Engagement Journey</h3>
-               <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"><Settings className="w-4 h-4"/></Button>
             </div>
             <div className="p-6">
               {loading ? (
