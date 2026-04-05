@@ -56,7 +56,7 @@ export default function TutorialPage() {
               {/* Placeholder YouTube Embed */}
               <iframe 
                 className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                src="https://www.youtube.com/embed/RUp7V8arhIA" 
                 title="Zuri Platform Tutorial"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowFullScreen
@@ -64,21 +64,6 @@ export default function TutorialPage() {
               
               {/* Subtle glass overlay for aesthetics when not playing (optional effect) */}
               <div className="absolute inset-0 pointer-events-none border-[12px] border-white/10 rounded-3xl z-10" />
-            </div>
-            
-            <div className="mt-8 flex items-center justify-between px-4">
-              <div className="flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-zinc-200" />
-                  ))}
-                </div>
-                <span className="text-sm font-medium opacity-60">Joined by 200+ resorts this month</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-widest">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Now Playing: Essential Setup
-              </div>
             </div>
           </FadeInView>
         </section>
@@ -112,9 +97,9 @@ export default function TutorialPage() {
               <Button asChild size="lg" className="rounded-full px-8 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xl h-14 text-base font-semibold transition-transform hover:scale-105">
                 <Link href="/signup">Start Free Trial</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-8 h-14 text-base font-medium border-black/10 hover:bg-zinc-50">
+              <Button asChild variant="outline" size="lg" className="rounded-full px-8 h-14 text-base font-medium border-black/10 hover:bg-zinc-200">
                 <Link href="/contact" className="flex items-center gap-2">
-                  Speak with Sales <ChevronRight className="w-4 h-4" />
+                  Explore Architecture <ChevronRight className="w-4 h-4" />
                 </Link>
               </Button>
             </div>

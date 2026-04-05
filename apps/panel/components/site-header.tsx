@@ -10,7 +10,7 @@ export function SiteHeader({ darkText = false, hideNav = false }: { darkText?: b
             ZURI
           </Link>
         </div>
-        
+
         {!hideNav && (
           <div className="hidden lg:flex items-center gap-10 text-base font-medium tracking-wide pointer-events-auto ml-16">
 
@@ -20,12 +20,12 @@ export function SiteHeader({ darkText = false, hideNav = false }: { darkText?: b
             <Link href="/contact" className="hover:opacity-70 transition-opacity">Contact Us</Link>
           </div>
         )}
-        
+
         <div className="flex items-center pointer-events-auto">
           {/* Real button in white to contrast mix-blend-difference */}
           <Button asChild className={darkText ? "rounded-full px-8 bg-zinc-900 hover:bg-zinc-800 text-white text-base font-semibold tracking-tight h-12 shadow-xl" : "rounded-full px-8 bg-white hover:bg-white/90 text-black text-base font-semibold tracking-tight h-12 shadow-xl"}>
 
-            <Link href="/signup">Book a Demo</Link>
+            <Link href="/tutorial">Watch Demo</Link>
           </Button>
         </div>
       </div>
