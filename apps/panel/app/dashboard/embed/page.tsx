@@ -183,9 +183,6 @@ export default function EmbedWidgetPage() {
           {/* Widget Access Control */}
           <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                <Shield className="w-6 h-6" />
-              </div>
               <div>
                 <h2 className="text-xl font-semibold text-foreground tracking-tight">Widget Access Control</h2>
                 <p className="text-sm text-muted-foreground mt-1">Manage AI widget deployment security</p>
