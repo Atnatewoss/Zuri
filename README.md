@@ -8,6 +8,12 @@ Zuri is a professional, action-oriented AI Concierge designed for the 2026 Hospi
 
 In Ethiopia and across East Africa, guests often face delays due to phone-based support, limited-hour front desks, or language barriers. Zuri solves this by turning a property's knowledge (PDFs, menus, handbooks) into an **Action-Capable Agent** that handles inquiries and bookings instantly.
 
+## Demo Video
+
+[![Zuri AI Demo](https://img.youtube.com/vi/RUp7V8arhIA/0.jpg)](https://youtu.be/RUp7V8arhIA)
+
+*Click the image above to watch the full platform walkthrough.*
+
 ## Key Features
 
 - **Native Multilingual Support**: Built-in, high-fidelity support for **Amharic, Oromifa, and Tigrinya**, alongside major international languages.
@@ -16,12 +22,6 @@ In Ethiopia and across East Africa, guests often face delays due to phone-based 
 - **Single-Line Deployment**: Integrates with any existing resort website in under 60 seconds with no infrastructure changes.
 - **Multi-Tenant Dashboard**: Manage knowledge bases, review live transcripts, and monitor bookings in a unified command center.
 - **Privacy & Security**: Per-tenant data isolation and dynamic domain whitelisting (CORS) for production-grade safety.
-
-## Demo Video
-
-[![Zuri AI Demo](https://img.youtube.com/vi/RUp7V8arhIA/0.jpg)](https://youtu.be/RUp7V8arhIA)
-
-*Click the image above to watch the full platform walkthrough.*
 
 ## Technology Stack
 
