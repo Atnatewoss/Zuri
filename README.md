@@ -1,6 +1,23 @@
 # Zuri AI Concierge
 
-Zuri AI Concierge is a comprehensive hospitality AI platform designed to empower resorts and hotels with a multi-tenant, RAG-powered concierge service. This system provides real-time guest assistance through an embeddable chat widget, managed through a professional resort panel dashboard.
+**Multilingual AI Assistant for Ethiopian Hospitality**
+
+Zuri is a professional, action-oriented AI Concierge designed for the 2026 Hospitality Hackathon. It addresses the critical communication gap in the East African tourism sector by providing a 24/7, high-utility assistant that speaks the guest's language—natively.
+
+> **"Hotels don’t lose guests because of rooms—they lose them in the moments they can’t respond."**
+
+In Ethiopia and across East Africa, guests often face delays due to phone-based support, limited-hour front desks, or language barriers. Zuri solves this by turning a property's knowledge (PDFs, menus, handbooks) into an **Action-Capable Agent** that handles inquiries and bookings instantly.
+
+## 📺 [Watch the Demo Video](https://youtu.be/RUp7V8arhIA)
+
+## Key Features
+
+- **Native Multilingual Support**: Built-in, high-fidelity support for **Amharic, Oromifa, and Tigrinya**, alongside major international languages.
+- **RAG-Powered Intelligence**: Securely ingests resort documentation to provide property-specific answers with zero hallucinations.
+- **Agentic Actions**: Beyond simple Q&A—Zuri is authorized to perform direct actions like spa bookings and room service requests.
+- **Single-Line Deployment**: Integrates with any existing resort website in under 60 seconds with no infrastructure changes.
+- **Multi-Tenant Dashboard**: Manage knowledge bases, review live transcripts, and monitor bookings in a unified command center.
+- **Privacy & Security**: Per-tenant data isolation and dynamic domain whitelisting (CORS) for production-grade safety.
 
 ## Technology Stack
 
@@ -10,16 +27,6 @@ Zuri AI Concierge is a comprehensive hospitality AI platform designed to empower
 | **Backend** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![SQLModel](https://img.shields.io/badge/SQLModel-EC4899?style=flat-square) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![ChromaDB](https://img.shields.io/badge/ChromaDB-3B82F6?style=flat-square) |
 | **AI Engine** | ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8B5CF6?style=flat-square&logo=google&logoColor=white) ![RAG](https://img.shields.io/badge/RAG-Integration-pink?style=flat-square) |
 | **Deployment** | ![Render](https://img.shields.io/badge/Render-46E3B7?style=flat-square&logo=render&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) |
-
-## Key Features
-
-- **Multi-Tenant Management**: Support for multiple resort locations with isolated settings and knowledge bases.
-- **RAG-Powered Chat**: Guest inquiries are answered using resort-specific documentation (PDF, DOCX).
-- **Embeddable Widget**: A lightweight JavaScript widget that can be integrated into any resort website.
-- **Service & Booking Management**: Track guest requests, staff efficiency, and service availability.
-- **Real-Time Dashboard**: Visualize guest activity and backend status with automated KPI calculation.
-- **Dynamic CORS Security**: Per-tenant allowed domains for the widget to prevent unauthorized embedding.
-- **Async Ingestion**: High-performance background processing for document uploads.
 
 ## Project Structure
 
@@ -100,6 +107,13 @@ Provide the required backend env vars in the Render dashboard (`DATABASE_URL`, `
 ### Vercel (Frontend)
 
 The management panel is optimized for Vercel deployment. Ensure you add the `NEXT_PUBLIC_APP_ENV` and `NEXT_PUBLIC_API_URL_PROD` variables in your Vercel project settings.
+
+## Team (Exp-Ethiopia)
+
+- **Amer Abdulqeum**
+- **Atnatewos Hailealem**
+- **Brook Teklebrhan**
+- **Yonatan Getachew**
 
 ## License
 

@@ -4,10 +4,11 @@ This is the core engine for Zuri AI Concierge. It provides a multi-tenant RAG (R
 
 ## Core Services
 
-- **Knowledge Service**: Asynchronous document ingestion (PDF, DOCX, TXT) into ChromaDB Cloud.
-- **Chat Service**: RAG-powered Q&A using Google Gemini 2.0 Flash.
-- **Management API**: Secure endpoints for bookings, services, and rooms, protected by JWT.
-- **Rate Limiter**: In-memory sliding window rate limiting.
+- **Knowledge Service**: Asynchronous document ingestion (PDF, DOCX, TXT) into ChromaDB Cloud with tenant-isolated embeddings.
+- **Chat Service**: RAG-powered Q&A using Google Gemini 2.5 Flash, with native support for **Amharic, Oromifa, and Tigrinya**.
+- **Agentic Actions**: Authorized function calling for direct booking orchestration (Spa, Room Service, etc.).
+- **Management API**: Secure multi-tenant endpoints for bookings, services, and inventory, protected by JWT.
+- **Rate Limiter**: In-memory sliding window rate limiting for public-facing widget endpoints.
 
 ## Installation & Setup
 
