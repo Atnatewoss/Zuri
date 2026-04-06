@@ -35,6 +35,7 @@ GEMINI_LIVE_MODEL = os.getenv("GEMINI_LIVE_MODEL", "models/gemini-2.5-flash-nati
 _ALWAYS_ALLOWED = [
     "https://www.zuriai.et",
     "https://zuriai.et",
+    "https://zuri-backend-rkws.onrender.com",
     "http://localhost:3000",
 ]
 _env_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
