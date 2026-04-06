@@ -126,3 +126,29 @@ def delete_document(
     session.commit()
 
     return {"ok": True, "message": f"Document '{doc.filename}' deleted"}
+
+
+@router.get("/documents/{document_id}/content")
+def get_document_content_view(
+    document_id: int,
+    hotel_id: str | None = None,
+    auth_hotel_id: str = Depends(get_authenticated_hotel_id),
+    session: Session = Depends(get_session),
+):
+    """Retrieve reconstructed document content from the vector store."""
+    resolved_hotel_id = auth_hotel_id
+    if hotel_id and hotel_id != auth_hotel_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    doc = session.get(Document, document_id)
+    if not doc or doc.hotel_id != resolved_hotel_id:
+        raise HTTPException(404, "Document not found")
+
+    from app.rag.vector_store import get_document_content
+    content = get_document_content(document_id)
+    
+    return {
+        "id": document_id,
+        "filename": doc.filename,
+        "content": content
+    }

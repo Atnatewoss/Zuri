@@ -86,3 +86,36 @@ def delete_document(document_id: int):
 
     if results["ids"]:
         collection.delete(ids=results["ids"])
+
+
+def get_document_content(document_id: int) -> str:
+    """
+    Reconstruct document text from its chunks in ChromaDB.
+    Returns the stitched content string.
+    """
+    collection = _get_collection()
+    
+    # Retrieve all chunks for this document
+    results = collection.get(
+        where={"document_id": document_id},
+        include=["documents", "metadatas"]
+    )
+    
+    if not results["ids"]:
+        return ""
+        
+    # Sort by chunk_index to maintain original order
+    # Zip IDs, docs, and metadatas together for sorting
+    chunks = []
+    for doc, meta in zip(results["documents"], results["metadatas"]):
+        chunks.append({
+            "content": doc,
+            "index": meta.get("chunk_index", 0)
+        })
+        
+    # Standard sort by index
+    chunks.sort(key=lambda x: x["index"])
+    
+    # Stitch everything together
+    full_text = "\n\n".join([c["content"] for c in chunks])
+    return full_text

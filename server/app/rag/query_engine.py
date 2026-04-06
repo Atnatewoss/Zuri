@@ -27,6 +27,9 @@ def _get_client() -> genai.Client:
     return _client
 
 
+# Ethiopian time languages: these use a +6 hour offset from Western time
+ETHIOPIAN_TIME_LANGS = {"amharic", "tigrinya", "oromifa"}
+
 LANGUAGE_INSTRUCTIONS = {
     "oromifa": (
         "STRICTLY use Latin (Qubee) script for Afaan Oromoo. "
@@ -50,11 +53,41 @@ LANGUAGE_INSTRUCTIONS = {
     "arabic": "Use professional Modern Standard Arabic (Right-to-Left script).",
 }
 
+
+def _get_time_system_instruction(language: str) -> str:
+    """Return deterministic time-system instructions based on the guest's language."""
+    lang_key = (language or "english").strip().lower()
+    if lang_key in ETHIOPIAN_TIME_LANGS:
+        return (
+            "TIME SYSTEM: ETHIOPIAN (locked for this session)\n"
+            "The guest is using Ethiopian local time. You MUST apply a deterministic +6 hour conversion:\n"
+            "  Ethiopian hour + 6 = Western 24h hour (mod 24)\n"
+            "  Examples: 2:00 Ethiopian → 08:00 Western, 4:00 Ethiopian → 10:00 Western,\n"
+            "            6:00 Ethiopian → 12:00 Western, 8:00 Ethiopian → 14:00 Western,\n"
+            "            10:00 Ethiopian → 16:00 Western, 12:00 Ethiopian → 18:00 Western.\n"
+            "  For ጥዋት/morning times: add 6 directly (e.g., ጥዋት 2 → 08:00).\n"
+            "  For ቀን/daytime times: add 6 directly (e.g., ቀን 6 → 12:00, ቀን 8 → 14:00).\n"
+            "  For ምሽት/evening times: add 6, these map to PM hours (e.g., ምሽት 12 → 18:00).\n"
+            "CRITICAL: When calling tools (list_available_time_slots, perform_booking), ALWAYS pass the WESTERN 24h time (e.g., '14:00'), never the Ethiopian time.\n"
+            "DO NOT ask unnecessary confirmation questions. Only ask if the hour is ambiguous (≤6 with no morning/evening qualifier).\n"
+            "When responding to the guest, display times in Ethiopian format (e.g., ቀን 8:00 ሰዓት) since that is their local system."
+        )
+    else:
+        return (
+            "TIME SYSTEM: WESTERN (standard 12/24 hour)\n"
+            "The guest uses standard Western time. Pass times directly to tools in 24h HH:MM format.\n"
+            "If the guest says '8 PM', convert to '20:00' for tool calls. If they say '10 AM', use '10:00'.\n"
+            "DO NOT ask unnecessary confirmation questions about time unless genuinely ambiguous."
+        )
+
+
 SYSTEM_PROMPT = """You are Zuri, a senior AI concierge for a luxury resort. You help guests with questions and perform actions like checking availability and making bookings.
 
 KNOWLEDGE BASE RULES:
 - Answer ONLY based on the provided context if asked a factual question.
 - Format responses professionally and warmly.
+
+{time_system_instruction}
 
 BOOKING & AGENT RULES:
 - You have internal tools to check room availability, list services, and place bookings.
@@ -66,8 +99,8 @@ BOOKING & AGENT RULES:
   - guest_name (required)
   - item/room/service name (required)
   - date in YYYY-MM-DD (required)
-  - time in HH:MM format (required)
-- If any required field is missing, ask the guest ONLY for the missing field(s) in {language}.
+  - time in HH:MM Western 24h format (required — convert from Ethiopian if needed)
+- If any required field is missing, ask the guest ONLY for the missing field(s) in {language}. Do NOT ask unnecessary questions.
 - As soon as all required fields are available and a valid time is selected, call `perform_booking` immediately.
 - After a successful booking, provide the guest with their confirmation code and a summary in {language}.
 
@@ -198,7 +231,8 @@ def answer_question(
     system_instruction = SYSTEM_PROMPT.format(
         context=context,
         language=language,
-        language_instruction=_get_language_instruction(language)
+        language_instruction=_get_language_instruction(language),
+        time_system_instruction=_get_time_system_instruction(language),
     )
     
     # Always provide tools to avoid "I know tools but can't find them" hallucinations
