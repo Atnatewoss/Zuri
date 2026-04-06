@@ -24,23 +24,16 @@ def get_matching_room(
 
 def reserve_room_inventory(session: Session, hotel_id: str, item_name: str) -> bool:
     """
-    Decrease room vacancy by 1 when a room booking is confirmed.
-    Returns False if the room exists but is sold out.
+    Validate room type exists for a confirmed booking.
+    Availability is handled per-date by booking_tools.py, so we no longer
+    decrement the static available_count globally.
     """
     room = get_matching_room(session, hotel_id, item_name, for_update=True)
     if not room:
         return True
-    if room.available_count <= 0:
-        return False
-    room.available_count -= 1
-    session.add(room)
     return True
 
 
 def release_room_inventory(session: Session, hotel_id: str, item_name: str) -> None:
-    """Increase room vacancy by 1 when a confirmed room booking is cancelled/unconfirmed."""
-    room = get_matching_room(session, hotel_id, item_name, for_update=True)
-    if not room:
-        return
-    room.available_count += 1
-    session.add(room)
+    """No-op for global inventory. Time slot is naturally freed in booking_tools."""
+    pass
