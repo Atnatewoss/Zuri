@@ -6,11 +6,12 @@ export const ZuriEvaluationBanner = () => {
   
   // This helps us be smart about returning them if they are testing locally vs prod
   const handleReturnToDashboard = () => {
-    // If they came from local, go back to local.
-    if (document.referrer && document.referrer.includes("localhost")) {
-      window.location.href = "http://localhost:5173/dashboard";
+    // Determine the dashboard origin based on the current origin
+    const currentOrigin = window.location.origin;
+    if (currentOrigin.includes("localhost")) {
+      window.location.href = "http://localhost:3000/dashboard";
     } else {
-      window.location.href = dashboardUrl;
+      window.location.href = "https://zuriai.et/dashboard";
     }
   };
 
