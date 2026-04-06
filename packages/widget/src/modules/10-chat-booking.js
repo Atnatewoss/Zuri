@@ -226,14 +226,54 @@
 
     function addBookingConfirmationCard(booking) {
         if (!booking) return;
+        const code = escapeHtml(booking.confirmation_code || 'ZUR-UNKNOWN');
+        const rawCode = booking.confirmation_code || 'ZUR-UNKNOWN';
         const html = `
-            <div class="zuri-booking-card">
-                <div class="zuri-booking-card-title">Booking Confirmed</div>
-                <div class="zuri-booking-card-code">${escapeHtml(booking.confirmation_code || 'ZUR-UNKNOWN')}</div>
-                <div class="zuri-booking-card-meta">${escapeHtml(booking.service || 'Reservation')} on ${escapeHtml(booking.date || 'TBD')} at ${escapeHtml(booking.time || 'TBD')}</div>
+            <div class="zuri-booking-card" id="zbc-${code}">
+                <div class="zuri-booking-card-header">
+                    <div class="zuri-booking-card-title">Booking Confirmed</div>
+                    <button class="zuri-booking-card-dismiss" data-dismiss="zbc-${code}" title="Dismiss">✕</button>
+                </div>
+                <div class="zuri-booking-card-code-row">
+                    <span class="zuri-booking-card-code" id="zbc-code-${code}">${code}</span>
+                    <button class="zuri-booking-card-copy" data-code="${rawCode}" title="Copy code">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        Copy
+                    </button>
+                </div>
+                <div class="zuri-booking-card-meta">${escapeHtml(booking.service || 'Reservation')} · ${escapeHtml(booking.date || 'TBD')} at ${escapeHtml(booking.time || 'TBD')}</div>
             </div>
         `;
-        addMessage('', 'ai', { html });
+        const msgEl = addMessage('', 'ai', { html });
+        // Wire up copy button
+        const copyBtn = msgEl && msgEl.querySelector('.zuri-booking-card-copy');
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                const toCopy = copyBtn.getAttribute('data-code') || '';
+                navigator.clipboard.writeText(toCopy).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy'; }, 2000);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const el = document.createElement('textarea');
+                    el.value = toCopy;
+                    el.style.position = 'fixed';
+                    el.style.opacity = '0';
+                    document.body.appendChild(el);
+                    el.focus();
+                    el.select();
+                    try { document.execCommand('copy'); copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy'; }, 2000); } catch(_){}
+                    document.body.removeChild(el);
+                });
+            };
+        }
+        // Wire up dismiss button
+        const dismissBtn = msgEl && msgEl.querySelector('.zuri-booking-card-dismiss');
+        if (dismissBtn) {
+            dismissBtn.onclick = () => {
+                if (msgEl && msgEl.parentNode) msgEl.parentNode.removeChild(msgEl);
+            };
+        }
     }
 
     function syncCancelModalState() {

@@ -130,10 +130,17 @@
     .zuri-booking-sync-cancel{border:1px solid #e7c5c5;background:#fff7f7;color:#8b1d1d;border-radius:7px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer}
     .zuri-booking-sync-cancel:hover{background:#ffecec}
     .zuri-booking-sync-cancel:disabled{opacity:.55;cursor:not-allowed}
-    .zuri-booking-card{margin-top:8px;border:1px solid #d9e9d7;background:#f6fbf5;border-radius:10px;padding:10px}
+    .zuri-booking-card{margin-top:8px;border:1px solid #d9e9d7;background:linear-gradient(135deg,#f6fbf5 0%,#eef7ec 100%);border-radius:12px;padding:12px 14px;position:relative}
+    .zuri-booking-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
     .zuri-booking-card-title{font-size:11px;font-weight:700;letter-spacing:.4px;color:#2f6b2f;text-transform:uppercase}
-    .zuri-booking-card-code{font-size:13px;font-weight:700;color:#1a1a1a;margin-top:2px}
-    .zuri-booking-card-meta{font-size:12px;color:#4a4a4a;margin-top:4px}
+    .zuri-booking-card-dismiss{background:none;border:none;cursor:pointer;font-size:14px;color:#999;padding:0 2px;line-height:1;transition:color .2s}
+    .zuri-booking-card-dismiss:hover{color:#333}
+    .zuri-booking-card-code-row{display:flex;align-items:center;gap:8px;margin:6px 0 8px;background:#fff;border:1px solid #e0e8de;border-radius:8px;padding:8px 10px}
+    .zuri-booking-card-code{font-size:15px;font-weight:800;color:#1a1a1a;letter-spacing:.8px;font-family:'Courier New',Courier,monospace;user-select:all;flex:1}
+    .zuri-booking-card-copy{display:inline-flex;align-items:center;gap:4px;background:#f0f7ee;border:1px solid #c8dcc5;color:#2f6b2f;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+    .zuri-booking-card-copy:hover{background:#e0f0dc;border-color:#a8c8a4}
+    .zuri-booking-card-copy:active{transform:scale(.96)}
+    .zuri-booking-card-meta{font-size:12px;color:#4a4a4a}
     #zuri-cancel-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.56);backdrop-filter:blur(4px);z-index:1000000}
     #zuri-cancel-modal.show{display:flex}
     .zuri-cancel-modal-card{width:min(420px,100%);background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.24);padding:18px}

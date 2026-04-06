@@ -415,7 +415,8 @@
         -webkit-backdrop-filter: blur(48px) saturate(210%);
         border: 0.5px solid var(--zuri-glass-border); border-radius: 28px;
         box-shadow: var(--zuri-glass-shadow-deep); padding: 24px;
-        display: none; flex-direction: column; gap: 16px; z-index: 1000005;
+        display: none; flex-direction: column; gap: 16px; z-index: 10000050;
+        pointer-events: auto;
 
         transform: scale(0.8); opacity: 0; transform-origin: bottom left;
         transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -423,13 +424,14 @@
     .zuri-sync-panel.visible { display: flex; opacity: 1; transform: scale(0.9); }
     .zuri-sync-close {
         position: absolute; top: 16px; right: 16px;
-        width: 24px; height: 24px; border-radius: 50%;
+        width: 32px; height: 32px; border-radius: 50%;
         background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: 0.3s; opacity: 0.4;
+        cursor: pointer; transition: 0.3s; opacity: 0.6;
+        z-index: 10;
     }
-    .zuri-sync-close:hover { background: rgba(255,255,255,0.15); opacity: 1; transform: scale(1.1); }
-    .zuri-sync-close svg { width: 12px; height: 12px; fill: #fff; }
+    .zuri-sync-close:hover { background: rgba(255,255,255,0.25); opacity: 1; transform: scale(1.1) rotate(90deg); }
+    .zuri-sync-close svg { width: 14px; height: 14px; fill: #fff; }
 
     .zuri-sync-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; scrollbar-width: none; padding-bottom: 10px; }
     .zuri-sync-list::-webkit-scrollbar { display: none; }
@@ -442,8 +444,8 @@
     }
     .zuri-booking-sync-item:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
     
-    .zuri-booking-sync-code { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 0.5px; opacity: 0.9; }
-    .zuri-booking-sync-meta { font-size: 11px; opacity: 0.5; color: #fff; margin-bottom: 2px; }
+    .zuri-booking-sync-code { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 0.5px; opacity: 0.9; user-select: text; }
+    .zuri-booking-sync-meta { font-size: 11px; opacity: 0.5; color: #fff; margin-bottom: 2px; user-select: text; }
     
     .zuri-booking-sync-status { 
         position: absolute; top: 18px; right: 18px;
@@ -465,10 +467,9 @@
 
 
     .zuri-modal-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
         backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center;
-        z-index: 1000020; padding: 24px;
-
+        z-index: 10000100; padding: 24px;
     }
     .zuri-modal-card {
         max-width: 300px; width: 100%; padding: 28px 24px;
@@ -479,6 +480,7 @@
         box-shadow: 0 40px 80px rgba(0, 0, 0, 0.35);
         transform: scale(0.92); transition: all 0.5s var(--zuri-ease);
         text-align: center;
+        pointer-events: auto;
     }
 
 
@@ -501,6 +503,19 @@
     }
     .zuri-conf-code-box:hover .zuri-copy-badge { opacity: 0.6; transform: translateY(0); }
     .zuri-conf-code-box.copied .zuri-copy-badge { opacity: 1; color: #30D158; }
+
+    .zuri-code-copy-mini {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: 0.3s;
+        opacity: 0; pointer-events: none; transform: translateX(5px);
+    }
+    /* .zuri-booking-sync-item:hover .zuri-code-copy-mini {
+        opacity: 1 !important; pointer-events: auto !important; transform: translateX(0) !important;
+    } */
+    .zuri-code-copy-mini svg { pointer-events: none; }
+    .zuri-code-copy-mini:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); transform: scale(1.05); }
+    .zuri-code-copy-mini.copied { background: rgba(48, 209, 88, 0.2); border-color: #30D158; opacity: 1 !important; transform: translateX(0) scale(1) !important; }
 
     `;
     const sEl = document.createElement('style');
@@ -599,12 +614,12 @@
                 <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #fff;">Confirmed!</h4>
                 <p style="margin: 0 0 16px 0; font-size: 12px; color: var(--zuri-text-muted);">Your reservation at Kuriftu is secured.</p>
                 
-                <div id="zuri-conf-code-tap" class="zuri-conf-code-box" style="padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;" title="Click to Copy">
-                    <div id="zuri-conf-code-val" style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 2px;">-------</div>
-                    <button class="zuri-btn-glass" style="width: 28px; height: 28px; border-radius: 6px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="white" style="opacity: 0.6;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                <div id="zuri-conf-code-tap" class="zuri-conf-code-box" style="padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: auto; z-index: 10;" title="Click to Copy">
+                    <div id="zuri-conf-code-val" style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 2px; user-select: text;">-------</div>
+                    <button class="zuri-code-copy-mini" id="zuri-conf-copy-btn" style="pointer-events: none; opacity: 1 !important; transform: none !important;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                     </button>
-                    <div class="zuri-copy-badge" id="zuri-conf-copy-text" style="top:4px; right:6px;">Click to Copy</div>
+                    <div class="zuri-copy-badge" id="zuri-conf-copy-text" style="top:4px; right:6px; pointer-events: none;">Click to Copy</div>
                 </div>
                 <div id="zuri-conf-details-val" style="font-size: 11px; color: #fff; opacity: 0.6; margin-top: -10px; margin-bottom: 20px; text-align: center;">Processing...</div>
 
@@ -660,6 +675,7 @@
     const confCodeVal = container.querySelector('#zuri-conf-code-val');
     const confDetailsVal = container.querySelector('#zuri-conf-details-val');
     const confDoneBtn = container.querySelector('#zuri-conf-done');
+    const confCloseBtn = container.querySelector('#zuri-conf-close');
     const confCodeTap = container.querySelector('#zuri-conf-code-tap');
     const confCopyText = container.querySelector('#zuri-conf-copy-text');
 
@@ -1137,26 +1153,10 @@
         confDetailsVal.textContent = `${booking.service || 'Reservation'} on ${formatDateDetailed(booking.date)} @ ${formatTimeAMPM(booking.time)}`;
 
         
-        // Re-bind click handlers to ensure responsiveness on current DOM
-        if (confDoneBtn) {
-            confDoneBtn.onclick = (e) => {
-                if (e) e.stopPropagation();
-                closeConfirmationModal();
-            };
-        }
-        
-        if (confCodeTap) {
-            confCodeTap.onclick = (e) => {
-                if (e) e.stopPropagation();
-                copyToClipboard(confCodeVal.textContent, confCodeTap, confCopyText);
-            };
-        }
-
-
+        // Handlers are managed via delegated listeners on the container
         confModal.style.display = 'flex';
         setTimeout(() => confModal.classList.add('visible'), 10);
     }
-
 
     function closeConfirmationModal() {
         if (!confModal) return;
@@ -1167,13 +1167,18 @@
     }
 
     function copyToClipboard(text, el, badgeEl) {
-        if (!text) return;
-        
-        const performCopy = () => {
+        text = String(text || '').trim();
+        if (!text || text === '-------') {
+            // console.warn('Zuri: No valid text to copy');
+            return;
+        }
+
+        // console.log('Zuri: Attempting to copy:', text);
+
+        const performCopyAction = () => {
+            // console.log('Zuri: Copy successful');
             if (el) {
                 el.classList.add('copied');
-                el.style.borderColor = '#30D158';
-                el.style.background = 'rgba(48, 209, 88, 0.1)';
             }
             if (badgeEl) {
                 badgeEl.textContent = 'Copied!';
@@ -1182,8 +1187,6 @@
             setTimeout(() => {
                 if (el) {
                     el.classList.remove('copied');
-                    el.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    el.style.background = 'rgba(255, 255, 255, 0.03)';
                 }
                 if (badgeEl) {
                     badgeEl.textContent = 'Click to Copy';
@@ -1192,25 +1195,38 @@
             }, 2000);
         };
 
-        try {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '0';
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            const successful = document.execCommand('copy');
-            document.body.removeChild(textarea);
-            if (successful) performCopy();
-        } catch (err) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(performCopy);
+        const fallback = () => {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                textArea.setAttribute('readonly', '');
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                textArea.setSelectionRange(0, 9999);
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) performCopyAction();
+                else console.error('Zuri: execCommand(copy) failed');
+            } catch (err) {
+                console.error('Zuri: Fallback copy failed', err);
             }
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text)
+                .then(performCopyAction)
+                .catch(err => {
+                    console.warn('Zuri: navigator.clipboard failed, using fallback', err);
+                    fallback();
+                });
+        } else {
+            fallback();
         }
     }
-
 
 
 
@@ -1313,7 +1329,6 @@
         const list = allBookings.filter(b => currentSessionBookings.has(b.confirmation_code));
         
         if (list.length === 0) {
-
             bookingSyncPanel.classList.remove('visible');
             setTimeout(() => {
                 if (!bookingSyncPanel.classList.contains('visible')) bookingSyncPanel.style.display = 'none';
@@ -1322,14 +1337,29 @@
         }
 
         bookingSyncList.innerHTML = list.map(b => `
-            <div class="zuri-booking-sync-item">
-                <div class="zuri-booking-sync-code">${escapeHtml(b.confirmation_code)}</div>
+            <div class="zuri-booking-sync-item" id="zsync-${escapeHtml(b.confirmation_code)}">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div class="zuri-booking-sync-code">${escapeHtml(b.confirmation_code)}</div>
+                    <button class="zuri-code-copy-mini" data-code="${escapeHtml(b.confirmation_code)}" title="Copy Code">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="white"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    </button>
+                </div>
                 <div class="zuri-booking-sync-status">${escapeHtml(b.status || 'Confirmed')}</div>
                 <div class="zuri-booking-sync-meta">${escapeHtml(b.service)}</div>
                 <div class="zuri-booking-sync-time">${formatDateDetailed(b.date)} at ${formatTimeAMPM(b.time)}</div>
             </div>
-
         `).join('');
+
+        // Explicit direct event listeners to bypass strict browser event delegation bugs with SVGs
+        bookingSyncList.querySelectorAll('.zuri-code-copy-mini').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const code = btn.getAttribute('data-code');
+                // console.log('Zuri: Explicit copy trigger (Sync Panel)', code);
+                copyToClipboard(code, btn, null);
+            });
+        });
 
         window._zuriOpenCancel = (code) => { /* Disabled */ };
     }
@@ -1379,12 +1409,17 @@
 
             const local = loadBookings();
             const remoteNormalized = remote.map(normalizeBooking).filter(Boolean);
-            const merged = [...remoteNormalized];
-            const seen = new Set(remoteNormalized.map((b) => b.confirmation_code));
-            for (const b of local) {
-                if (!seen.has(b.confirmation_code)) merged.push(b);
-            }
-            saveBookings(merged);
+            
+            // Robust deduplication
+            const mergedMap = new Map();
+            remoteNormalized.forEach(b => mergedMap.set(b.confirmation_code, b));
+            local.forEach(b => {
+                const code = b.confirmation_code;
+                if (!code) return; // skip corrupt
+                if (!mergedMap.has(code)) mergedMap.set(code, b);
+            });
+
+            saveBookings(Array.from(mergedMap.values()));
             renderBookingSyncPanel();
         } catch (_) { }
     }
@@ -2392,16 +2427,57 @@
         });
     }
 
+    // == DELEGATED CLICK LISTENERS (Robust) ==
+    container.addEventListener('click', (e) => {
+        // 1. Modal Confirmation Code Tap
+        const tap = e.target.closest('#zuri-conf-code-tap');
+        if (tap) {
+            e.preventDefault();
+            e.stopPropagation();
+            const code = (confCodeVal.textContent || '').trim();
+            // console.log('Zuri: Delegated copy trigger (Modal)', code);
+            copyToClipboard(code, tap, confCopyText);
+            
+            const btn = tap.querySelector('.zuri-code-copy-mini');
+            if (btn) {
+                btn.classList.add('copied');
+                setTimeout(() => btn.classList.remove('copied'), 2000);
+            }
+            return;
+        }
 
-    if (syncCloseBtn) {
-        syncCloseBtn.onclick = (e) => {
-            if (e) e.stopPropagation();
+        // 2. Sync Panel Mini Copy Buttons
+        const miniBtn = e.target.closest('.zuri-code-copy-mini');
+        if (miniBtn) {
+            const code = miniBtn.getAttribute('data-code');
+            // console.log('Zuri: Delegated copy trigger (Sync Panel)', code);
+            copyToClipboard(code, miniBtn, null);
+            return;
+        }
+        
+        // 3. Central Modal Done Button
+        if (e.target.closest('#zuri-conf-done')) {
+            e.stopPropagation();
+            closeConfirmationModal();
+            return;
+        }
+
+        // 5. Sync Panel Close Button (Top Right X)
+        if (e.target.closest('#zuri-sync-close')) {
+            e.stopPropagation();
             hideBookingSyncPanel();
-        };
+            return;
+        }
+    });
+
+    // Re-bind explicit listener for the sync panel close button just in case delegation missed the SVG click area
+    if (syncCloseBtn) {
+        syncCloseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            hideBookingSyncPanel();
+        });
     }
-
-
-
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && cancelModal && cancelModal.classList.contains('show')) {
