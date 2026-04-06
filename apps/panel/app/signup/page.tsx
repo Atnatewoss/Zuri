@@ -30,7 +30,7 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const response = await apiFetch<{ 
+      const response = await apiFetch<{
         resort: { hotel_id: string; resort_name: string };
       }>(
         '/api/resorts/signup',
@@ -67,21 +67,21 @@ export default function SignupPage() {
           <Link href="/" className="text-2xl font-bold tracking-tight text-zinc-900 uppercase">
             ZURI
           </Link>
-          
+
           <div className="max-w-lg">
             <h2 className="text-4xl xl:text-5xl font-medium text-zinc-900 mb-8 leading-[1.15]">
               Streamline your guest experience.
             </h2>
             <p className="text-lg xl:text-xl text-zinc-600 mb-12 leading-relaxed opacity-90">
-              Join leading luxury properties in automating guest requests, answering FAQs natively in 4 languages, and driving direct bookings through an intelligent concierge widget.
+              Join leading luxury properties in automating guest requests, answering FAQs natively in 8 languages, and driving direct bookings through an intelligent concierge widget.
             </p>
-            
+
             <div className="space-y-5 text-base xl:text-lg text-zinc-600 border-l-4 border-primary/30 pl-6">
               <p className="italic font-light opacity-90">“Implementing Zuri fundamentally changed how efficiently our front desk operates.”</p>
               <p className="font-semibold text-zinc-900 tracking-wide">— General Manager, Early Adopter</p>
             </div>
           </div>
-          
+
           <div className="text-sm text-zinc-400 font-medium tracking-wide">
             © 2026 Zuri Concierge
           </div>
@@ -151,7 +151,7 @@ export default function SignupPage() {
                 />
               </div>
 
-              <Button 
+              <Button
                 type="submit"
                 disabled={loading}
                 className="w-full h-[52px] rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 transition-colors mt-5 text-base font-medium shadow-xl hover:scale-[1.01]"

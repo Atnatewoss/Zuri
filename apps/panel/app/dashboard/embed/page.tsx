@@ -7,11 +7,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Copy, Check, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { apiFetch, PUBLIC_API_BASE_URL } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
 import { toast } from 'sonner'
+import { JudgeOnboardingModal } from '@/components/dashboard/judge-onboarding-modal'
 
 export default function EmbedWidgetPage() {
+  const { theme } = useTheme()
   const [copied, setCopied] = useState(false)
   const [hotelId, setHotelId] = useState<string | null>(null)
   const [scriptCode, setScriptCode] = useState('')
@@ -80,7 +83,8 @@ export default function EmbedWidgetPage() {
         `/api/embed/verify/${encodeURIComponent(hotelId)}`
       )
       if (result.ok) {
-        setVerifyMessage(`Verified. Open mockup test page: ${result.mockup_url}`)
+        const themeParam = `?theme=${theme === 'light' ? 'light' : 'dark'}`
+        setVerifyMessage(`Verified. Open mockup test page: ${result.mockup_url}${themeParam}`)
       } else {
         setVerifyMessage('Verification could not confirm setup.')
       }
@@ -122,6 +126,7 @@ export default function EmbedWidgetPage() {
 
   return (
     <div className="flex bg-background min-h-screen">
+      <JudgeOnboardingModal />
       <DashboardSidebar />
       <div className="flex-1 overflow-auto flex flex-col relative w-full h-screen">
         <DashboardHeader

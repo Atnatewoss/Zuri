@@ -8,6 +8,7 @@ import { Upload, FileText, CheckCircle2, Clock, Lightbulb } from 'lucide-react'
 import { API_BASE_URL, apiFetch } from '@/lib/api'
 import { getTenantHotelId } from '@/lib/tenant'
 import { toast } from 'sonner'
+import { FileContentModal } from '@/components/dashboard/file-content-modal'
 
 type KnowledgeDocument = {
   id: number
@@ -23,6 +24,7 @@ export default function KnowledgeBasePage() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [selectedFile, setSelectedFile] = useState<{ id: number; filename: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const loadDocuments = async (tenantId: string) => {
@@ -225,11 +227,14 @@ export default function KnowledgeBasePage() {
                     {files.map((file) => (
                       <tr key={file.id} className="group hover:bg-secondary/20 transition-all duration-300">
                         <td className="px-6 py-5">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                          <div 
+                            className="flex items-center gap-4 cursor-pointer hover:opacity-70 transition-all group/file"
+                            onClick={() => setSelectedFile({ id: file.id, filename: file.filename })}
+                          >
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover/file:bg-primary/20 transition-colors">
                               <FileText className="w-5 h-5" />
                             </div>
-                            <span className="font-serif text-lg text-foreground">{file.filename}</span>
+                            <span className="font-serif text-lg text-foreground border-b border-transparent group-hover/file:border-primary/30">{file.filename}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5 text-sm font-medium text-foreground/40">{file.file_size}</td>
@@ -269,6 +274,13 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
       </div>
+
+      <FileContentModal 
+        id={selectedFile?.id || null} 
+        filename={selectedFile?.filename || null}
+        hotelId={hotelId}
+        onClose={() => setSelectedFile(null)}
+      />
     </div>
   )
 }

@@ -25,7 +25,7 @@ export function SiteHeader({ darkText = false, hideNav = false }: { darkText?: b
           {/* Real button in white to contrast mix-blend-difference */}
           <Button asChild className={darkText ? "rounded-full px-8 bg-zinc-900 hover:bg-zinc-800 text-white text-base font-semibold tracking-tight h-12 shadow-xl" : "rounded-full px-8 bg-white hover:bg-white/90 text-black text-base font-semibold tracking-tight h-12 shadow-xl"}>
 
-            <Link href="/signup">Book a Demo</Link>
+            <Link href="/login">Book a Demo</Link>
           </Button>
         </div>
       </div>

@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased text-foreground bg-background selection:bg-primary/20">
+      <body className="font-sans antialiased text-foreground bg-background selection:bg-primary/20" cz-shortcut-listen="true">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ResortProvider>
             {children}
