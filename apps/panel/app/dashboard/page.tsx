@@ -11,6 +11,7 @@ import { clearAuth, getTenantHotelId } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useResort } from '@/lib/resort-context'
+import { JudgeOnboardingModal } from '@/components/dashboard/judge-onboarding-modal'
 
 interface RecentInteraction {
   id: number
@@ -83,6 +84,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex bg-background min-h-screen font-sans text-foreground">
+      <JudgeOnboardingModal />
       <DashboardSidebar />
       
       <div className="flex-1 flex flex-col min-w-0 bg-background shadow-[-4px_0_24px_-12px_rgba(0,0,0,0.1)] z-10">

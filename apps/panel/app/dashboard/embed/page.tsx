@@ -180,6 +180,27 @@ export default function EmbedWidgetPage() {
             </div>
           </div>
 
+          {/* Quick Setup Re-trigger */}
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+             <div>
+                <h3 className="text-sm font-semibold text-amber-600 dark:text-amber-400">Testing locally or evaluating for hackathon?</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                   You can automatically configure access rules and launch the demo environment.
+                </p>
+             </div>
+             <Button 
+               variant="outline" 
+               size="sm"
+               className="border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10"
+               onClick={() => {
+                  sessionStorage.removeItem('zuri_judge_onboarded');
+                  window.location.reload();
+               }}
+             >
+                Run automated setup
+             </Button>
+          </div>
+
           {/* Widget Access Control */}
           <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
             <div className="flex items-center gap-4 mb-6">

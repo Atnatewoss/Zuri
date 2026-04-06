@@ -13,7 +13,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-sm">
+    <nav className="fixed top-12 left-0 right-0 z-50 bg-primary/95 backdrop-blur-sm shadow-md">
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
         <button
           onClick={() => setIsOpen(!isOpen)}
