@@ -1,0 +1,625 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zuri | Sandbox - Kuriftu-resort</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0A0B;
+            --text: #FFFFFF;
+            --sec-text: #a1a1aa;
+            --amber: #D97706;
+            --border: #27272a;
+            --toolbar: rgba(10, 10, 11, 0.8);
+            --btn-bg: #FFFFFF;
+            --btn-text: #0A0A0B;
+            --pill-bg: #27272a;
+            --sidebar: rgba(10, 10, 11, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Professional Audit Sidebar */
+        .knowledge-sidebar {
+            width: 320px;
+            height: 100vh;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .knowledge-sidebar.collapsed {
+            margin-left: -320px;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .sidebar-header-text h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .sidebar-header-text p {
+            font-size: 10px;
+            color: var(--sec-text);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+
+        .collapse-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--sec-text);
+            transition: all 0.2s;
+        }
+
+        .collapse-toggle:hover {
+            background: var(--pill-bg);
+            color: var(--amber);
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            padding: 20px 24px 0;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .sidebar-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding-bottom: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--sec-text);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            color: var(--amber);
+            border-color: var(--amber);
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .intelligence-card {
+            padding: 16px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .intelligence-card:hover {
+            border-color: var(--amber);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .card-icon {
+            color: var(--amber);
+            opacity: 0.8;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: var(--sec-text);
+            line-height: 1.4;
+        }
+
+        .sidebar-guidance {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .guidance-text {
+            font-size: 10px;
+            line-height: 1.5;
+            color: var(--sec-text);
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+
+        /* Main Site Content */
+        .site-viewport {
+            flex: 1;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .eval-toolbar {
+            height: 64px;
+            background: var(--toolbar);
+            backdrop-filter: saturate(180%) blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: var(--pill-bg);
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .status-text {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cmd-btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 8px 16px;
+            border-radius: 6px;
+            letter-spacing: 0.1em;
+            transition: all 0.2s;
+        }
+
+        .cmd-btn:hover {
+            transform: translateY(-1.5px);
+            opacity: 0.9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-container {
+            flex: 1;
+            background: radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.05) 0%, transparent 40%);
+            padding: 0 10%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hero-container.blurred {
+            filter: blur(12px) saturate(120%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hero-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--amber);
+            margin-bottom: 24px;
+            opacity: 0.8;
+            display: block;
+        }
+
+        .hero-container h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            line-height: 0.95;
+            margin-bottom: 32px;
+        }
+
+        .hero-container h1 i {
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .hero-container p {
+            font-size: 1.1rem;
+            color: var(--sec-text);
+            max-width: 500px;
+            font-weight: 300;
+        }
+
+        /* Re-open Toggle (When Sidebar Collapsed) */
+        .audit-corner-toggle {
+            position: fixed;
+            bottom: 32px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 2000;
+            transition: all 0.3s;
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        .audit-corner-toggle.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Focus Content Overlay */
+        .focus-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 1500;
+            display: none;
+            backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .focus-content.active {
+            display: flex;
+        }
+
+        .focus-paper {
+            background: var(--sidebar);
+            width: 100%;
+            max-width: 800px;
+            height: 85vh;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 50px 150px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .paper-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .paper-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .close-focus {
+            cursor: pointer;
+            color: var(--sec-text);
+            transition: color 0.2s;
+        }
+
+        .close-focus:hover {
+            color: var(--amber);
+        }
+
+        @media (max-width: 1000px) {
+            .knowledge-sidebar {
+                display: none !important;
+            }
+
+            .eval-toolbar {
+                padding: 0 20px;
+            }
+
+            .hero-container {
+                padding: 0 24px;
+                text-align: center;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="knowledge-sidebar" id="sidebar-v3">
+        <div class="sidebar-header">
+            <div class="sidebar-header-text">
+                <h2>AI Training Data</h2>
+                <p>Grounding Logic</p>
+            </div>
+            <div class="collapse-toggle" onclick="toggleAuditSidebar()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="sidebar-tabs">
+            <div class="tab-btn active" id="tab-docs" onclick="switchAuditTab('docs')">DOCS</div>
+            <div class="tab-btn" id="tab-services" onclick="switchAuditTab('services')">SERVICES</div>
+            <div class="tab-btn" id="tab-rooms" onclick="switchAuditTab('rooms')">ROOMS</div>
+        </div>
+
+        <div class="content-area" id="audit-intelligence-list"></div>
+
+        <div class="sidebar-guidance">
+            <p class="guidance-text">Ground-truth data used by Zuri to resolve requests. Audit accurately below.</p>
+            <a href="http://localhost:3000/dashboard/knowledge"
+                style="color: var(--amber); font-size: 10px; font-weight: 800; text-decoration: none; letter-spacing: 0.1em;">SOURCE
+                MANAGEMENT →</a>
+        </div>
+    </aside>
+
+    <div class="audit-corner-toggle" id="open-audit-trigger" onclick="toggleAuditSidebar()">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+        </svg>
+    </div>
+
+    <main class="site-viewport">
+        <header class="eval-toolbar">
+            <div class="brand-name">ZURI / <span>SANDBOX</span></div>
+            <div class="header-actions">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text">Agent Active</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero-container" id="mockup-hero">
+            <span class="hero-label">// LIVE EVALUATION MODE</span>
+            <h1>Kuriftu-resort <i>Resort</i></h1>
+            <p>A new frontier in guest intelligence. Fully autonomous, data-driven, and session-aware.</p>
+        </section>
+    </main>
+
+    <div class="focus-content" id="audit-focus-overlay">
+        <div class="focus-paper">
+            <div class="paper-header">
+                <h2 id="audit-focus-title" style="font-family: 'Playfair Display', serif; font-size: 24px;"></h2>
+                <div class="close-focus" onclick="closeAuditFocus()">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="paper-body" id="audit-focus-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const auditData = {
+            docs: [{ "id": 3, "filename": "knowledge.txt", "size": "2.6 KB" }],
+            services: [{ "name": "Spa & Wellness", "desc": "Premium resort service curated for guests.", "price": "Varies" }, { "name": "Fine Dining", "desc": "Premium resort service curated for guests.", "price": "Varies" }, { "name": "Room Service", "desc": "Premium resort service curated for guests.", "price": "Varies" }, { "name": "Activities & Tours", "desc": "Premium resort service curated for guests.", "price": "Varies" }],
+            rooms: [{ "name": "Deluxe Room", "desc": "Luxury accommodation. 1 units available.", "price": "$150.0/night" }, { "name": "Premium Twin", "desc": "Luxury accommodation. 1 units available.", "price": "$145.0/night" }, { "name": "Premium Double", "desc": "Luxury accommodation. 1 units available.", "price": "$150.0/night" }, { "name": "Classic Room", "desc": "Luxury accommodation. 1 units available.", "price": "$120.0/night" }, { "name": "Twin Room", "desc": "Luxury accommodation. 1 units available.", "price": "$130.0/night" }, { "name": "Superior Room", "desc": "Luxury accommodation. 3 units available.", "price": "$159.0/night" }, { "name": "Presidental Room", "desc": "Luxury accommodation. 2 units available.", "price": "$350.0/night" }, { "name": "Junior Suite", "desc": "Luxury accommodation. 0 units available.", "price": "$210.0/night" }, { "name": "Junior Suite", "desc": "Luxury accommodation. 0 units available.", "price": "$210.0/night" }, { "name": "Standard Room", "desc": "Luxury accommodation. 0 units available.", "price": "$110.0/night" }, { "name": "Family Room", "desc": "Luxury accommodation. 0 units available.", "price": "$180.0/night" }]
+        };
+        let currentAuditTab = 'docs';
+
+        window.toggleAuditSidebar = function () {
+            const sidebar = document.getElementById('sidebar-v3');
+            const openBtn = document.getElementById('open-audit-trigger');
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+
+            if (isCollapsed) {
+                openBtn.classList.add('visible');
+            } else {
+                openBtn.classList.remove('visible');
+            }
+        };
+
+        window.switchAuditTab = function (tabId) {
+            currentAuditTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.add('active');
+            renderAuditIntelligence();
+        };
+
+        function renderAuditIntelligence() {
+            const list = document.getElementById('audit-intelligence-list');
+            const items = auditData[currentAuditTab];
+
+            if (items.length === 0) {
+                list.innerHTML = `<div style="padding: 40px 20px; text-align: center; opacity: 0.5; font-size: 13px;">No data indexed for this category.</div>`;
+                return;
+            }
+
+            list.innerHTML = items.map((item, i) => `
+                <div class="intelligence-card" onclick="inspectAuditItem('${currentAuditTab}', ${i})">
+                    <div class="card-header">
+                        <div class="card-icon">${getAuditTabIcon(currentAuditTab)}</div>
+                        <span class="card-title">${item.filename || item.name}</span>
+                    </div>
+                    <p class="card-desc">${currentAuditTab === 'docs' ? (item.size || 'Proprietary Knowledge') : (item.desc || 'Operational Metadata')}</p>
+                </div>
+            `).join('');
+        }
+
+        function getAuditTabIcon(tab) {
+            if (tab === 'docs') return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+            if (tab === 'services') return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path></svg>';
+            return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>';
+        }
+
+        function parseAuditMarkdown(text) {
+            if (!text) return '';
+            return text
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+                .replace(/\*(.*)\*/gim, '<i>$1</i>')
+                .replace(/^- (.*$)/gim, '<li>$1</li>')
+                .replace(/
+                    / gim, '<br>');
+        }
+
+        window.inspectAuditItem = async function (tab, index) {
+            const item = auditData[tab][index];
+            const overlay = document.getElementById('audit-focus-overlay');
+            const hero = document.getElementById('mockup-hero');
+            const title = document.getElementById('audit-focus-title');
+            const body = document.getElementById('audit-focus-body');
+
+            title.innerText = item.filename || item.name;
+            overlay.classList.add('active');
+            hero.classList.add('blurred');
+
+            if (tab === 'docs') {
+                body.innerHTML = '<div style="opacity: 0.5; padding: 20px;">Retrieving grounding sequence...</div>';
+                try {
+                    const res = await fetch(`${window.location.origin}/api/knowledge/documents/${item.id}/content?hotel_id=kuriftu-resort`);
+                    const json = await res.json();
+                    body.innerHTML = parseAuditMarkdown(json.content);
+                } catch (e) { body.innerHTML = '<div style="color: #ef4444;">Failed to retrieve doc.</div>'; }
+            } else {
+                body.innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="text-transform: uppercase; font-size: 11px; color: var(--amber); margin-bottom: 8px;">Description</h4>
+                        <p style="font-size: 16px;">${item.desc || 'No description available.'}</p>
+                    </div>
+                    <div>
+                        <h4 style="text-transform: uppercase; font-size: 11px; color: var(--amber); margin-bottom: 8px;">Pricing/Availability</h4>
+                        <p style="font-size: 16px;">${item.price || 'Direct resort info.'}</p>
+                    </div>
+                `;
+            }
+        };
+
+        window.closeAuditFocus = function () {
+            document.getElementById('audit-focus-overlay').classList.remove('active');
+            document.getElementById('mockup-hero').classList.remove('blurred');
+        };
+
+        // Auto-open AI Chat for Judges
+        if (true) {
+            setTimeout(() => {
+                if (window.Zuri) {
+                    window.Zuri.open();
+                } else {
+                    const bubble = document.querySelector('.zuri-trigger-bubble');
+                    if (bubble) bubble.click();
+                    window.postMessage({ type: 'ZURI_WIDGET_OPEN' }, '*');
+                }
+            }, 2000);
+        }
+
+        // Initial trigger
+        renderAuditIntelligence();
+    </script>
+
+    <!-- Zuri AI Concierge Embed -->
+    <script src="https://zuri-backend-rkws.onrender.com/api/embed/widget.js" data-hotel-id="kuriftu-resort"
+        data-api-url="https://zuri-backend-rkws.onrender.com" async></script>
+</body>
+
+</html>
